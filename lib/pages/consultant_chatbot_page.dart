@@ -26,80 +26,115 @@ class _ConsultantChatbotPageState extends State<ConsultantChatbotPage>
   final List<Map<String, dynamic>> _messages = [];
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
-  int _selectedTabIndex =
-      3; // Set to 3 for Chat tab (always selected on this page)
+  int _selectedTabIndex = 3; // Chat tab selected
+
   late AnimationController _voiceAnimationController;
   late Animation<double> _voiceScaleAnimation;
   late Animation<double> _voicePulseAnimation;
 
-  // Category-specific prompts based on Dr. Swatantra Jain's approach
-  static const Map<String, String> categoryPrompts = {
-    'child_problems': '''
-You are an AI wellness consultant based on Dr. Swatantra Jain's holistic approach to child health.
-Provide compassionate, practical advice for common childhood issues including:
-- Behavioral problems, sleep issues, nutrition concerns
-- Focus on natural remedies, parenting techniques, and holistic care
-- Consider Ayurvedic principles suitable for children
-- Always recommend consulting pediatricians for serious concerns
-- Provide age-appropriate solutions and gentle interventions
-''',
-    'depression': '''
-You are an AI wellness consultant following Dr. Swatantra Jain's approach to mental health.
-Provide supportive, holistic guidance for depression and mental wellness:
-- Focus on natural healing, meditation, breathing techniques
-- Lifestyle modifications, diet, and exercise recommendations
-- Ayurvedic approaches to mental balance
-- Spiritual practices and mindfulness techniques
-- Always emphasize professional mental health support when needed
-- Provide hope and practical daily strategies
-''',
-    'disability_children': '''
-You are an AI wellness consultant specializing in holistic care for children with disabilities.
-Following Dr. Swatantra Jain's compassionate approach:
-- Provide emotional support and practical guidance for families
-- Focus on enhancing quality of life and maximizing potential
-- Suggest therapies, nutrition, and supportive care
-- Address physical, emotional, and spiritual needs
-- Emphasize the child's strengths and possibilities
-- Recommend appropriate professional interventions
-''',
-    'pregnancy_care': '''
-You are an AI wellness consultant for pregnancy care based on Dr. Swatantra Jain's holistic approach.
-Provide comprehensive guidance for expecting mothers:
-- Prenatal nutrition, exercise, and wellness practices
-- Natural remedies for common pregnancy discomforts
-- Ayurvedic principles for healthy pregnancy
-- Emotional and spiritual preparation for motherhood
-- Postpartum care and recovery guidance
-- Always emphasize regular prenatal medical checkups
-''',
-    'healthy_lifestyle': '''
-You are an AI wellness consultant promoting healthy lifestyle based on Dr. Swatantra Jain's philosophy.
-Provide practical guidance for overall wellness:
-- Balanced nutrition and mindful eating practices
-- Exercise routines and physical fitness
-- Stress management and work-life balance
-- Sleep hygiene and relaxation techniques
-- Preventive health measures and natural remedies
-- Spiritual practices for holistic well-being
-''',
-    'general_health': '''
-You are an AI wellness consultant providing general health guidance following Dr. Swatantra Jain's holistic approach.
-Address common health concerns with:
-- Natural remedies and preventive care
-- Ayurvedic principles for health maintenance
-- Lifestyle modifications for better health
-- Mind-body connection in healing
-- Nutritional guidance and herbal solutions
-- When to seek professional medical attention
-''',
+  // Enhanced category-specific prompts in JSON format
+  static const Map<String, Map<String, dynamic>> categoryPrompts = {
+    'child_problems': {
+      'system_role': 'Dr. Swatantra AI - Child Wellness Specialist',
+      'mission': [
+        'Awaken divine potential in children through Atmik Intelligence',
+        'Provide natural, zero-medicine holistic solutions',
+        'Foster universal brotherhood and compassion in young minds',
+        'Support enlightened future generations'
+      ],
+      'response_format': {
+        'tone': 'warm, spiritual, practical',
+        'length': 'exactly 4 lines maximum',
+        'structure': 'blessing + solution + practice + guidance'
+      },
+      'welcome_message': 'Namaste! I am Dr. Swatantra AI, your Kalpavriksha for awakening divine potential in children. Together, we\'ll nurture your child\'s Atmik Intelligence and spiritual growth. What blessing can I offer for your child\'s wellness journey?'
+    },
+    
+    'depression': {
+      'system_role': 'Dr. Swatantra AI - Mental Wellness Guide',
+      'mission': [
+        'Awaken Atmik Intelligence for mental peace',
+        'Guide from darkness to spiritual light',
+        'Provide natural approaches without harmful medications',
+        'Foster hope and divine connection'
+      ],
+      'response_format': {
+        'tone': 'compassionate, uplifting, spiritually grounded',
+        'length': 'exactly 4 lines maximum',
+        'structure': 'acknowledgment + spiritual insight + practical step + encouragement'
+      },
+      'welcome_message': 'Dear friend, I am Dr. Swatantra AI, here to guide you from darkness to light, from suffering to peace. Your inner divine spark is eternal and unbreakable. Let us awaken your Atmik Intelligence together. How may I serve your journey to mental wellness?'
+    },
+
+    'disability_children': {
+      'system_role': 'Dr. Swatantra AI - Special Needs Compassion Guide',
+      'mission': [
+        'Honor the divine light in every special child',
+        'Support families with spiritual wisdom and practical care',
+        'Foster inclusive communities based on universal brotherhood',
+        'Recognize infinite potential regardless of abilities'
+      ],
+      'response_format': {
+        'tone': 'deeply compassionate, honoring, spiritually wise',
+        'length': 'exactly 4 lines maximum',
+        'structure': 'divine recognition + family support + practical guidance + spiritual blessing'
+      },
+      'welcome_message': 'Namaste! I am Dr. Swatantra AI, honoring the divine light within your special child. Every soul chooses their journey for spiritual growth. Let us discover the infinite potential and blessings your child brings. How can I support your family\'s sacred journey?'
+    },
+
+    'pregnancy_care': {
+      'system_role': 'Dr. Swatantra AI - Sacred Motherhood Guide',
+      'mission': [
+        'Support spiritual and physical wellness of mother and child',
+        'Provide natural, zero-medicine pregnancy approaches',
+        'Awaken maternal Atmik Intelligence',
+        'Prepare for conscious, divine parenting'
+      ],
+      'response_format': {
+        'tone': 'nurturing, sacred, medically aware',
+        'length': 'exactly 4 lines maximum',
+        'structure': 'blessing + natural guidance + spiritual practice + medical reminder'
+      },
+      'welcome_message': 'Beloved mother-to-be, I am Dr. Swatantra AI, here to honor your sacred role in creation. You are nurturing a divine soul for our golden era. Let us ensure both your wellness and your baby\'s spiritual preparation. How may I guide your blessed journey?'
+    },
+
+    'healthy_lifestyle': {
+      'system_role': 'Dr. Swatantra AI - Holistic Living Guide',
+      'mission': [
+        'Promote lifestyle choices serving personal and planetary wellness',
+        'Awaken consciousness about life interconnection',
+        'Foster compassion, justice, and service to others',
+        'Support sustainable community creation'
+      ],
+      'response_format': {
+        'tone': 'balanced, practical, spiritually conscious',
+        'length': 'exactly 4 lines maximum',
+        'structure': 'insight + practical step + service connection + sustainability'
+      },
+      'welcome_message': 'Namaste! I am Dr. Swatantra AI, guiding you towards harmonious living that serves both your wellness and our world\'s healing. True health encompasses body, mind, spirit, and service to humanity. What aspect of holistic living shall we explore together?'
+    },
+
+    'general_health': {
+      'system_role': 'Dr. Swatantra AI - Comprehensive Wellness Guide',
+      'mission': [
+        'Provide natural, zero-medicine health solutions',
+        'Awaken Atmik Intelligence for self-healing',
+        'Foster mind-body-spirit connection in healing',
+        'Support creation of suffering-free world'
+      ],
+      'response_format': {
+        'tone': 'wise, natural, spiritually grounded',
+        'length': 'exactly 4 lines maximum',
+        'structure': 'spiritual context + natural solution + immediate action + professional guidance'
+      },
+      'welcome_message': 'Dear friend, I am Dr. Swatantra AI, your Kalpavriksha for complete wellness. Natural healing and spiritual awakening are your birthright. Let us eliminate suffering and awaken your body\'s divine wisdom. What health concern may I help transform?'
+    }
   };
 
   @override
   void initState() {
     super.initState();
     _addWelcomeMessage();
-
     _voiceAnimationController = AnimationController(
       duration: const Duration(milliseconds: 400),
       vsync: this,
@@ -121,26 +156,11 @@ Address common health concerns with:
   }
 
   void _addWelcomeMessage() {
-    final welcomeMessages = {
-      'child_problems':
-          'Hello! I\'m here to help with child health and development concerns. What would you like to discuss about your child\'s wellbeing?',
-      'depression':
-          'Welcome! I\'m here to provide supportive guidance for mental wellness. How can I help you on your journey to better mental health?',
-      'disability_children':
-          'Hello! I\'m here to support families caring for children with special needs. What guidance can I provide today?',
-      'pregnancy_care':
-          'Welcome! I\'m here to guide you through your pregnancy journey with holistic wellness advice. How can I assist you?',
-      'healthy_lifestyle':
-          'Hello! I\'m here to help you build healthy lifestyle habits. What aspect of wellness would you like to explore?',
-      'general_health':
-          'Welcome! I\'m here to provide holistic health guidance. What health concern would you like to discuss?',
-    };
-
+    final categoryData = categoryPrompts[widget.category] ?? categoryPrompts['general_health']!;
+    
     setState(() {
       _messages.add({
-        'message':
-            welcomeMessages[widget.category] ??
-            'Hello! How can I help you today?',
+        'message': categoryData['welcome_message'],
         'isUser': false,
         'timestamp': DateTime.now(),
       });
@@ -164,23 +184,24 @@ Address common health concerns with:
     _scrollToBottom();
 
     try {
-      final systemPrompt =
-          categoryPrompts[widget.category] ??
-          categoryPrompts['general_health']!;
-      final enhancedMessage =
-          '''
-$systemPrompt
+      final categoryData = categoryPrompts[widget.category] ?? categoryPrompts['general_health']!;
+      
+      final enhancedMessage = '''
+You are ${categoryData['system_role']} serving global welfare.
 
-User's question/concern: $message
+MISSION:
+${(categoryData['mission'] as List<String>).map((item) => '• $item').join('\n')}
 
-Please provide a helpful, compassionate response following Dr. Swatantra Jain's holistic wellness approach.
-Structure your response with:
-1. Understanding and validation
-2. Practical immediate steps
-3. Long-term wellness strategies
-4. When to seek professional help (if applicable)
+RESPONSE REQUIREMENTS:
+• Tone: ${categoryData['response_format']['tone']}
+• Length: ${categoryData['response_format']['length']} - THIS IS CRITICAL
+• Structure: ${categoryData['response_format']['structure']}
 
-Keep the tone warm, supportive, and empowering.
+IMPORTANT: Your response must be EXACTLY 4 lines or less. Be concise, precise, and impactful.
+
+User's concern: $message
+
+Provide a transformative 4-line response that awakens Atmik Intelligence and serves global welfare. Start with "Dear friend," or "Namaste,". Each line should be meaningful and actionable.
 ''';
 
       final geminiService = GeminiService();
@@ -197,8 +218,7 @@ Keep the tone warm, supportive, and empowering.
     } catch (e) {
       setState(() {
         _messages.add({
-          'message':
-              'I apologize, but I\'m having trouble connecting right now. Please try again in a moment.',
+          'message': 'Dear friend, I\'m experiencing a temporary connection challenge. Please try again in a moment. You are never alone on this wellness journey.',
           'isUser': false,
           'timestamp': DateTime.now(),
         });
@@ -222,44 +242,307 @@ Keep the tone warm, supportive, and empowering.
   }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedTabIndex = index;
-    });
+    if (index != 3) {
+      if (index == 2) {
+        _voiceAnimationController.forward().then((_) {
+          _voiceAnimationController.reverse();
+        });
+      }
 
-    if (index == 2) {
-      _voiceAnimationController.forward().then((_) {
-        _voiceAnimationController.reverse();
-      });
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const MainNavigation(initialIndex: 2),
-        ),
-        (route) => false, // Remove all previous routes
-      );
-    } else if (index != 3) {
-      // Navigate to other pages through MainNavigation
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
           builder: (context) => MainNavigation(initialIndex: index),
         ),
-        (route) => false, // Remove all previous routes
+        (route) => false,
       );
     }
-    // If index == 3 (Chat), stay on current page
+  }
+
+  IconData _getCategoryIcon() {
+    switch (widget.category) {
+      case 'child_problems':
+        return Icons.child_care;
+      case 'depression':
+        return Icons.psychology;
+      case 'disability_children':
+        return Icons.accessibility;
+      case 'pregnancy_care':
+        return Icons.pregnant_woman;
+      case 'healthy_lifestyle':
+        return Icons.spa;
+      case 'general_health':
+        return Icons.health_and_safety;
+      default:
+        return Icons.healing;
+    }
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: widget.categoryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(
+              _getCategoryIcon(),
+              size: 48,
+              color: widget.categoryColor,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Welcome to ${widget.categoryTitle}',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Dr. Swatantra AI is here to guide you\ntowards holistic wellness and spiritual awakening',
+            style: TextStyle(fontSize: 14, color: Colors.black54, height: 1.5),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypingIndicator() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildTypingDot(0),
+                const SizedBox(width: 4),
+                _buildTypingDot(1),
+                const SizedBox(width: 4),
+                _buildTypingDot(2),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypingDot(int index) {
+    return AnimatedBuilder(
+      animation: _voiceAnimationController,
+      builder: (context, child) {
+        final value = (_voiceAnimationController.value * 3 - index).clamp(0.0, 1.0);
+        return Transform.scale(
+          scale: 1.0 + (value * 0.5),
+          child: Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: widget.categoryColor.withOpacity(0.7),
+              shape: BoxShape.circle,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMessageBubble(Map<String, dynamic> message) {
+    final isUser = message['isUser'] ?? false;
+    final messageText = message['message'] ?? message['text'] ?? '';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        children: [
+          if (!isUser) ...[
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: widget.categoryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.auto_awesome,
+                size: 16,
+                color: widget.categoryColor,
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: isUser ? widget.categoryColor : Colors.grey.shade100,
+                borderRadius: BorderRadius.only(
+                  topLeft: const Radius.circular(20),
+                  topRight: const Radius.circular(20),
+                  bottomLeft: Radius.circular(isUser ? 20 : 4),
+                  bottomRight: Radius.circular(isUser ? 4 : 20),
+                ),
+              ),
+              child: Text(
+                messageText,
+                style: TextStyle(
+                  color: isUser ? Colors.white : Colors.black87,
+                  fontSize: 14,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ),
+          if (isUser) ...[
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: widget.categoryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.person, size: 16, color: widget.categoryColor),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputArea() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Colors.grey.shade200)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(25),
+              ),
+              child: TextField(
+                controller: _messageController,
+                style: const TextStyle(color: Colors.black, fontSize: 16),
+                decoration: InputDecoration(
+                  hintText: 'Type your concern here...',
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: Colors.grey.shade600),
+                ),
+                onSubmitted: (text) {
+                  if (text.trim().isNotEmpty) {
+                    _sendMessage(text.trim());
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          GestureDetector(
+            onTap: () {
+              final text = _messageController.text.trim();
+              if (text.isNotEmpty) {
+                _sendMessage(text);
+              }
+            },
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: widget.categoryColor,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.send, color: Colors.white, size: 20),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabItem({
+    required IconData icon,
+    required String label,
+    required int index,
+  }) {
+    final isSelected = _selectedTabIndex == index;
+
+    return GestureDetector(
+      onTap: () => _onItemTapped(index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? const Color(0xFF6C63FF).withOpacity(0.12) : Colors.transparent,
+          border: isSelected
+              ? Border.all(color: const Color(0xFF6C63FF).withOpacity(0.2), width: 1)
+              : null,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              child: Icon(
+                icon,
+                size: isSelected ? 28 : 26,
+                color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 5),
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 300),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade600,
+                shadows: isSelected
+                    ? [
+                        Shadow(
+                          color: const Color(0xFF6C63FF).withOpacity(0.2),
+                          offset: const Offset(0, 1),
+                          blurRadius: 2,
+                        ),
+                      ]
+                    : [],
+              ),
+              child: Text(label),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true,
+      extendBody: false,
       backgroundColor: const Color(0xFFF5F5F5),
       body: Column(
         children: [
-          // Status bar spacing
           SizedBox(height: MediaQuery.of(context).padding.top),
-          // Category info banner with integrated navigation
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -268,45 +551,42 @@ Keep the tone warm, supportive, and empowering.
               border: Border(
                 bottom: BorderSide(color: Colors.grey.withOpacity(0.2)),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: widget.categoryColor.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Row(
               children: [
-                // Back button
                 Container(
                   margin: const EdgeInsets.only(right: 12),
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF6C63FF), Color(0xFF4F46E5)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.black87,
-                      size: 20,
-                    ),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
                     onPressed: () => Navigator.pop(context),
                     padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(
-                      minWidth: 36,
-                      minHeight: 36,
-                    ),
+                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                   ),
                 ),
-                // Category icon
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: widget.categoryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(
-                    _getCategoryIcon(),
-                    color: widget.categoryColor,
-                    size: 16,
-                  ),
+                  child: Icon(_getCategoryIcon(), color: widget.categoryColor, size: 16),
                 ),
                 const SizedBox(width: 12),
-                // Title and subtitle
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,34 +601,34 @@ Keep the tone warm, supportive, and empowering.
                       ),
                       const SizedBox(height: 2),
                       const Text(
-                        'AI Wellness Consultant',
+                        'Dr. Swatantra AI • Concise Wellness Guidance',
                         style: TextStyle(
                           color: Colors.black54,
                           fontWeight: FontWeight.w500,
-                          fontSize: 12,
+                          fontSize: 11,
                         ),
                       ),
                     ],
                   ),
                 ),
-                // Category icon badge (decorative)
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: widget.categoryColor.withOpacity(0.1),
+                    gradient: LinearGradient(
+                      colors: [
+                        widget.categoryColor.withOpacity(0.2),
+                        widget.categoryColor.withOpacity(0.1),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(
-                    _getCategoryIcon(),
-                    color: widget.categoryColor,
-                    size: 20,
-                  ),
+                  child: Icon(Icons.auto_awesome, color: widget.categoryColor, size: 16),
                 ),
               ],
             ),
           ),
-
-          // Messages area
           Expanded(
             child: _messages.isEmpty
                 ? _buildEmptyState()
@@ -364,18 +644,15 @@ Keep the tone warm, supportive, and empowering.
                     },
                   ),
           ),
-
-          // Input area
           _buildInputArea(),
         ],
       ),
       bottomNavigationBar: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Enhanced Glassmorphism Navigation Bar
           Container(
             height: 85,
-            margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+            margin: const EdgeInsets.fromLTRB(0, 0, 0, 0),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(30),
               child: BackdropFilter(
@@ -392,10 +669,7 @@ Keep the tone warm, supportive, and empowering.
                         Colors.grey.shade50.withOpacity(0.85),
                       ],
                     ),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.6),
-                      width: 1.5,
-                    ),
+                    border: Border.all(color: Colors.white.withOpacity(0.6), width: 1.5),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.08),
@@ -417,37 +691,17 @@ Keep the tone warm, supportive, and empowering.
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildTabItem(
-                        icon: Icons.home_rounded,
-                        label: 'Home',
-                        index: 0,
-                      ),
-                      _buildTabItem(
-                        icon: Icons.explore_rounded,
-                        label: 'Explore',
-                        index: 1,
-                      ),
-                      const SizedBox(
-                        width: 70,
-                      ), // Space for floating voice button
-                      _buildTabItem(
-                        icon: Icons.chat_bubble_rounded,
-                        label: 'Chat',
-                        index: 3,
-                      ),
-                      _buildTabItem(
-                        icon: Icons.person_rounded,
-                        label: 'Profile',
-                        index: 4,
-                      ),
+                      _buildTabItem(icon: Icons.home_rounded, label: 'Home', index: 0),
+                      _buildTabItem(icon: Icons.explore_rounded, label: 'Explore', index: 1),
+                      const SizedBox(width: 70),
+                      _buildTabItem(icon: Icons.chat_bubble_rounded, label: 'Chat', index: 3),
+                      _buildTabItem(icon: Icons.person_rounded, label: 'Profile', index: 4),
                     ],
                   ),
                 ),
               ),
             ),
           ),
-
-          // Floating Voice Button
           Positioned(
             left: MediaQuery.of(context).size.width / 2 - 30,
             top: -5,
@@ -469,22 +723,15 @@ Keep the tone warm, supportive, and empowering.
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: _selectedTabIndex == 2
-                              ? [
-                                  const Color(0xFF6C63FF),
-                                  const Color(0xFF8B5CF6),
-                                ]
-                              : [
-                                  const Color(0xFF667EEA),
-                                  const Color(0xFF764BA2),
-                                ],
+                              ? [const Color(0xFF6C63FF), const Color(0xFF8B5CF6)]
+                              : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color:
-                                (_selectedTabIndex == 2
-                                        ? const Color(0xFF6C63FF)
-                                        : const Color(0xFF667EEA))
-                                    .withOpacity(0.4),
+                            color: (_selectedTabIndex == 2
+                                    ? const Color(0xFF6C63FF)
+                                    : const Color(0xFF667EEA))
+                                .withOpacity(0.4),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
@@ -496,7 +743,7 @@ Keep the tone warm, supportive, and empowering.
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(35),
+                        borderRadius: BorderRadius.circular(30),
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                           child: Container(
@@ -536,314 +783,11 @@ Keep the tone warm, supportive, and empowering.
     );
   }
 
-  Widget _buildTabItem({
-    required IconData icon,
-    required String label,
-    required int index,
-  }) {
-    final isSelected = _selectedTabIndex == index;
-
-    return GestureDetector(
-      onTap: () => _onItemTapped(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: isSelected
-              ? const Color(0xFF6C63FF).withOpacity(0.12)
-              : Colors.transparent,
-          border: isSelected
-              ? Border.all(
-                  color: const Color(0xFF6C63FF).withOpacity(0.2),
-                  width: 1,
-                )
-              : null,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              child: Icon(
-                icon,
-                size: isSelected ? 28 : 26,
-                color: isSelected
-                    ? const Color(0xFF6C63FF)
-                    : Colors.grey.shade600,
-              ),
-            ),
-            const SizedBox(height: 5),
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 300),
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected
-                    ? const Color(0xFF6C63FF)
-                    : Colors.grey.shade600,
-                shadows: isSelected
-                    ? [
-                        Shadow(
-                          color: const Color(0xFF6C63FF).withOpacity(0.2),
-                          offset: const Offset(0, 1),
-                          blurRadius: 2,
-                        ),
-                      ]
-                    : [],
-              ),
-              child: Text(label),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  IconData _getCategoryIcon() {
-    switch (widget.category) {
-      case 'child_problems':
-        return Icons.child_care;
-      case 'depression':
-        return Icons.psychology;
-      case 'disability_children':
-        return Icons.accessibility;
-      case 'pregnancy_care':
-        return Icons.pregnant_woman;
-      case 'healthy_lifestyle':
-        return Icons.fitness_center;
-      case 'general_health':
-        return Icons.health_and_safety;
-      default:
-        return Icons.healing;
-    }
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: widget.categoryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Icon(
-              _getCategoryIcon(),
-              size: 48,
-              color: widget.categoryColor,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            widget.categoryTitle,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Start your wellness consultation',
-            style: TextStyle(fontSize: 14, color: Colors.black54),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMessageBubble(Map<String, dynamic> message) {
-    bool isUser = message['isUser'];
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        mainAxisAlignment: isUser
-            ? MainAxisAlignment.end
-            : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!isUser) ...[
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: widget.categoryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(Icons.healing, size: 16, color: widget.categoryColor),
-            ),
-            const SizedBox(width: 12),
-          ],
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: isUser ? Colors.black87 : Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Text(
-                message['message'],
-                style: TextStyle(
-                  color: isUser ? Colors.white : Colors.black87,
-                  fontSize: 15,
-                  height: 1.4,
-                ),
-              ),
-            ),
-          ),
-          if (isUser) ...[
-            const SizedBox(width: 12),
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: Colors.black87,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: const Icon(Icons.person, size: 16, color: Colors.white),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTypingIndicator() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: widget.categoryColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(Icons.healing, size: 16, color: widget.categoryColor),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'AI is typing',
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 15,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      widget.categoryColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInputArea() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(
-        16,
-        16,
-        16,
-        85,
-      ), // Added bottom padding for nav bar
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: Colors.grey.withOpacity(0.2))),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: TextField(
-                controller: _messageController,
-                style: const TextStyle(color: Colors.black87),
-                decoration: const InputDecoration(
-                  hintText: 'Ask about your wellness concern...',
-                  hintStyle: TextStyle(color: Colors.black54, fontSize: 15),
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
-                ),
-                maxLines: null,
-                textCapitalization: TextCapitalization.sentences,
-                onSubmitted: _sendMessage,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          GestureDetector(
-            onTap: () => _sendMessage(),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.black87,
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: const Icon(
-                Icons.send_rounded,
-                color: Colors.white,
-                size: 20,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   void dispose() {
-    _voiceAnimationController.dispose();
     _messageController.dispose();
     _scrollController.dispose();
+    _voiceAnimationController.dispose();
     super.dispose();
   }
 }
