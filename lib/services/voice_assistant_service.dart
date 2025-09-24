@@ -4,40 +4,42 @@ import 'package:google_generative_ai/google_generative_ai.dart';
 import 'gemini_service.dart';
 
 /// Enhanced Voice Assistant Service with comprehensive TTS voice configuration
+/// MALE VOICES ONLY - Optimized for therapeutic and wellness applications
 ///
 /// Features:
-/// - Configurable voice pitch (0.5 to 2.0)
+/// - Configurable voice pitch (0.5 to 2.0) - optimized for male range
 /// - Adjustable speech rate (0.0 to 1.0)
 /// - Volume control (0.0 to 1.0)
 /// - Language and voice selection
-/// - Gender-based voice filtering
-/// - Voice presets for different scenarios
+/// - Male voice filtering and selection
+/// - Therapeutic voice presets for wellness
 ///
 /// Usage Examples:
 /// ```dart
 /// final voiceAssistant = VoiceAssistantService();
 ///
-/// // Set custom voice parameters
-/// await voiceAssistant.setPitch(1.3);
-/// await voiceAssistant.setSpeechRate(0.4);
-/// await voiceAssistant.setVoiceGender('female');
+/// // Set custom voice parameters (always male)
+/// await voiceAssistant.setPitch(0.7);
+/// await voiceAssistant.setSpeechRate(0.3);
+/// await voiceAssistant.setVoiceGender('male'); // Always male
 ///
-/// // Use voice presets
-/// await voiceAssistant.setTherapeuticVoice(); // For counseling
-/// await voiceAssistant.setEnergeticVoice(); // For motivation
+/// // Use therapeutic voice presets
+/// await voiceAssistant.setTherapeuticVoice(); // Default therapeutic voice
+/// await voiceAssistant.setSoothingMaleVoice(); // For calm, deep male voice
+/// await voiceAssistant.setProfessionalDeepVoice(); // For authoritative voice
 ///
 /// // Configure advanced settings
 /// await voiceAssistant.configureAdvancedVoice(
-///   pitch: 1.2,
-///   speechRate: 0.5,
-///   volume: 0.8,
+///   pitch: 0.75,
+///   speechRate: 0.3,
+///   volume: 0.75,
 ///   language: 'en-US',
-///   gender: 'female',
+///   gender: 'male', // Always male
 /// );
 ///
-/// // Get available voices
+/// // Get available male voices only
 /// final voices = voiceAssistant.getAvailableVoices();
-/// final femaleVoices = voiceAssistant.getVoicesByGender('female');
+/// final maleVoices = voiceAssistant.getVoicesByGender('male');
 /// ```
 
 class VoiceAssistantService {
@@ -49,19 +51,19 @@ class VoiceAssistantService {
   String userTranscript = '';
   String aiTranscript = '';
 
-  // TTS Voice Configuration Properties
-  double _pitch = 1.0; // Range: 0.5 to 2.0
-  double _speechRate = 0.5; // Range: 0.0 to 1.0
-  double _volume = 0.8; // Range: 0.0 to 1.0
+  // TTS Voice Configuration Properties - Updated for soothing male voice
+  double _pitch = 0.7; // Lower pitch for deeper male voice (Range: 0.5 to 2.0)
+  double _speechRate = 0.4; // Slower rate for calm delivery (Range: 0.0 to 1.0)
+  double _volume = 0.8; // Good volume level (Range: 0.0 to 1.0)
   String _language = 'en-US';
   String? _selectedVoice;
   List<Map<String, dynamic>> _availableVoices = [];
 
-  // Advanced voice settings
-  bool _useDeepVoice = false;
-  double _voicePitch = 1.0; // Additional pitch control
-  double _voiceTone = 1.0; // Tone adjustment (when supported)
-  String _voiceGender = 'female'; // male, female, neutral
+  // Advanced voice settings - Updated for male voice preference
+  bool _useDeepVoice = true; // Enable deep voice mode
+  double _voicePitch = 0.7; // Additional pitch control for deeper tone
+  double _voiceTone = 0.8; // Lower tone for more masculine sound
+  String _voiceGender = 'male'; // Set to male by default
 
   // Constructor
   VoiceAssistantService() {
@@ -77,12 +79,12 @@ class VoiceAssistantService {
       // Set language
       await _tts.setLanguage(_language);
 
-      // Configure voice parameters
+      // Configure voice parameters for soothing male voice
       await _tts.setPitch(_pitch);
       await _tts.setSpeechRate(_speechRate);
       await _tts.setVolume(_volume);
 
-      // Try to set a preferred voice based on gender
+      // Try to set a preferred male voice
       await _setPreferredVoice();
 
       // Set the therapeutic voice preset as the default
@@ -119,11 +121,11 @@ class VoiceAssistantService {
     }
   }
 
-  /// Set preferred voice based on gender and language
+  /// Set preferred voice based on gender and language - Enhanced for male voice selection
   Future<void> _setPreferredVoice() async {
     if (_availableVoices.isEmpty) return;
 
-    // Filter voices by language and gender preference
+    // Filter voices by language and male gender preference
     final filteredVoices = _availableVoices.where((voice) {
       final name = (voice['name'] as String).toLowerCase();
       final locale = (voice['locale'] as String).toLowerCase();
@@ -133,29 +135,54 @@ class VoiceAssistantService {
           locale.contains(_language.toLowerCase().replaceAll('-', '_')) ||
           locale.contains(_language.toLowerCase().replaceAll('-', ''));
 
-      // Check if voice matches gender preference
+      // Enhanced male voice detection - Only male voices allowed
       bool matchesGender = true;
-      if (_voiceGender == 'female') {
-        matchesGender =
-            name.contains('female') ||
-            name.contains('woman') ||
-            name.contains('girl') ||
-            !name.contains('male');
-      } else if (_voiceGender == 'male') {
+      if (_voiceGender == 'male') {
         matchesGender =
             name.contains('male') ||
             name.contains('man') ||
-            name.contains('boy');
+            name.contains('boy') ||
+            name.contains('deep') ||
+            name.contains('bass') ||
+            // Common male voice names
+            name.contains('alex') ||
+            name.contains('daniel') ||
+            name.contains('tom') ||
+            name.contains('david') ||
+            name.contains('jorge') ||
+            name.contains('diego') ||
+            (!name.contains('female') && !name.contains('woman') && !name.contains('girl'));
+      } else {
+        // Force male voice only - no female voices allowed
+        matchesGender =
+            name.contains('male') ||
+            name.contains('man') ||
+            name.contains('boy') ||
+            name.contains('deep') ||
+            name.contains('bass') ||
+            (!name.contains('female') && !name.contains('woman') && !name.contains('girl'));
       }
 
       return matchesLanguage && matchesGender;
     }).toList();
 
-    if (filteredVoices.isNotEmpty) {
-      _selectedVoice = filteredVoices.first['name'];
+    // Prefer deeper/bass voices if available
+    final deepVoices = filteredVoices.where((voice) {
+      final name = (voice['name'] as String).toLowerCase();
+      return name.contains('deep') || 
+             name.contains('bass') || 
+             name.contains('low') ||
+             name.contains('rich');
+    }).toList();
+
+    final voiceToUse = deepVoices.isNotEmpty ? deepVoices.first : 
+                      (filteredVoices.isNotEmpty ? filteredVoices.first : null);
+
+    if (voiceToUse != null) {
+      _selectedVoice = voiceToUse['name'];
       await _tts.setVoice({
         'name': _selectedVoice!,
-        'locale': filteredVoices.first['locale'],
+        'locale': voiceToUse['locale'],
       });
     }
   }
@@ -187,12 +214,11 @@ class VoiceAssistantService {
     await _setPreferredVoice(); // Update voice based on new language
   }
 
-  /// Set voice gender preference
+  /// Set voice gender preference - Only male voices supported
   Future<void> setVoiceGender(String gender) async {
-    if (['male', 'female', 'neutral'].contains(gender)) {
-      _voiceGender = gender;
-      await _setPreferredVoice();
-    }
+    // Force male voice only - no female voices allowed
+    _voiceGender = 'male';
+    await _setPreferredVoice();
   }
 
   /// Set specific voice by name
@@ -254,48 +280,49 @@ class VoiceAssistantService {
     }).toList();
   }
 
-  /// Get voices filtered by gender
+  /// Get voices filtered by gender - Only returns male voices
   List<Map<String, dynamic>> getVoicesByGender(String gender) {
+    // Always return only male voices regardless of input
     return _availableVoices.where((voice) {
       final name = (voice['name'] as String).toLowerCase();
 
-      if (gender == 'female') {
-        return name.contains('female') ||
-            name.contains('woman') ||
-            name.contains('girl') ||
-            !name.contains('male');
-      } else if (gender == 'male') {
-        return name.contains('male') ||
-            name.contains('man') ||
-            name.contains('boy');
-      }
-      return true; // neutral or any
+      return name.contains('male') ||
+          name.contains('man') ||
+          name.contains('boy') ||
+          name.contains('deep') ||
+          name.contains('bass') ||
+          name.contains('alex') ||
+          name.contains('daniel') ||
+          name.contains('tom') ||
+          name.contains('david') ||
+          (!name.contains('female') && !name.contains('woman') && !name.contains('girl'));
     }).toList();
   }
 
-  /// Reset voice settings to default
+  /// Reset voice settings to therapeutic male voice default
   Future<void> resetVoiceSettings() async {
-    _pitch = 1.0;
-    _speechRate = 0.5;
-    _volume = 0.8;
+    _pitch = 0.75;
+    _speechRate = 0.3;
+    _volume = 0.75;
     _language = 'en-US';
-    _voiceGender = 'female';
-    _useDeepVoice = false;
-    _voicePitch = 1.0;
-    _voiceTone = 1.0;
+    _voiceGender = 'male';
+    _useDeepVoice = true;
+    _voicePitch = 0.75;
+    _voiceTone = 0.8;
 
     await _initializeTTS();
   }
 
   // ===== Voice Presets =====
 
-  /// Apply a gentle female voice preset
-  Future<void> setGentleFemaleVoice() async {
+  /// Apply a soothing deep male voice preset
+  Future<void> setSoothingMaleVoice() async {
     await configureAdvancedVoice(
-      pitch: 1.2,
-      speechRate: 0.4,
-      volume: 0.7,
-      gender: 'female',
+      pitch: 0.7,        // Lower pitch for deeper voice
+      speechRate: 0.35,  // Slower for calm delivery
+      volume: 0.8,       // Clear but not overwhelming
+      gender: 'male',
+      useDeepVoice: true,
     );
   }
 
@@ -312,25 +339,41 @@ class VoiceAssistantService {
   /// Apply a calm narrator voice preset
   Future<void> setCalmNarratorVoice() async {
     await configureAdvancedVoice(
-      pitch: 1.0,
+      pitch: 0.75,  // Slightly lower for male narrator
       speechRate: 0.4,
       volume: 0.8,
-      gender: 'neutral',
+      gender: 'male',
     );
   }
 
-  /// Apply an energetic voice preset
+  /// Apply an energetic male voice preset
   Future<void> setEnergeticVoice() async {
-    await configureAdvancedVoice(pitch: 1.3, speechRate: 0.6, volume: 0.9);
+    await configureAdvancedVoice(
+      pitch: 1.1,        // Slightly higher but still male range
+      speechRate: 0.6, 
+      volume: 0.9,
+      gender: 'male',
+    );
   }
 
-  /// Apply a soothing therapeutic voice preset
+  /// Apply a soothing therapeutic voice preset - Updated for male voice
   Future<void> setTherapeuticVoice() async {
     await configureAdvancedVoice(
-      pitch: 1.1,
-      speechRate: 0.3,
-      volume: 0.7,
-      gender: 'female',
+      pitch: 0.75,       // Slightly deeper than default
+      speechRate: 0.3,   // Very slow and calming
+      volume: 0.75,      // Gentle volume
+      gender: 'male',
+    );
+  }
+
+  /// Apply a professional deep male voice preset - NEW
+  Future<void> setProfessionalDeepVoice() async {
+    await configureAdvancedVoice(
+      pitch: 0.65,       // Very deep
+      speechRate: 0.45,  // Professional pace
+      volume: 0.85,      // Clear and authoritative
+      gender: 'male',
+      useDeepVoice: true,
     );
   }
 
@@ -383,7 +426,7 @@ class VoiceAssistantService {
         aiTranscript += text;
         onAIChunk(text);
 
-        // Speak chunk immediately
+        // Speak chunk immediately with soothing male voice
         await _tts.awaitSpeakCompletion(true);
         await _tts.speak(text);
       }

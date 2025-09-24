@@ -43,7 +43,8 @@ class _ExplorePageState extends State<ExplorePage>
       'coverImage': 'assets/deviahilya.png',
       'description':
           'A comprehensive guide to natural healing methods and holistic health practices.',
-      'url': 'https://drive.google.com/file/d/1UQNuEYMoyaiG7H7DOJrEW2zVNzgvzAcd/view?usp=sharing',
+      'url':
+          'https://drive.google.com/file/d/1UQNuEYMoyaiG7H7DOJrEW2zVNzgvzAcd/view?usp=sharing',
     },
     {
       'title':
@@ -52,7 +53,8 @@ class _ExplorePageState extends State<ExplorePage>
       'coverImage': 'assets/swatantra_ai_book.png',
       'description':
           'Discover effective homeopathic remedies for common ailments and chronic conditions.',
-      'url': 'https://drive.google.com/file/d/10oyeqPL17ZvdfJaofpYMw1EotI7lPMld/view?usp=sharing',
+      'url':
+          'https://drive.google.com/file/d/10oyeqPL17ZvdfJaofpYMw1EotI7lPMld/view?usp=sharing',
     },
     {
       'title': 'Universal Prosperity: The Dawn of Satyug',
@@ -68,7 +70,8 @@ class _ExplorePageState extends State<ExplorePage>
       'coverImage': 'assets/timeless_path.png',
       'description':
           'Understanding the powerful connection between mental and physical health.',
-      'url': 'https://drive.google.com/file/d/1iV9piIHfG5DBiHVeL5cR2IHaz3uZ_1MP/view?usp=sharing',
+      'url':
+          'https://drive.google.com/file/d/1iV9piIHfG5DBiHVeL5cR2IHaz3uZ_1MP/view?usp=sharing',
     },
   ];
 

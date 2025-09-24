@@ -40,30 +40,33 @@ class _ConsultantChatbotPageState extends State<ConsultantChatbotPage>
         'Awaken divine potential in children through Atmik Intelligence',
         'Provide natural, zero-medicine holistic solutions',
         'Foster universal brotherhood and compassion in young minds',
-        'Support enlightened future generations'
+        'Support enlightened future generations',
       ],
       'response_format': {
         'tone': 'warm, spiritual, practical',
         'length': 'exactly 4 lines maximum',
-        'structure': 'blessing + solution + practice + guidance'
+        'structure': 'blessing + solution + practice + guidance',
       },
-      'welcome_message': 'Namaste! I am Dr. Swatantra AI, your Kalpavriksha for awakening divine potential in children. Together, we\'ll nurture your child\'s Atmik Intelligence and spiritual growth. What blessing can I offer for your child\'s wellness journey?'
+      'welcome_message':
+          'Namaste! I am Dr. Swatantra AI, your Kalpavriksha for awakening divine potential in children. Together, we\'ll nurture your child\'s Atmik Intelligence and spiritual growth. What blessing can I offer for your child\'s wellness journey?',
     },
-    
+
     'depression': {
       'system_role': 'Dr. Swatantra AI - Mental Wellness Guide',
       'mission': [
         'Awaken Atmik Intelligence for mental peace',
         'Guide from darkness to spiritual light',
         'Provide natural approaches without harmful medications',
-        'Foster hope and divine connection'
+        'Foster hope and divine connection',
       ],
       'response_format': {
         'tone': 'compassionate, uplifting, spiritually grounded',
         'length': 'exactly 4 lines maximum',
-        'structure': 'acknowledgment + spiritual insight + practical step + encouragement'
+        'structure':
+            'acknowledgment + spiritual insight + practical step + encouragement',
       },
-      'welcome_message': 'Dear friend, I am Dr. Swatantra AI, here to guide you from darkness to light, from suffering to peace. Your inner divine spark is eternal and unbreakable. Let us awaken your Atmik Intelligence together. How may I serve your journey to mental wellness?'
+      'welcome_message':
+          'Dear friend, I am Dr. Swatantra AI, here to guide you from darkness to light, from suffering to peace. Your inner divine spark is eternal and unbreakable. Let us awaken your Atmik Intelligence together. How may I serve your journey to mental wellness?',
     },
 
     'disability_children': {
@@ -72,14 +75,16 @@ class _ConsultantChatbotPageState extends State<ConsultantChatbotPage>
         'Honor the divine light in every special child',
         'Support families with spiritual wisdom and practical care',
         'Foster inclusive communities based on universal brotherhood',
-        'Recognize infinite potential regardless of abilities'
+        'Recognize infinite potential regardless of abilities',
       ],
       'response_format': {
         'tone': 'deeply compassionate, honoring, spiritually wise',
         'length': 'exactly 4 lines maximum',
-        'structure': 'divine recognition + family support + practical guidance + spiritual blessing'
+        'structure':
+            'divine recognition + family support + practical guidance + spiritual blessing',
       },
-      'welcome_message': 'Namaste! I am Dr. Swatantra AI, honoring the divine light within your special child. Every soul chooses their journey for spiritual growth. Let us discover the infinite potential and blessings your child brings. How can I support your family\'s sacred journey?'
+      'welcome_message':
+          'Namaste! I am Dr. Swatantra AI, honoring the divine light within your special child. Every soul chooses their journey for spiritual growth. Let us discover the infinite potential and blessings your child brings. How can I support your family\'s sacred journey?',
     },
 
     'pregnancy_care': {
@@ -88,14 +93,16 @@ class _ConsultantChatbotPageState extends State<ConsultantChatbotPage>
         'Support spiritual and physical wellness of mother and child',
         'Provide natural, zero-medicine pregnancy approaches',
         'Awaken maternal Atmik Intelligence',
-        'Prepare for conscious, divine parenting'
+        'Prepare for conscious, divine parenting',
       ],
       'response_format': {
         'tone': 'nurturing, sacred, medically aware',
         'length': 'exactly 4 lines maximum',
-        'structure': 'blessing + natural guidance + spiritual practice + medical reminder'
+        'structure':
+            'blessing + natural guidance + spiritual practice + medical reminder',
       },
-      'welcome_message': 'Beloved mother-to-be, I am Dr. Swatantra AI, here to honor your sacred role in creation. You are nurturing a divine soul for our golden era. Let us ensure both your wellness and your baby\'s spiritual preparation. How may I guide your blessed journey?'
+      'welcome_message':
+          'Beloved mother-to-be, I am Dr. Swatantra AI, here to honor your sacred role in creation. You are nurturing a divine soul for our golden era. Let us ensure both your wellness and your baby\'s spiritual preparation. How may I guide your blessed journey?',
     },
 
     'healthy_lifestyle': {
@@ -104,14 +111,16 @@ class _ConsultantChatbotPageState extends State<ConsultantChatbotPage>
         'Promote lifestyle choices serving personal and planetary wellness',
         'Awaken consciousness about life interconnection',
         'Foster compassion, justice, and service to others',
-        'Support sustainable community creation'
+        'Support sustainable community creation',
       ],
       'response_format': {
         'tone': 'balanced, practical, spiritually conscious',
         'length': 'exactly 4 lines maximum',
-        'structure': 'insight + practical step + service connection + sustainability'
+        'structure':
+            'insight + practical step + service connection + sustainability',
       },
-      'welcome_message': 'Namaste! I am Dr. Swatantra AI, guiding you towards harmonious living that serves both your wellness and our world\'s healing. True health encompasses body, mind, spirit, and service to humanity. What aspect of holistic living shall we explore together?'
+      'welcome_message':
+          'Namaste! I am Dr. Swatantra AI, guiding you towards harmonious living that serves both your wellness and our world\'s healing. True health encompasses body, mind, spirit, and service to humanity. What aspect of holistic living shall we explore together?',
     },
 
     'general_health': {
@@ -120,15 +129,17 @@ class _ConsultantChatbotPageState extends State<ConsultantChatbotPage>
         'Provide natural, zero-medicine health solutions',
         'Awaken Atmik Intelligence for self-healing',
         'Foster mind-body-spirit connection in healing',
-        'Support creation of suffering-free world'
+        'Support creation of suffering-free world',
       ],
       'response_format': {
         'tone': 'wise, natural, spiritually grounded',
         'length': 'exactly 4 lines maximum',
-        'structure': 'spiritual context + natural solution + immediate action + professional guidance'
+        'structure':
+            'spiritual context + natural solution + immediate action + professional guidance',
       },
-      'welcome_message': 'Dear friend, I am Dr. Swatantra AI, your Kalpavriksha for complete wellness. Natural healing and spiritual awakening are your birthright. Let us eliminate suffering and awaken your body\'s divine wisdom. What health concern may I help transform?'
-    }
+      'welcome_message':
+          'Dear friend, I am Dr. Swatantra AI, your Kalpavriksha for complete wellness. Natural healing and spiritual awakening are your birthright. Let us eliminate suffering and awaken your body\'s divine wisdom. What health concern may I help transform?',
+    },
   };
 
   @override
@@ -156,8 +167,9 @@ class _ConsultantChatbotPageState extends State<ConsultantChatbotPage>
   }
 
   void _addWelcomeMessage() {
-    final categoryData = categoryPrompts[widget.category] ?? categoryPrompts['general_health']!;
-    
+    final categoryData =
+        categoryPrompts[widget.category] ?? categoryPrompts['general_health']!;
+
     setState(() {
       _messages.add({
         'message': categoryData['welcome_message'],
@@ -184,9 +196,12 @@ class _ConsultantChatbotPageState extends State<ConsultantChatbotPage>
     _scrollToBottom();
 
     try {
-      final categoryData = categoryPrompts[widget.category] ?? categoryPrompts['general_health']!;
-      
-      final enhancedMessage = '''
+      final categoryData =
+          categoryPrompts[widget.category] ??
+          categoryPrompts['general_health']!;
+
+      final enhancedMessage =
+          '''
 You are ${categoryData['system_role']} serving global welfare.
 
 MISSION:
@@ -218,7 +233,8 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
     } catch (e) {
       setState(() {
         _messages.add({
-          'message': 'Dear friend, I\'m experiencing a temporary connection challenge. Please try again in a moment. You are never alone on this wellness journey.',
+          'message':
+              'Dear friend, I\'m experiencing a temporary connection challenge. Please try again in a moment. You are never alone on this wellness journey.',
           'isUser': false,
           'timestamp': DateTime.now(),
         });
@@ -347,7 +363,10 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
     return AnimatedBuilder(
       animation: _voiceAnimationController,
       builder: (context, child) {
-        final value = (_voiceAnimationController.value * 3 - index).clamp(0.0, 1.0);
+        final value = (_voiceAnimationController.value * 3 - index).clamp(
+          0.0,
+          1.0,
+        );
         return Transform.scale(
           scale: 1.0 + (value * 0.5),
           child: Container(
@@ -370,7 +389,9 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isUser
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: [
           if (!isUser) ...[
             Container(
@@ -494,9 +515,14 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: isSelected ? const Color(0xFF6C63FF).withOpacity(0.12) : Colors.transparent,
+          color: isSelected
+              ? const Color(0xFF6C63FF).withOpacity(0.12)
+              : Colors.transparent,
           border: isSelected
-              ? Border.all(color: const Color(0xFF6C63FF).withOpacity(0.2), width: 1)
+              ? Border.all(
+                  color: const Color(0xFF6C63FF).withOpacity(0.2),
+                  width: 1,
+                )
               : null,
         ),
         child: Column(
@@ -507,7 +533,9 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
               child: Icon(
                 icon,
                 size: isSelected ? 28 : 26,
-                color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade600,
+                color: isSelected
+                    ? const Color(0xFF6C63FF)
+                    : Colors.grey.shade600,
               ),
             ),
             const SizedBox(height: 5),
@@ -516,7 +544,9 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                color: isSelected ? const Color(0xFF6C63FF) : Colors.grey.shade600,
+                color: isSelected
+                    ? const Color(0xFF6C63FF)
+                    : Colors.grey.shade600,
                 shadows: isSelected
                     ? [
                         Shadow(
@@ -572,10 +602,17 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 20,
+                    ),
                     onPressed: () => Navigator.pop(context),
                     padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                    constraints: const BoxConstraints(
+                      minWidth: 36,
+                      minHeight: 36,
+                    ),
                   ),
                 ),
                 Container(
@@ -584,7 +621,11 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
                     color: widget.categoryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(_getCategoryIcon(), color: widget.categoryColor, size: 16),
+                  child: Icon(
+                    _getCategoryIcon(),
+                    color: widget.categoryColor,
+                    size: 16,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -624,7 +665,11 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Icon(Icons.auto_awesome, color: widget.categoryColor, size: 16),
+                  child: Icon(
+                    Icons.auto_awesome,
+                    color: widget.categoryColor,
+                    size: 16,
+                  ),
                 ),
               ],
             ),
@@ -669,7 +714,10 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
                         Colors.grey.shade50.withOpacity(0.85),
                       ],
                     ),
-                    border: Border.all(color: Colors.white.withOpacity(0.6), width: 1.5),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.6),
+                      width: 1.5,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.08),
@@ -691,11 +739,27 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildTabItem(icon: Icons.home_rounded, label: 'Home', index: 0),
-                      _buildTabItem(icon: Icons.explore_rounded, label: 'Explore', index: 1),
+                      _buildTabItem(
+                        icon: Icons.home_rounded,
+                        label: 'Home',
+                        index: 0,
+                      ),
+                      _buildTabItem(
+                        icon: Icons.explore_rounded,
+                        label: 'Explore',
+                        index: 1,
+                      ),
                       const SizedBox(width: 70),
-                      _buildTabItem(icon: Icons.chat_bubble_rounded, label: 'Chat', index: 3),
-                      _buildTabItem(icon: Icons.person_rounded, label: 'Profile', index: 4),
+                      _buildTabItem(
+                        icon: Icons.chat_bubble_rounded,
+                        label: 'Chat',
+                        index: 3,
+                      ),
+                      _buildTabItem(
+                        icon: Icons.person_rounded,
+                        label: 'Profile',
+                        index: 4,
+                      ),
                     ],
                   ),
                 ),
@@ -723,15 +787,22 @@ Provide a transformative 4-line response that awakens Atmik Intelligence and ser
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                           colors: _selectedTabIndex == 2
-                              ? [const Color(0xFF6C63FF), const Color(0xFF8B5CF6)]
-                              : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
+                              ? [
+                                  const Color(0xFF6C63FF),
+                                  const Color(0xFF8B5CF6),
+                                ]
+                              : [
+                                  const Color(0xFF667EEA),
+                                  const Color(0xFF764BA2),
+                                ],
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: (_selectedTabIndex == 2
-                                    ? const Color(0xFF6C63FF)
-                                    : const Color(0xFF667EEA))
-                                .withOpacity(0.4),
+                            color:
+                                (_selectedTabIndex == 2
+                                        ? const Color(0xFF6C63FF)
+                                        : const Color(0xFF667EEA))
+                                    .withOpacity(0.4),
                             blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),

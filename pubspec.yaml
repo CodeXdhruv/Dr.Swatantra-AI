@@ -27,6 +27,7 @@ dependencies:
   path_provider: ^2.1.1
   speech_to_text: ^7.3.0
   flutter_tts: ^4.0.2
+  flutter_sound: ^9.28.0
 
   
   # AI and network
@@ -48,11 +49,13 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.4
   flutter_lints: ^6.0.0
 
+
 flutter:
   uses-material-design: true
 
   assets:
-    - assets/hands.png
+    - assets/app_logo.png
+    - assets/app_logo.svg
     - assets/counselling.png
     - assets/slide3.png
     - assets/slide4.png
@@ -63,19 +66,21 @@ flutter:
     - assets/swatantra_ai_book.png
     - assets/universal_prosperity.png
     - assets/timeless_path.png
+    - assets/splash.png
 
 # Flutter Launcher Icons configuration
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/kalpvraksha_icon.png"
+  image_path: "assets/app_logo.svg"
+  remove_alpha_ios: true
   min_sdk_android: 21
   web:
     generate: true
-    image_path: "assets/kalpvraksha_icon.png"
+    image_path: "assets/app_logo.png"
     background_color: "#hexcode"
     theme_color: "#hexcode"
   windows:
     generate: true
-    image_path: "assets/kalpvraksha_icon.png"
+    image_path: "assets/app_logo.png"
     icon_size: 48
