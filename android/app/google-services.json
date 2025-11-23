@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "344645667742-2q2o82hppv13nen251glc9mii4jlccai.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.muktiya_new",
+            "certificate_hash": "99d34f38ea3a4455f7cb82adcee4ec1acfcbd474"
+          }
+        },
+        {
           "client_id": "344645667742-cf6knrpkvjkl8d7bbe6rqkeqlej47cvr.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

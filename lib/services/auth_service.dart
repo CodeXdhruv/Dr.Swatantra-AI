@@ -56,8 +56,8 @@ class AuthService {
         password: password,
       );
       return result;
-    } on FirebaseAuthException catch (e) {
-      throw e;
+    } on FirebaseAuthException {
+      rethrow;
     } catch (e) {
       // Special handling for type casting errors from Flutter plugin
       if (e.toString().contains("List<Object?>") &&
@@ -89,7 +89,7 @@ class AuthService {
       }
 
       print("❌ Registration failed: ${e.toString()}");
-      throw e;
+      rethrow;
     }
   }
 
@@ -108,7 +108,7 @@ class AuthService {
       return result;
     } on FirebaseAuthException catch (e) {
       print("Firebase Auth Exception during sign-in: ${e.code} - ${e.message}");
-      throw e;
+      rethrow;
     } catch (e) {
       print("Sign-in error: $e");
 
@@ -144,7 +144,7 @@ class AuthService {
         return SimpleUserCredential(_auth.currentUser!);
       }
 
-      throw e;
+      rethrow;
     }
   }
 
@@ -290,7 +290,7 @@ class AuthService {
         };
       }
 
-      throw e;
+      rethrow;
     }
   }
 

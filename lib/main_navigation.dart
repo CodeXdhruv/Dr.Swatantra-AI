@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:ui';
 import 'pages/home_page.dart';
 import 'pages/explore_page.dart';
@@ -86,15 +87,15 @@ class _MainNavigationState extends State<MainNavigation>
         children: [
           // Enhanced Glassmorphism Navigation Bar
           Container(
-            height: 85,
-            margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+            height: 70.h,
+            margin: EdgeInsets.fromLTRB(20.w, 0, 20.w, 0),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(30.r),
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(30.r),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -139,9 +140,7 @@ class _MainNavigationState extends State<MainNavigation>
                         label: 'Explore',
                         index: 1,
                       ),
-                      const SizedBox(
-                        width: 70,
-                      ), // Space for floating voice button
+                      SizedBox(width: 60.w), // Space for floating voice button
                       _buildTabItem(
                         icon: Icons.chat_bubble_rounded,
                         label: 'Chat',
@@ -161,8 +160,8 @@ class _MainNavigationState extends State<MainNavigation>
 
           // Floating Voice Button (unchanged)
           Positioned(
-            left: MediaQuery.of(context).size.width / 2 - 30,
-            top: -5,
+            left: MediaQuery.of(context).size.width / 2 - 30.w,
+            top: -5.h,
             child: AnimatedBuilder(
               animation: _voiceAnimationController,
               builder: (context, child) {
@@ -173,8 +172,8 @@ class _MainNavigationState extends State<MainNavigation>
                   child: GestureDetector(
                     onTap: () => _onItemTapped(2),
                     child: Container(
-                      width: 60,
-                      height: 60,
+                      width: 55.w,
+                      height: 55.h,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         gradient: LinearGradient(
@@ -208,7 +207,7 @@ class _MainNavigationState extends State<MainNavigation>
                         ],
                       ),
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(30.r),
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                           child: Container(
@@ -232,7 +231,7 @@ class _MainNavigationState extends State<MainNavigation>
                                   ? Icons.graphic_eq_rounded
                                   : Icons.radio_button_checked_rounded,
                               color: Colors.white,
-                              size: 20,
+                              size: 18.sp,
                             ),
                           ),
                         ),
@@ -260,9 +259,9 @@ class _MainNavigationState extends State<MainNavigation>
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20.r),
           color: isSelected
               ? const Color(0xFF6C63FF).withOpacity(0.12)
               : Colors.transparent,
@@ -280,17 +279,17 @@ class _MainNavigationState extends State<MainNavigation>
               duration: const Duration(milliseconds: 300),
               child: Icon(
                 icon,
-                size: isSelected ? 28 : 26,
+                size: isSelected ? 24.sp : 22.sp,
                 color: isSelected
                     ? const Color(0xFF6C63FF)
                     : Colors.grey.shade600,
               ),
             ),
-            const SizedBox(height: 5),
+            SizedBox(height: 4.h),
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 300),
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 10.sp,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                 color: isSelected
                     ? const Color(0xFF6C63FF)

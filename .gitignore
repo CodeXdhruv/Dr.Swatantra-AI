@@ -23,11 +23,16 @@ ios/Runner.xcworkspace/
 ios/Pods/
 ios/Podfile.lock
 
-# Sensitive files
+# Sensitive files - CRITICAL: Never commit these
 *.key
 *.pem
 *.env
 *.keystore
+.env*
+key.properties
+google-services.json
+GoogleService-Info.plist
+firebase_app_id_file.json
 
 
 #vscode settings

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'auth/login_page.dart';
-import 'auth/signup_page.dart'; // Correctly importing your detailed SignupPage
+// Correctly importing your detailed SignupPage
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});

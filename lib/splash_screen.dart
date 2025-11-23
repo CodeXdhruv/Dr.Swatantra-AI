@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:async';
 import 'auth_wrapper.dart';
 
@@ -34,14 +35,22 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    _fadeController =
-        AnimationController(duration: const Duration(milliseconds: 1500), vsync: this);
-    _scaleController =
-        AnimationController(duration: const Duration(milliseconds: 1200), vsync: this);
-    _pulseController =
-        AnimationController(duration: const Duration(milliseconds: 2000), vsync: this);
-    _illustrationController =
-        AnimationController(duration: const Duration(milliseconds: 2500), vsync: this);
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _scaleController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+    _illustrationController = AnimationController(
+      duration: const Duration(milliseconds: 2500),
+      vsync: this,
+    );
 
     _dotsController = AnimationController(
       duration: const Duration(milliseconds: 1200),
@@ -107,15 +116,12 @@ class _SplashScreenState extends State<SplashScreen>
       builder: (context, child) {
         double value = (_dotsController.value * 3 - index).clamp(0.0, 1.0);
         double offsetY = -8 * (1 - (value - 0.5).abs() * 2); // bounce effect
-        return Transform.translate(
-          offset: Offset(0, offsetY),
-          child: child,
-        );
+        return Transform.translate(offset: Offset(0, offsetY), child: child);
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 6),
-        width: 12,
-        height: 12,
+        margin: EdgeInsets.symmetric(horizontal: 6.w),
+        width: 12.w,
+        height: 12.h,
         decoration: const BoxDecoration(
           color: Color(0xFF667EEA),
           shape: BoxShape.circle,
@@ -155,8 +161,8 @@ class _SplashScreenState extends State<SplashScreen>
                           scale: _pulseAnimation.value,
                           child: Image.asset(
                             'assets/splash.png',
-                            width: 220,
-                            height: 220,
+                            width: 220.w,
+                            height: 220.h,
                             fit: BoxFit.contain,
                           ),
                         );
@@ -165,7 +171,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                SizedBox(height: 40.h),
 
                 // App Name + Tagline grouped
                 FadeTransition(
@@ -176,43 +182,46 @@ class _SplashScreenState extends State<SplashScreen>
                       children: [
                         ShaderMask(
                           shaderCallback: (bounds) => const LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
                             colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
                           ).createShader(bounds),
+                          blendMode: BlendMode.srcIn,
                           child: const Text(
                             'Dr.Swatantra AI',
                             textAlign: TextAlign.center,
-                            softWrap: false,           // ❗ force single line
+                            softWrap: false,
                             overflow: TextOverflow.visible,
                             style: TextStyle(
-                              fontSize: 56,            // large heading
+                              fontSize: 56,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                               letterSpacing: 2.0,
-                              fontFamily: 'Roboto',    // or 'Calibri'
+                              fontFamily: 'Roboto',
                             ),
                           ),
                         ),
-                        const SizedBox(height: 14),
-                        const Text(
-                          'Your Wellness Journey Begins',
+                        SizedBox(height: 15.h),
+                        Text(
+                          'One Humanity, One Shared Destiny',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 26,             // ✅ bigger tagline
-                            color: Color(0xFF667EEA),
+                            fontSize: 26.sp,
+                            color: const Color(0xFF667EEA),
                             letterSpacing: 1.3,
                             fontWeight: FontWeight.w600,
                             height: 1.4,
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.only(top: 12),
-                          height: 3,
-                          width: 140,
+                          margin: EdgeInsets.only(top: 12.h),
+                          height: 3.h,
+                          width: 140.w,
                           decoration: BoxDecoration(
                             gradient: const LinearGradient(
                               colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
                             ),
-                            borderRadius: BorderRadius.circular(2),
+                            borderRadius: BorderRadius.circular(2.r),
                           ),
                         ),
                       ],
@@ -220,18 +229,14 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                 ),
 
-                const SizedBox(height: 70),
+                SizedBox(height: 70.h),
 
                 // Three Dots Loading
                 FadeTransition(
                   opacity: _fadeAnimation,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildDot(0),
-                      _buildDot(1),
-                      _buildDot(2),
-                    ],
+                    children: [_buildDot(0), _buildDot(1), _buildDot(2)],
                   ),
                 ),
               ],

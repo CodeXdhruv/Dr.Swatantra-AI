@@ -35,7 +35,7 @@ class _VoicePageState extends State<VoicePage> with TickerProviderStateMixin {
   bool _isActive = false;
 
   // Chat messages list
-  List<ChatMessage> _chatMessages = [];
+  final List<ChatMessage> _chatMessages = [];
   final ScrollController _scrollController = ScrollController();
 
   // Voice wave animations
@@ -135,10 +135,13 @@ class _VoicePageState extends State<VoicePage> with TickerProviderStateMixin {
     _breatheController.dispose();
     _scrollController.dispose();
 
-    // Stop voice service when leaving the page
+    // Stop voice service and clear chat history when leaving the page
     if (_isActive) {
       widget.voiceService.stopVoiceLoop();
     }
+
+    // Clear conversation history when user navigates away from voice page
+    widget.voiceService.clearHistory();
 
     super.dispose();
   }

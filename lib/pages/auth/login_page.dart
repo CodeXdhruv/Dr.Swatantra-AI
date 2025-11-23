@@ -159,7 +159,7 @@
 //                   crossAxisAlignment: CrossAxisAlignment.stretch,
 //                   children: [
 //                     const SizedBox(height: 40),
-                    
+
 //                     // Main Card Container - Minimalistic Glassmorphism
 //                     Container(
 //                       width: double.infinity,
@@ -572,6 +572,7 @@ import '../../main_navigation.dart';
 import 'signup_page.dart';
 import 'forgot_password_page.dart';
 import 'google_user_details_page.dart';
+import '../../utils/logger.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -610,21 +611,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutBack,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack),
+        );
 
     _fadeController.forward();
     _slideController.forward();
@@ -649,7 +643,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       );
 
       if (result != null || _authService.isLoggedIn) {
-        print("✅ Sign-in successful!");
+        Logger.success("Sign-in successful!");
 
         if (mounted) {
           await Future.delayed(const Duration(milliseconds: 100));
@@ -679,7 +673,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     try {
       final result = await _authService.signInWithGoogleEnhanced();
       if (result != null) {
-        print("✅ Google sign-in successful!");
+        Logger.success("Google sign-in successful!");
 
         if (mounted) {
           await Future.delayed(const Duration(milliseconds: 100));
@@ -727,7 +721,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 40),
-                    
+
                     // Main Card Container - Enhanced for white background
                     Container(
                       width: double.infinity,
@@ -765,15 +759,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [
-                                  Color(0xFF6C63FF),
-                                  Color(0xFF4F46E5),
-                                ],
+                                colors: [Color(0xFF6C63FF), Color(0xFF4F46E5)],
                               ),
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                  color: const Color(
+                                    0xFF6C63FF,
+                                  ).withOpacity(0.3),
                                   blurRadius: 20,
                                   offset: const Offset(0, 10),
                                 ),
@@ -792,10 +785,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           ShaderMask(
                             shaderCallback: (bounds) {
                               return const LinearGradient(
-                                colors: [
-                                  Color(0xFF2D2D2D),
-                                  Color(0xFF6C63FF),
-                                ],
+                                colors: [Color(0xFF2D2D2D), Color(0xFF6C63FF)],
                               ).createShader(bounds);
                             },
                             child: const Text(
@@ -947,7 +937,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const ForgotPasswordPage(),
+                                    builder: (context) =>
+                                        const ForgotPasswordPage(),
                                   ),
                                 );
                               },
@@ -977,7 +968,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                shadowColor: const Color(0xFF6C63FF).withOpacity(0.3),
+                                shadowColor: const Color(
+                                  0xFF6C63FF,
+                                ).withOpacity(0.3),
                               ),
                               child: _isLoading
                                   ? const SizedBox(
@@ -985,9 +978,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                       height: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
                                       ),
                                     )
                                   : const Text(
@@ -1012,7 +1006,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
                                 child: Text(
                                   'OR',
                                   style: TextStyle(

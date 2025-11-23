@@ -1,19 +1,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Network permissions -->
+    <!-- ESSENTIAL: Network permissions for AI services and Firebase -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     
-    <!-- Audio permissions for voice recording -->
+    <!-- JUSTIFIED: Voice recording for voice assistant feature -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     
-    <!-- Additional microphone permissions for better compatibility -->
-    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <!-- REMOVED: Dangerous permissions that could cause Play Store rejection
+         - CAPTURE_AUDIO_OUTPUT: Rarely approved, not needed
+         - WRITE_EXTERNAL_STORAGE: Deprecated on API 29+
+         - READ_EXTERNAL_STORAGE: Not needed with scoped storage
+         - BLUETOOTH_ADMIN: Not justified for this app
+         - ACCESS_WIFI_STATE: Not essential
+         - MODIFY_AUDIO_SETTINGS: Not needed for basic TTS/STT
+    -->
     
   
     <!-- Hardware feature requirements -->
@@ -29,9 +29,9 @@
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
         android:enableOnBackInvokedCallback="true"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="false"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:requestLegacyExternalStorage="true">
+        android:requestLegacyExternalStorage="false">
         <activity
             android:name=".MainActivity"
             android:exported="true"

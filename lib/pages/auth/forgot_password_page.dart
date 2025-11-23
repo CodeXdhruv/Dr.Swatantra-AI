@@ -499,7 +499,8 @@ class ForgotPasswordPage extends StatefulWidget {
   State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
-class _ForgotPasswordPageState extends State<ForgotPasswordPage> with TickerProviderStateMixin {
+class _ForgotPasswordPageState extends State<ForgotPasswordPage>
+    with TickerProviderStateMixin {
   final TextEditingController _emailController = TextEditingController();
   final AuthService _authService = AuthService();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -530,21 +531,14 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with TickerProv
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutBack,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack),
+        );
 
     _fadeController.forward();
     _slideController.forward();
@@ -636,7 +630,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with TickerProv
                           ),
                         ),
                         child: IconButton(
-                          icon: Icon(Icons.arrow_back, color: Colors.grey.shade700),
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: Colors.grey.shade700,
+                          ),
                           onPressed: () => Navigator.of(context).pop(),
                         ),
                       ),
@@ -691,7 +688,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with TickerProv
                                 borderRadius: BorderRadius.circular(20),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                    color: const Color(
+                                      0xFF6C63FF,
+                                    ).withOpacity(0.3),
                                     blurRadius: 20,
                                     offset: const Offset(0, 10),
                                   ),
@@ -819,7 +818,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with TickerProv
                                 width: double.infinity,
                                 height: 56,
                                 child: ElevatedButton(
-                                  onPressed: _isLoading ? null : _sendPasswordReset,
+                                  onPressed: _isLoading
+                                      ? null
+                                      : _sendPasswordReset,
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF6C63FF),
                                     foregroundColor: Colors.white,
@@ -827,7 +828,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with TickerProv
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
-                                    shadowColor: const Color(0xFF6C63FF).withOpacity(0.3),
+                                    shadowColor: const Color(
+                                      0xFF6C63FF,
+                                    ).withOpacity(0.3),
                                   ),
                                   child: _isLoading
                                       ? const SizedBox(
@@ -835,9 +838,10 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> with TickerProv
                                           height: 24,
                                           child: CircularProgressIndicator(
                                             strokeWidth: 2,
-                                            valueColor: AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
                                           ),
                                         )
                                       : const Text(

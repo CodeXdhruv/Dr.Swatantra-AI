@@ -1,13 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <domain-config cleartextTrafficPermitted="true">
+    <!-- SECURITY: Only allow HTTPS connections -->
+    <domain-config cleartextTrafficPermitted="false">
         <domain includeSubdomains="true">swatantra-ai.onrender.com</domain>
-        <domain includeSubdomains="true">render.com</domain>
-        <domain includeSubdomains="true">onrender.com</domain>
+        <domain includeSubdomains="true">googleapis.com</domain>
+        <domain includeSubdomains="true">firebase.googleapis.com</domain>
     </domain-config>
-    <base-config cleartextTrafficPermitted="true">
+    <!-- Global security: Block all HTTP traffic -->
+    <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
             <certificates src="system"/>
         </trust-anchors>
     </base-config>
+    <!-- Debug builds only: Allow localhost for development -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system"/>
+            <certificates src="user"/>
+        </trust-anchors>
+    </debug-overrides>
 </network-security-config>

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'providers/theme_provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'splash_screen.dart';
+import 'utils/logger.dart';
 
 // Custom page transition builder that removes animation
 class _NoTransitionPageTransitionsBuilder extends PageTransitionsBuilder {
@@ -30,12 +32,18 @@ void main() async {
   // Initialize Firebase
   await Firebase.initializeApp();
 
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
-      child: const MyApp(),
-    ),
-  );
+  // Initialize Crashlytics for error reporting
+  if (!kDebugMode) {
+    // Only enable Crashlytics in release builds
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+    Logger.info('Crashlytics initialized for production error tracking');
+  }
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -43,45 +51,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
+    return ScreenUtilInit(
+      designSize: const Size(392, 844), // Base design size (standard mobile)
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
         return MaterialApp(
-          title: 'Kalpvraksha',
-          theme: themeProvider.isDarkMode
-              ? ThemeData.dark().copyWith(
-                  scaffoldBackgroundColor: const Color(0xFF2A1F5D),
-                  primaryColor: const Color(0xFF8B6EFF),
-                  pageTransitionsTheme: PageTransitionsTheme(
-                    builders: {
-                      TargetPlatform.android:
-                          _NoTransitionPageTransitionsBuilder(),
-                      TargetPlatform.iOS: _NoTransitionPageTransitionsBuilder(),
-                      TargetPlatform.windows:
-                          _NoTransitionPageTransitionsBuilder(),
-                      TargetPlatform.macOS:
-                          _NoTransitionPageTransitionsBuilder(),
-                      TargetPlatform.linux:
-                          _NoTransitionPageTransitionsBuilder(),
-                    },
-                  ),
-                )
-              : ThemeData.light().copyWith(
-                  scaffoldBackgroundColor: const Color(0xFFE86D4C),
-                  primaryColor: const Color(0xFFFF8F6E),
-                  pageTransitionsTheme: PageTransitionsTheme(
-                    builders: {
-                      TargetPlatform.android:
-                          _NoTransitionPageTransitionsBuilder(),
-                      TargetPlatform.iOS: _NoTransitionPageTransitionsBuilder(),
-                      TargetPlatform.windows:
-                          _NoTransitionPageTransitionsBuilder(),
-                      TargetPlatform.macOS:
-                          _NoTransitionPageTransitionsBuilder(),
-                      TargetPlatform.linux:
-                          _NoTransitionPageTransitionsBuilder(),
-                    },
-                  ),
-                ),
+          title: 'Dr.Swatantra AI',
+          theme: ThemeData.light().copyWith(
+            scaffoldBackgroundColor: const Color(0xFFE86D4C),
+            primaryColor: const Color(0xFFFF8F6E),
+            pageTransitionsTheme: const PageTransitionsTheme(
+              builders: {
+                TargetPlatform.android: _NoTransitionPageTransitionsBuilder(),
+                TargetPlatform.iOS: _NoTransitionPageTransitionsBuilder(),
+                TargetPlatform.windows: _NoTransitionPageTransitionsBuilder(),
+                TargetPlatform.macOS: _NoTransitionPageTransitionsBuilder(),
+                TargetPlatform.linux: _NoTransitionPageTransitionsBuilder(),
+              },
+            ),
+          ),
           home: const SplashScreen(),
         );
       },

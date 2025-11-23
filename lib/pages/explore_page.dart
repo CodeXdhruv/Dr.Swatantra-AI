@@ -1,9 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:muktiya_new/pages/chatbot_page.dart';
-import 'package:muktiya_new/pages/home_page.dart';
-import 'package:muktiya_new/pages/voice_page.dart';
-import 'package:muktiya_new/pages/profile_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:muktiya_new/services/youtube_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -611,19 +607,19 @@ class _ExplorePageState extends State<ExplorePage>
     );
   }
 
-  _launchURL(String url) async {
+  Future<void> _launchURL(String url) async {
     try {
       final Uri uri = Uri.parse(url);
       bool canLaunch = false;
       try {
         canLaunch = await launchUrl(uri, mode: LaunchMode.externalApplication);
       } catch (e) {
-        print('URL launcher plugin error: $e');
+        // URL launcher error handled silently
         canLaunch = false;
       }
 
       if (!canLaunch) {
-        print('Could not launch $url, showing dialog instead');
+        // Fallback to dialog
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -665,7 +661,7 @@ class _ExplorePageState extends State<ExplorePage>
         );
       }
     } catch (e) {
-      print('Error handling URL: $e');
+      // Error handled silently in production
     }
   }
 
@@ -685,7 +681,7 @@ class _ExplorePageState extends State<ExplorePage>
               );
 
               launchUrl(uri, mode: LaunchMode.inAppWebView).catchError((error) {
-                print('Error opening YouTube URL: $error');
+                // Error handled with user feedback
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
@@ -699,7 +695,7 @@ class _ExplorePageState extends State<ExplorePage>
             }
           })
           .catchError((error) {
-            print('Error opening YouTube URL: $error');
+            // Error handled with user feedback
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Could not open video. Please try again.'),
@@ -708,7 +704,7 @@ class _ExplorePageState extends State<ExplorePage>
             );
           });
     } catch (e) {
-      print('General error launching YouTube: $e');
+      // General error handled silently
     }
   }
 
@@ -733,7 +729,7 @@ class _ExplorePageState extends State<ExplorePage>
         });
       }
     } catch (e) {
-      print('Error fetching video thumbnails: $e');
+      // Error handled silently in production
 
       if (mounted) {
         setState(() {

@@ -76,13 +76,10 @@ class _GoogleUserDetailsPageState extends State<GoogleUserDetailsPage> {
       // Update display name with the entered information using robust method
       final fullName =
           '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}';
-      print("🔄 Setting display name to: $fullName");
       await _authService.updateUserDisplayName(fullName);
 
       // Store additional user data in Firebase (you can extend this to use Firestore)
-      // For now, we'll just use the display name
-      print("Profile completed for: $fullName");
-      print("Phone: ${_phoneController.text.trim()}");
+      // Profile completed successfully
 
       if (mounted) {
         // Navigate to home page
@@ -92,7 +89,7 @@ class _GoogleUserDetailsPageState extends State<GoogleUserDetailsPage> {
         );
       }
     } catch (e) {
-      print("Error completing profile: $e");
+      // Error handled with user feedback
       setState(
         () => _errorMessage = 'Failed to complete profile. Please try again.',
       );
@@ -306,7 +303,7 @@ class _GoogleUserDetailsPageState extends State<GoogleUserDetailsPage> {
               const SizedBox(height: 32),
 
               // Complete Profile Button
-              Container(
+              SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'consultant_chatbot_page.dart';
-import 'home_page.dart';
-import 'explore_page.dart';
-import 'chatbot_page.dart';
 import '../main_navigation.dart';
 
 class WellnessConsultantPage extends StatefulWidget {
-  const WellnessConsultantPage({Key? key}) : super(key: key);
+  const WellnessConsultantPage({super.key});
 
   @override
   State<WellnessConsultantPage> createState() => _WellnessConsultantPageState();

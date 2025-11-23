@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/auth_service.dart';
 import '../pages/auth/login_page.dart';
 
@@ -424,6 +425,38 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // Method to open privacy policy
+  Future<void> _openPrivacyPolicy() async {
+    // TODO: Replace with your actual hosted privacy policy URL
+    final Uri privacyPolicyUrl = Uri.parse(
+      'https://your-website.com/privacy-policy',
+    );
+
+    try {
+      if (await canLaunchUrl(privacyPolicyUrl)) {
+        await launchUrl(privacyPolicyUrl, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Could not open privacy policy'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error opening privacy policy'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
   Widget _buildContactRow(String title, String content, IconData icon) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -714,6 +747,58 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Privacy Policy card (full width)
+              GestureDetector(
+                onTap: _openPrivacyPolicy,
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.privacy_tip_outlined,
+                          color: Colors.black87,
+                          size: 24,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Text(
+                        'Privacy Policy',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      const Spacer(),
+                      const Icon(
+                        Icons.open_in_new,
+                        color: Colors.black54,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                ),
               ),
 
               const Spacer(),

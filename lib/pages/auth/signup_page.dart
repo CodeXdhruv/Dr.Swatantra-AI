@@ -97,7 +97,7 @@
 
 //       if (result != null) {
 //         await _authService.updateUserDisplayName(_nameController.text.trim());
-        
+
 //         if (mounted) {
 //           await Future.delayed(const Duration(milliseconds: 100));
 //           Navigator.pushReplacement(
@@ -172,7 +172,7 @@
 //                   crossAxisAlignment: CrossAxisAlignment.stretch,
 //                   children: [
 //                     const SizedBox(height: 20),
-                    
+
 //                     // Main Card Container - Minimalistic Glassmorphism
 //                     Container(
 //                       width: double.infinity,
@@ -694,21 +694,14 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
       vsync: this,
     );
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _fadeController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _fadeController, curve: Curves.easeInOut),
+    );
 
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.3),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _slideController,
-      curve: Curves.easeOutBack,
-    ));
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.3), end: Offset.zero).animate(
+          CurvedAnimation(parent: _slideController, curve: Curves.easeOutBack),
+        );
 
     _fadeController.forward();
     _slideController.forward();
@@ -746,7 +739,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
 
       if (result != null) {
         await _authService.updateUserDisplayName(_nameController.text.trim());
-        
+
         if (mounted) {
           await Future.delayed(const Duration(milliseconds: 100));
           Navigator.pushReplacement(
@@ -821,7 +814,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const SizedBox(height: 20),
-                    
+
                     // Main Card Container - Enhanced for white background
                     Container(
                       width: double.infinity,
@@ -859,15 +852,14 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                               gradient: const LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [
-                                  Color(0xFF6C63FF),
-                                  Color(0xFF4F46E5),
-                                ],
+                                colors: [Color(0xFF6C63FF), Color(0xFF4F46E5)],
                               ),
                               borderRadius: BorderRadius.circular(20),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF6C63FF).withOpacity(0.3),
+                                  color: const Color(
+                                    0xFF6C63FF,
+                                  ).withOpacity(0.3),
                                   blurRadius: 20,
                                   offset: const Offset(0, 10),
                                 ),
@@ -886,10 +878,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                           ShaderMask(
                             shaderCallback: (bounds) {
                               return const LinearGradient(
-                                colors: [
-                                  Color(0xFF2D2D2D),
-                                  Color(0xFF6C63FF),
-                                ],
+                                colors: [Color(0xFF2D2D2D), Color(0xFF6C63FF)],
                               ).createShader(bounds);
                             },
                             child: const Text(
@@ -1102,7 +1091,8 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                                 suffixIcon: IconButton(
                                   onPressed: () {
                                     setState(() {
-                                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                                      _obscureConfirmPassword =
+                                          !_obscureConfirmPassword;
                                     });
                                   },
                                   icon: Icon(
@@ -1137,7 +1127,9 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(16),
                                 ),
-                                shadowColor: const Color(0xFF6C63FF).withOpacity(0.3),
+                                shadowColor: const Color(
+                                  0xFF6C63FF,
+                                ).withOpacity(0.3),
                               ),
                               child: _isLoading
                                   ? const SizedBox(
@@ -1145,9 +1137,10 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                                       height: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Colors.white,
-                                        ),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
                                       ),
                                     )
                                   : const Text(
@@ -1172,7 +1165,9 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                                 ),
                               ),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                ),
                                 child: Text(
                                   'OR',
                                   style: TextStyle(
