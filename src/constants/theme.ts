@@ -8,19 +8,32 @@ import '@/global.css';
 import { Platform } from 'react-native';
 
 export const Colors = {
+  primary: '#24385A',
+  secondary: '#DCEAF6',
+  accent: '#D8B97A',
+  background: '#FAFBFC',
+  surface: '#FFFFFF',
+  success: '#6BAA75',
+  warning: '#D6A04A',
+  error: '#C46A5A',
+  textPrimary: '#202124',
+  textSecondary: '#6B7280',
+  border: '#E5EAF2',
+  card: '#FFFFFF',
+  // Keep some defaults for compatibility if needed, or stick to the new design
   light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+    text: '#202124',
+    background: '#FAFBFC',
+    backgroundElement: '#FFFFFF',
+    backgroundSelected: '#DCEAF6',
+    textSecondary: '#6B7280',
   },
   dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
+    text: '#FAF9F6',
+    background: '#121C2D', // Darker shade of primary
+    backgroundElement: '#24385A',
+    backgroundSelected: '#3A4E70',
+    textSecondary: '#DCEAF6',
   },
 } as const;
 
@@ -52,6 +65,14 @@ export const Fonts = Platform.select({
 });
 
 export const Spacing = {
+  xs: 8,
+  sm: 12,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+  xxxl: 64,
+  // Keep defaults for compatibility
   half: 2,
   one: 4,
   two: 8,
@@ -59,6 +80,32 @@ export const Spacing = {
   four: 24,
   five: 32,
   six: 64,
+} as const;
+
+export const Radius = {
+  xs: 8,
+  sm: 12,
+  md: 16,
+  lg: 20,
+  xl: 28,
+  xxl: 40,
+} as const;
+
+export const Shadows = {
+  glass: {
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.05,
+    shadowRadius: 24,
+    elevation: 3,
+  },
+  soft: {
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 12,
+    elevation: 2,
+  }
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
