@@ -1,0 +1,242 @@
+import React from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Image, Dimensions } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Colors } from '@/constants/theme';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { ArrowLeft, Mail, Lock } from 'lucide-react-native';
+
+const { width } = Dimensions.get('window');
+
+export default function SignInScreen() {
+  const router = useRouter();
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      <Image
+        source={require('@/assets/images/quote_illustration.png')}
+        style={styles.bottomBg}
+        resizeMode="cover"
+      />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => router.back()}
+            >
+              <ArrowLeft color={Colors.textPrimary} size={24} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.logoContainer}>
+            <Image
+              source={require('@/assets/images/app_icon.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
+
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.subtitle}>Sign in to continue your journey</Text>
+          </View>
+
+          <View style={styles.formContainer}>
+            <Input
+              label="Email or Phone"
+              placeholder="Enter your email or phone"
+              keyboardType="email-address"
+              autoCapitalize="none"
+              leftIcon={<Mail color={Colors.textSecondary} size={20} />}
+            />
+
+            <View style={styles.passwordContainer}>
+              <Input
+                label="Password"
+                placeholder="Enter your password"
+                isPassword
+                leftIcon={<Lock color={Colors.textSecondary} size={20} />}
+              />
+              <TouchableOpacity style={styles.forgotPassword}>
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            </View>
+
+            <Button
+              title="Sign In"
+              style={styles.signInButton}
+            />
+
+            <Button
+              title="Demo Login (Bypass Auth)"
+              variant="outline"
+              style={styles.demoButton}
+              onPress={() => router.replace('/(tabs)')}
+            />
+          </View>
+
+          <View style={styles.dividerContainer}>
+            <View style={styles.divider} />
+            <Text style={styles.dividerText}>or</Text>
+            <View style={styles.divider} />
+          </View>
+
+          <View style={styles.socialContainer}>
+            <TouchableOpacity style={styles.socialButton}>
+              <Text style={styles.googleG}>G</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialButton}>
+              <Mail color={Colors.textPrimary} size={24} />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              Don't have an account?{' '}
+            </Text>
+            <TouchableOpacity onPress={() => router.push('/auth/sign-up')}>
+              <Text style={styles.signUpText}>Create Account</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FAFCFF',
+  },
+  bottomBg: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: 300,
+    opacity: 0.15,
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 24,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+
+  backButton: {
+    padding: 8,
+    marginLeft: -8,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: -20,
+  },
+  logo: {
+    width: 150,
+    height: 150,
+  },
+  titleContainer: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '500',
+    color: Colors.primary,
+    marginBottom: 4,
+    fontFamily: 'serif',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
+  formContainer: {
+    marginBottom: 16,
+  },
+  passwordContainer: {
+    marginBottom: 16,
+  },
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginTop: 12,
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    color: '#D4AF37', // Gold color from design
+    fontWeight: '500',
+  },
+  signInButton: {
+    marginTop: 16,
+    height: 56,
+  },
+  demoButton: {
+    marginTop: 12,
+    height: 56,
+    borderColor: Colors.accent,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+    paddingHorizontal: 32,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.border,
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    color: Colors.textSecondary,
+    fontSize: 14,
+  },
+  socialContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 24,
+    marginBottom: 16,
+  },
+  socialButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  googleG: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#4285F4',
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  footerText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
+  signUpText: {
+    fontSize: 14,
+    color: '#D4AF37',
+    fontWeight: '600',
+  },
+});
