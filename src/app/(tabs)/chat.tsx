@@ -22,7 +22,7 @@ export default function ChatScreen() {
           
           <View style={styles.headerCenter}>
             <View style={styles.headerTitleRow}>
-              <Image source={require('@/assets/images/lotus_icon.png')} style={{ width: 24, height: 24 }} resizeMode="contain" />
+              <Image source={require('@/assets/images/app_icon.png')} style={{ width: 24, height: 24 }} resizeMode="contain" />
               <Text style={styles.headerTitle}>AI Chat</Text>
             </View>
             <Text style={styles.headerSubtitle}>Your Inner Guide, Always with You</Text>
@@ -48,7 +48,7 @@ export default function ChatScreen() {
             >
               <View style={styles.bannerContent}>
                 <View style={styles.bannerAvatar}>
-                  <Image source={require('@/assets/images/lotus_icon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+                  <Image source={require('@/assets/images/app_icon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
                 </View>
                 <View style={styles.bannerTextContainer}>
                   <View style={styles.botNameRow}>
@@ -71,11 +71,11 @@ export default function ChatScreen() {
             style={styles.topicsContainer}
           >
             {[
-              { label: 'Meditation', image: require('@/assets/images/lotus_icon.png') },
+              { label: 'Meditation', image: require('@/assets/images/app_icon.png') },
               { label: 'Health', icon: Heart },
               { label: 'Wisdom', icon: BookOpen },
-              { label: 'Atmik Intelligence', image: require('@/assets/images/lotus_icon.png') },
-              { label: 'Nature', image: require('@/assets/images/lotus_icon.png') },
+              { label: 'Atmik Intelligence', image: require('@/assets/images/app_icon.png') },
+              { label: 'Nature', image: require('@/assets/images/app_icon.png') },
             ].map((topic, index) => (
               <TouchableOpacity key={index} style={styles.topicChip}>
                 {topic.image ? (
@@ -113,7 +113,7 @@ export default function ChatScreen() {
           {/* AI Message 1 */}
           <View style={styles.aiMessageContainer}>
             <View style={styles.aiAvatar}>
-              <Image source={require('@/assets/images/lotus_icon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
+              <Image source={require('@/assets/images/app_icon.png')} style={{ width: 20, height: 20 }} resizeMode="contain" />
             </View>
             <View style={styles.aiBubbleContainer}>
               <View style={styles.aiBubble}>

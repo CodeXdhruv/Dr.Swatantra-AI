@@ -1,5 +1,6 @@
+import { SafeAreaView } from 'react-native-safe-area-context';
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Colors, Spacing } from '@/constants/theme';
 import { Card } from '@/components/cards/Card';
 import { Button } from '@/components/ui/Button';

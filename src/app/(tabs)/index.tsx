@@ -13,7 +13,7 @@ const { width } = Dimensions.get('window');
 const HeroCarousel = () => {
   const scrollRef = useRef<ScrollView>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  
+
   const quotes = [
     { id: 1, quote: "To heal the planet,\nwe must heal humanity.", author: "— Dr. Swatantra Jain" },
     { id: 2, quote: "Peace comes from within.\nDo not seek it without.", author: "— Dr. Swatantra Jain" },
@@ -45,7 +45,7 @@ const HeroCarousel = () => {
       >
         {quotes.map((item, index) => (
           <View key={item.id} style={[styles.heroCard, { width: width - Spacing.lg * 2 }]}>
-            <ImageBackground 
+            <ImageBackground
               source={require('@/assets/images/quote_illustration.png')}
               style={styles.heroBackground}
               imageStyle={{ borderRadius: Radius.lg, resizeMode: 'cover' }}
@@ -54,7 +54,7 @@ const HeroCarousel = () => {
                 <View style={{ width: '65%' }}>
                   <View style={styles.heroLabelContainer}>
                     <Text style={styles.heroLabel}>Daily Inspiration</Text>
-                    <Lightbulb color={Colors.textPrimary} size={14} style={{marginLeft: 4}} />
+                    <Lightbulb color={Colors.textPrimary} size={14} style={{ marginLeft: 4 }} />
                   </View>
                   <Text style={styles.heroQuote}>{item.quote}</Text>
                   <Text style={styles.heroAuthor}>{item.author}</Text>
@@ -78,15 +78,12 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <StatusBar style="dark" />
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
+
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Image source={require('@/assets/images/app_icon.png')} style={{ width: 36, height: 36, marginRight: 12 }} resizeMode="contain" />
-                <Text style={styles.greeting}>Welcome back, Dhruv!</Text>
-              </View>
+              <Text style={styles.greeting}>Welcome back, Dhruv!</Text>
               <Text style={styles.subGreeting}>How are you feeling today?</Text>
             </View>
           </View>
@@ -103,12 +100,12 @@ export default function HomeScreen() {
 
         {/* Daily Inspiration Hero */}
         <HeroCarousel />
-        
+
         {/* Your Daily Practice */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Your Daily Practice</Text>
-            <Text style={{color: Colors.textSecondary, letterSpacing: 2}}>•••</Text>
+            <Text style={{ color: Colors.textSecondary, letterSpacing: 2 }}>•••</Text>
           </View>
           <View style={styles.practiceContainer}>
             <TouchableOpacity style={styles.practiceItem}>
