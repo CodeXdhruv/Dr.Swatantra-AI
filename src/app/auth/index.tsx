@@ -36,7 +36,11 @@ export default function WelcomeScreen() {
         <View style={styles.buttonContainer}>
           <TouchableOpacity style={[styles.customBtn, { backgroundColor: Colors.primary }]} activeOpacity={0.8}>
             <View style={styles.iconCircle}>
-              <Text style={styles.googleG}>G</Text>
+              <Image 
+                source={require('@/assets/images/google.png')}
+                style={{ width: 24, height: 24 }}
+                resizeMode="contain"
+              />
             </View>
             <Text style={[styles.customBtnText, { color: 'white' }]}>Continue with Google</Text>
           </TouchableOpacity>

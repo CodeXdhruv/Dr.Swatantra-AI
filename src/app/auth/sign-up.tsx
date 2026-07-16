@@ -68,13 +68,7 @@ export default function SignUpScreen() {
               leftIcon={<Lock color={Colors.textSecondary} size={20} />}
             />
             
-            <Input 
-              label="Confirm Password"
-              placeholder="Confirm your password"
-              isPassword
-              leftIcon={<Lock color={Colors.textSecondary} size={20} />}
-            />
-            
+
             <TouchableOpacity 
               style={styles.checkboxContainer}
               onPress={() => setAgreedToTerms(!agreedToTerms)}
@@ -105,10 +99,11 @@ export default function SignUpScreen() {
           
           <View style={styles.socialContainer}>
             <TouchableOpacity style={styles.socialButton}>
-              <Text style={styles.googleG}>G</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.socialButton}>
-              <Mail color={Colors.textPrimary} size={24} />
+              <Image 
+                source={require('@/assets/images/google.png')}
+                style={{ width: 24, height: 24 }}
+                resizeMode="contain"
+              />
             </TouchableOpacity>
           </View>
         </View>
