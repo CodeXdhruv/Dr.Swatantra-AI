@@ -6,6 +6,7 @@ import { Home, MessageSquare, BookOpen, Heart, User } from 'lucide-react-native'
 import { Colors, Radius, Shadows } from '@/constants/theme';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Image } from 'react-native';
+import { LotusButton } from './LotusButton';
 
 const { width } = Dimensions.get('window');
 
@@ -48,17 +49,10 @@ export const GlassTabBar = ({ state, descriptors, navigation }: BottomTabBarProp
 
           if (isCenter) {
             return (
-              <TouchableOpacity
-                key={route.key}
-                onPress={onPress}
-                style={styles.tabItem}
-                activeOpacity={0.8}
-              >
-                <View style={styles.centerButton}>
-                  <Image source={require('@/assets/images/nav_bar_icon.png')} style={{ width: 100, height: 100, tintColor: '#DEAB5B', marginTop: 6 }} resizeMode="contain" />
-                </View>
+              <View key={route.key} style={styles.tabItem}>
+                <LotusButton />
                 {isFocused && <View style={[styles.indicator, { backgroundColor: '#DEAB5B' }]} />}
-              </TouchableOpacity>
+              </View>
             );
           }
 
