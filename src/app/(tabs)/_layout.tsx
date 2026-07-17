@@ -10,9 +10,9 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Home' }} />
-      <Tabs.Screen name="learn" options={{ title: 'Learn' }} />
+      <Tabs.Screen name="health" options={{ title: 'Practice' }} />
       <Tabs.Screen name="chat" options={{ title: 'AI Chat' }} />
-      <Tabs.Screen name="health" options={{ title: 'Health' }} />
+      <Tabs.Screen name="learn" options={{ title: 'Library' }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
     </Tabs>
   );
