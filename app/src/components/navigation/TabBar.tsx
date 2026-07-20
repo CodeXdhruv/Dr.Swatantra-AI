@@ -11,6 +11,11 @@ import { LotusButton } from './LotusButton';
 const { width } = Dimensions.get('window');
 
 export const GlassTabBar = ({ state, descriptors, navigation }: BottomTabBarProps) => {
+  const focusedRoute = state.routes[state.index];
+  if (focusedRoute.name === 'chat') {
+    return null;
+  }
+
   return (
     <View style={styles.container}>
       <BlurView intensity={80} tint="light" style={[StyleSheet.absoluteFill, styles.blurContainer]} />

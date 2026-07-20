@@ -7,6 +7,7 @@ export default function TabLayout() {
       tabBar={(props) => <GlassTabBar {...props} />}
       screenOptions={{
         headerShown: false,
+        sceneContainerStyle: { backgroundColor: '#FCFAF8' }
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Home' }} />

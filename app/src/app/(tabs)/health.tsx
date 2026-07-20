@@ -20,22 +20,22 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 const COLORS = {
-  background: '#FAFBFC',
+  background: '#FCFAF8',
   card: '#FFFFFF',
-  primary: '#243B5A',
-  accent: '#D8B97A',
+  primary: '#1C2A3A',
+  accent: '#D9A05B',
   divider: '#ECECEC',
-  success: '#6BAA75',
-  text: '#1F2937',
-  textSecondary: '#6B7280',
-  textTertiary: '#9CA3AF',
+  success: '#D9A05B',
+  text: '#1C2A3A',
+  textSecondary: '#8C8C8C',
+  textTertiary: '#A0A0A0',
 };
 
 const FONTS = {
-  heading: Platform.OS === 'ios' ? 'Georgia' : 'serif', // Canela fallback
-  title: Platform.OS === 'ios' ? 'System' : 'sans-serif-medium', // Manrope fallback
-  body: 'System', // Inter fallback
-  prompt: Platform.OS === 'ios' ? 'Georgia' : 'serif', // Cormorant Garamond fallback
+  heading: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  title: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+  body: 'System',
+  prompt: Platform.OS === 'ios' ? 'Georgia' : 'serif',
 };
 
 export default function DailyPracticeScreen() {
@@ -273,7 +273,7 @@ export default function DailyPracticeScreen() {
                   </View>
                 ) : (
                   <View style={styles.gratitudeSuccess}>
-                    <Text style={styles.successEmoji}>🌸</Text>
+                    <Text style={styles.successEmoji}>✧</Text>
                     <Text style={styles.successText}>Today's Gratitude Completed</Text>
                   </View>
                 )}
@@ -302,18 +302,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 26,
     fontFamily: FONTS.heading,
+    fontWeight: '600',
     color: COLORS.primary,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   headerSubtitle: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: FONTS.body,
     color: COLORS.textSecondary,
     textAlign: 'center',
-    paddingHorizontal: 20,
-    lineHeight: 22,
+    paddingHorizontal: 30,
+    lineHeight: 20,
+    letterSpacing: 0.3,
   },
   card: {
     backgroundColor: COLORS.card,
@@ -343,11 +345,12 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   cardTitle: {
-    fontSize: 17,
+    fontSize: 18,
     fontFamily: FONTS.title,
     fontWeight: '600',
     color: COLORS.primary,
-    marginBottom: 4,
+    marginBottom: 2,
+    letterSpacing: 0.5,
   },
   cardMeta: {
     fontSize: 14,
@@ -493,7 +496,8 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
   },
   successEmoji: {
-    fontSize: 48,
+    fontSize: 32,
+    color: COLORS.accent,
     marginBottom: 16,
   },
   successText: {
