@@ -1,0 +1,387 @@
+import { create } from 'zustand';
+import { 
+  ContentItem, 
+  Category, 
+  Tag, 
+  User, 
+  MediaItem, 
+  Comment, 
+  ActivityLog,
+  initialContent,
+  initialCategories,
+  initialTags,
+  initialUsers,
+  initialMedia,
+  initialComments,
+  initialActivityLogs
+} from '../services/mockData';
+
+interface AdminState {
+  // Authentication
+  isAuthenticated: boolean;
+  currentAdmin: User | null;
+  login: (email: string) => boolean;
+  logout: () => void;
+
+  // Data Collections
+  contentList: ContentItem[];
+  categories: Category[];
+  tags: Tag[];
+  users: User[];
+  mediaLibrary: MediaItem[];
+  comments: Comment[];
+  activityLogs: ActivityLog[];
+
+  // Content Actions
+  addContentItem: (item: Omit<ContentItem, 'id' | 'views' | 'bookmarks' | 'downloads' | 'date'>) => void;
+  updateContentItem: (id: string, updates: Partial<ContentItem>) => void;
+  deleteContentItem: (id: string) => void;
+
+  // Categories Actions
+  addCategory: (name: string, parentId: string | null) => void;
+  renameCategory: (id: string, name: string) => void;
+  deleteCategory: (id: string) => void;
+
+  // Tags Actions
+  addTag: (name: string, color: string) => void;
+  deleteTag: (id: string) => void;
+  mergeTags: (sourceId: string, targetId: string) => void;
+
+  // Media Actions
+  uploadMediaItem: (file: { name: string; type: string; size: string; url: string; folder?: string }) => void;
+  deleteMediaItem: (id: string) => void;
+  renameMediaItem: (id: string, newName: string) => void;
+
+  // Comment Actions
+  approveComment: (id: string) => void;
+  rejectComment: (id: string) => void;
+  deleteComment: (id: string) => void;
+
+  // User Actions
+  toggleUserStatus: (id: string) => void;
+  updateUserRole: (id: string, role: User['role']) => void;
+  inviteUser: (name: string, email: string, role: User['role']) => void;
+
+  // UI States
+  sidebarCollapsed: boolean;
+  toggleSidebar: () => void;
+  commandPaletteOpen: boolean;
+  setCommandPaletteOpen: (open: boolean) => void;
+  notificationCenterOpen: boolean;
+  setNotificationCenterOpen: (open: boolean) => void;
+
+  // Search & Filter State
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  typeFilter: string;
+  setTypeFilter: (type: string) => void;
+  statusFilter: string;
+  setStatusFilter: (status: string) => void;
+  langFilter: string;
+  setLangFilter: (lang: string) => void;
+  
+  // Notification logs
+  notifications: { id: string; title: string; desc: string; time: string; read: boolean }[];
+  markAllNotificationsRead: () => void;
+  addLog: (actionName: string, details: string) => void;
+}
+
+export const useAdminStore = create<AdminState>((set, get) => ({
+  // Authentication
+  isAuthenticated: false,
+  currentAdmin: null,
+  login: (email: string) => {
+    const admin = initialUsers.find(u => u.email === email && u.role !== 'Viewer') || initialUsers[0];
+    set({ isAuthenticated: true, currentAdmin: admin });
+    
+    // Add auth log
+    get().addLog(`Admin Logged In`, `Admin ${admin.name} logged into the dashboard successfully.`);
+    return true;
+  },
+  logout: () => {
+    const admin = get().currentAdmin;
+    if (admin) {
+      get().addLog(`Admin Logged Out`, `Admin ${admin.name} logged out.`);
+    }
+    set({ isAuthenticated: false, currentAdmin: null });
+  },
+
+  // Data Collections
+  contentList: [],
+  categories: [],
+  tags: [],
+  users: initialUsers,
+  mediaLibrary: [],
+  comments: [],
+  activityLogs: [],
+
+  // Helper log adding
+  addLog: (actionName: ActivityLog['action'] | string, details: string) => {
+    const newLog: ActivityLog = {
+      id: Math.random().toString(),
+      adminName: get().currentAdmin?.name || 'System',
+      adminAvatar: get().currentAdmin?.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80&q=80',
+      action: (['Publish', 'Delete', 'Upload', 'Update', 'Auth'].includes(actionName) ? actionName : 'Update') as ActivityLog['action'],
+      details,
+      timestamp: 'Just now'
+    };
+    set(state => ({
+      activityLogs: [newLog, ...state.activityLogs],
+      notifications: [
+        {
+          id: Math.random().toString(),
+          title: String(actionName),
+          desc: details,
+          time: 'Just now',
+          read: false
+        },
+        ...state.notifications
+      ]
+    }));
+  },
+
+  // Content Actions
+  addContentItem: (item) => {
+    const newItem: ContentItem = {
+      ...item,
+      id: Math.random().toString(),
+      views: 0,
+      bookmarks: 0,
+      downloads: 0,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    };
+    set(state => ({
+      contentList: [newItem, ...state.contentList]
+    }));
+    get().addLog('Publish', `Created new ${item.type} "${item.title}"`);
+  },
+  updateContentItem: (id, updates) => {
+    set(state => ({
+      contentList: state.contentList.map(item => 
+        item.id === id ? { ...item, ...updates } : item
+      )
+    }));
+    const item = get().contentList.find(i => i.id === id);
+    get().addLog('Update', `Updated ${item?.type || 'content'} "${item?.title || 'item'}"`);
+  },
+  deleteContentItem: (id) => {
+    const item = get().contentList.find(i => i.id === id);
+    set(state => ({
+      contentList: state.contentList.filter(item => item.id !== id)
+    }));
+    get().addLog('Delete', `Deleted ${item?.type || 'content'} "${item?.title || 'item'}"`);
+  },
+
+  // Categories Actions
+  addCategory: (name, parentId) => {
+    const newCat: Category = {
+      id: `cat-${Math.random().toString()}`,
+      name,
+      slug: name.toLowerCase().replace(/\s+/g, '-'),
+      parentId,
+      children: []
+    };
+    
+    set(state => {
+      if (!parentId) {
+        return { categories: [...state.categories, newCat] };
+      }
+      
+      const insertChild = (list: Category[]): Category[] => {
+        return list.map(cat => {
+          if (cat.id === parentId) {
+            return { ...cat, children: [...(cat.children || []), newCat] };
+          } else if (cat.children && cat.children.length > 0) {
+            return { ...cat, children: insertChild(cat.children) };
+          }
+          return cat;
+        });
+      };
+      
+      return { categories: insertChild(state.categories) };
+    });
+    
+    get().addLog('Update', `Added new category "${name}"`);
+  },
+  renameCategory: (id, name) => {
+    set(state => {
+      const updateName = (list: Category[]): Category[] => {
+        return list.map(cat => {
+          if (cat.id === id) {
+            return { ...cat, name, slug: name.toLowerCase().replace(/\s+/g, '-') };
+          } else if (cat.children && cat.children.length > 0) {
+            return { ...cat, children: updateName(cat.children) };
+          }
+          return cat;
+        });
+      };
+      return { categories: updateName(state.categories) };
+    });
+    get().addLog('Update', `Renamed category to "${name}"`);
+  },
+  deleteCategory: (id) => {
+    set(state => {
+      const filterCat = (list: Category[]): Category[] => {
+        return list
+          .filter(cat => cat.id !== id)
+          .map(cat => ({
+            ...cat,
+            children: cat.children ? filterCat(cat.children) : []
+          }));
+      };
+      return { categories: filterCat(state.categories) };
+    });
+    get().addLog('Delete', `Deleted category`);
+  },
+
+  // Tags Actions
+  addTag: (name, color) => {
+    const newTag: Tag = {
+      id: `t-${Math.random().toString()}`,
+      name,
+      slug: name.toLowerCase().replace(/\s+/g, '-'),
+      color,
+      count: 0
+    };
+    set(state => ({ tags: [...state.tags, newTag] }));
+    get().addLog('Update', `Added tag "${name}"`);
+  },
+  deleteTag: (id) => {
+    const tag = get().tags.find(t => t.id === id);
+    set(state => ({ tags: state.tags.filter(t => t.id !== id) }));
+    get().addLog('Delete', `Deleted tag "${tag?.name || ''}"`);
+  },
+  mergeTags: (sourceId, targetId) => {
+    const sourceTag = get().tags.find(t => t.id === sourceId);
+    const targetTag = get().tags.find(t => t.id === targetId);
+    if (!sourceTag || !targetTag) return;
+
+    set(state => {
+      // 1. Update tag counts
+      const updatedTags = state.tags.map(t => {
+        if (t.id === targetId) {
+          return { ...t, count: t.count + sourceTag.count };
+        }
+        return t;
+      }).filter(t => t.id !== sourceId);
+
+      // 2. Update references in content items
+      const updatedContent = state.contentList.map(item => {
+        if (item.tags.includes(sourceTag.name)) {
+          const filtered = item.tags.filter(t => t !== sourceTag.name);
+          if (!filtered.includes(targetTag.name)) {
+            filtered.push(targetTag.name);
+          }
+          return { ...item, tags: filtered };
+        }
+        return item;
+      });
+
+      return { tags: updatedTags, contentList: updatedContent };
+    });
+
+    get().addLog('Update', `Merged tag "${sourceTag.name}" into "${targetTag.name}"`);
+  },
+
+  // Media Actions
+  uploadMediaItem: (file) => {
+    const newItem: MediaItem = {
+      id: `m-${Math.random().toString()}`,
+      name: file.name,
+      type: file.type as MediaItem['type'],
+      url: file.url,
+      size: file.size,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      folder: file.folder || 'Uploads'
+    };
+    set(state => ({ mediaLibrary: [newItem, ...state.mediaLibrary] }));
+    get().addLog('Upload', `Uploaded media file "${file.name}" to Cloudflare R2`);
+  },
+  deleteMediaItem: (id) => {
+    const file = get().mediaLibrary.find(m => m.id === id);
+    set(state => ({ mediaLibrary: state.mediaLibrary.filter(m => m.id !== id) }));
+    get().addLog('Delete', `Deleted media file "${file?.name || ''}"`);
+  },
+  renameMediaItem: (id, newName) => {
+    set(state => ({
+      mediaLibrary: state.mediaLibrary.map(m => m.id === id ? { ...m, name: newName } : m)
+    }));
+    get().addLog('Update', `Renamed media file to "${newName}"`);
+  },
+
+  // Comment Actions
+  approveComment: (id) => {
+    set(state => ({
+      comments: state.comments.map(c => c.id === id ? { ...c, status: 'Approved' } : c)
+    }));
+    get().addLog('Update', `Approved a comment`);
+  },
+  rejectComment: (id) => {
+    set(state => ({
+      comments: state.comments.map(c => c.id === id ? { ...c, status: 'Rejected' } : c)
+    }));
+    get().addLog('Update', `Rejected a comment`);
+  },
+  deleteComment: (id) => {
+    set(state => ({
+      comments: state.comments.filter(c => c.id !== id)
+    }));
+    get().addLog('Delete', `Deleted a comment`);
+  },
+
+  // User Actions
+  toggleUserStatus: (id) => {
+    set(state => ({
+      users: state.users.map(u => u.id === id ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u)
+    }));
+    const user = get().users.find(u => u.id === id);
+    get().addLog('Update', `Toggled status of user "${user?.name}" to ${user?.status}`);
+  },
+  updateUserRole: (id, role) => {
+    set(state => ({
+      users: state.users.map(u => u.id === id ? { ...u, role } : u)
+    }));
+    const user = get().users.find(u => u.id === id);
+    get().addLog('Update', `Updated user "${user?.name}" role to ${role}`);
+  },
+  inviteUser: (name, email, role) => {
+    const newUser: User = {
+      id: Math.random().toString(),
+      name,
+      email,
+      avatar: `https://images.unsplash.com/photo-${Math.random() > 0.5 ? '1534528741775-53994a69daeb' : '1507003211169-0a1dd7228f2d'}?auto=format&fit=crop&w=150&h=150&q=80`,
+      role,
+      status: 'Active',
+      lastLogin: 'Never',
+      permissions: role === 'Editor' ? ['content.read', 'content.write', 'media.upload'] : ['content.read']
+    };
+    set(state => ({ users: [...state.users, newUser] }));
+    get().addLog('Update', `Invited new user "${name}" as ${role}`);
+  },
+
+  // UI States
+  sidebarCollapsed: false,
+  toggleSidebar: () => set(state => ({ sidebarCollapsed: !state.sidebarCollapsed })),
+  commandPaletteOpen: false,
+  setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
+  notificationCenterOpen: false,
+  setNotificationCenterOpen: (open) => set({ notificationCenterOpen: open }),
+
+  // Search & Filter State
+  searchQuery: '',
+  setSearchQuery: (query) => set({ searchQuery: query }),
+  typeFilter: 'All Types',
+  setTypeFilter: (type) => set({ typeFilter: type }),
+  statusFilter: 'All Status',
+  setStatusFilter: (status) => set({ statusFilter: status }),
+  langFilter: 'All Languages',
+  setLangFilter: (lang) => set({ langFilter: lang }),
+
+  // Notification logs
+  notifications: [],
+  markAllNotificationsRead: () => {
+    set(state => ({
+      notifications: state.notifications.map(n => ({ ...n, read: true }))
+    }));
+  }
+}));

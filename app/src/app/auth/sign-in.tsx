@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Image, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -6,11 +6,87 @@ import { Colors } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { ArrowLeft, Mail, Lock } from 'lucide-react-native';
+import { getAuth, signInWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from '@react-native-firebase/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { AuthService } from '@/api';
 
 const { width } = Dimensions.get('window');
 
 export default function SignInScreen() {
   const router = useRouter();
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: '460808209690-bvks3qatoeg67rnbg08r9sd1qifn58ic.apps.googleusercontent.com',
+    });
+  }, []);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      setError('Please enter your email and password');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // 1. Sign in with Firebase
+      const auth = getAuth();
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      
+      // 2. Sync user to our Cloudflare D1 Database (non-blocking)
+      AuthService.syncUser(userCredential.user.uid, email, userCredential.user.displayName || '').catch(console.error);
+
+      // 3. Navigate to main app
+      router.replace('/(tabs)');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Invalid email or password');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      // 1. Check if device supports Google Play
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      // 2. Get the users ID token
+      const signInResult = await GoogleSignin.signIn();
+      const idToken = signInResult.data?.idToken;
+      if (!idToken) throw new Error('No ID token found');
+      
+      // 3. Create a Google credential with both idToken and accessToken
+      const tokens = await GoogleSignin.getTokens();
+      const googleCredential = GoogleAuthProvider.credential(idToken, tokens.accessToken);
+      
+      // 4. Sign-in the user with the credential
+      const auth = getAuth();
+      const userCredential = await signInWithCredential(auth, googleCredential);
+      
+      // 5. Sync to our database (non-blocking)
+      AuthService.syncUser(
+        userCredential.user.uid, 
+        userCredential.user.email || '', 
+        userCredential.user.displayName || ''
+      ).catch(console.error);
+
+      // 6. Navigate
+      router.replace('/(tabs)');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Failed to sign in with Google');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
@@ -47,11 +123,14 @@ export default function SignInScreen() {
           </View>
 
           <View style={styles.formContainer}>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
             <Input
-              label="Email or Phone"
-              placeholder="Enter your email or phone"
+              label="Email Address"
+              placeholder="Enter your email"
               keyboardType="email-address"
               autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
               leftIcon={<Mail color={Colors.textSecondary} size={20} />}
             />
 
@@ -60,6 +139,8 @@ export default function SignInScreen() {
                 label="Password"
                 placeholder="Enter your password"
                 isPassword
+                value={password}
+                onChangeText={setPassword}
                 leftIcon={<Lock color={Colors.textSecondary} size={20} />}
               />
               <TouchableOpacity style={styles.forgotPassword}>
@@ -68,8 +149,10 @@ export default function SignInScreen() {
             </View>
 
             <Button
-              title="Sign In"
+              title={isLoading ? "Signing In..." : "Sign In"}
               style={styles.signInButton}
+              disabled={isLoading}
+              onPress={handleSignIn}
             />
 
             <Button
@@ -87,7 +170,7 @@ export default function SignInScreen() {
           </View>
 
           <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignIn} disabled={isLoading}>
               <Image 
                 source={require('@/assets/images/google.png')}
                 style={{ width: 24, height: 24 }}
@@ -163,6 +246,12 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     marginBottom: 16,
+  },
+  errorText: {
+    color: '#e74c3c',
+    marginBottom: 12,
+    textAlign: 'center',
+    fontSize: 14,
   },
   passwordContainer: {
     marginBottom: 16,

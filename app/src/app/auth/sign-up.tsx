@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -6,10 +6,81 @@ import { Colors } from '@/constants/theme';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { ArrowLeft, User, Mail, Lock, CheckSquare, Square } from 'lucide-react-native';
+import auth from '@react-native-firebase/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { AuthService } from '@/api';
 
 export default function SignUpScreen() {
   const router = useRouter();
+  
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: '460808209690-bvks3qatoeg67rnbg08r9sd1qifn58ic.apps.googleusercontent.com',
+    });
+  }, []);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSignUp = async () => {
+    if (!email || !password || !name) {
+      setError('Please fill in all fields');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError('');
+
+    try {
+      // 1. Create user in Firebase
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      
+      // 2. Update Firebase Display Name
+      await userCredential.user.updateProfile({ displayName: name });
+      
+      // 3. Sync user to our Cloudflare D1 Database (non-blocking)
+      AuthService.syncUser(userCredential.user.uid, email, name).catch(console.error);
+
+      // 4. Navigate to main app
+      router.replace('/(tabs)');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Failed to sign up');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      const signInResult = await GoogleSignin.signIn();
+      const idToken = signInResult.data?.idToken;
+      if (!idToken) throw new Error('No ID token found');
+      
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const userCredential = await auth().signInWithCredential(googleCredential);
+      
+      // Sync to database non-blocking
+      AuthService.syncUser(
+        userCredential.user.uid, 
+        userCredential.user.email || '', 
+        userCredential.user.displayName || ''
+      ).catch(console.error);
+
+      router.replace('/(tabs)');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Failed to sign up with Google');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
@@ -42,14 +113,17 @@ export default function SignUpScreen() {
           
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Create Your Account</Text>
-            <Text style={styles.subtitle}>Start your journey with{'\n'}Dr. Swatantra AI</Text>
+            <Text style={styles.subtitle}>Start your journey with{'\n'}Dr. Atmik AI</Text>
           </View>
           
           <View style={styles.formContainer}>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
             <Input 
               label="Full Name"
               placeholder="Enter your full name"
               autoCapitalize="words"
+              value={name}
+              onChangeText={setName}
               leftIcon={<User color={Colors.textSecondary} size={20} />}
             />
             
@@ -58,6 +132,8 @@ export default function SignUpScreen() {
               placeholder="Enter your email"
               keyboardType="email-address"
               autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
               leftIcon={<Mail color={Colors.textSecondary} size={20} />}
             />
             
@@ -65,6 +141,8 @@ export default function SignUpScreen() {
               label="Password"
               placeholder="Create a strong password"
               isPassword
+              value={password}
+              onChangeText={setPassword}
               leftIcon={<Lock color={Colors.textSecondary} size={20} />}
             />
             
@@ -85,9 +163,10 @@ export default function SignUpScreen() {
             </TouchableOpacity>
             
             <Button 
-              title="Create Account" 
+              title={isLoading ? "Creating Account..." : "Create Account"} 
               style={styles.signUpButton}
-              disabled={!agreedToTerms}
+              disabled={!agreedToTerms || isLoading}
+              onPress={handleSignUp}
             />
           </View>
           
@@ -98,7 +177,7 @@ export default function SignUpScreen() {
           </View>
           
           <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignUp} disabled={isLoading}>
               <Image 
                 source={require('@/assets/images/google.png')}
                 style={{ width: 24, height: 24 }}
@@ -167,6 +246,12 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     marginBottom: 16,
+  },
+  errorText: {
+    color: '#e74c3c',
+    marginBottom: 12,
+    textAlign: 'center',
+    fontSize: 14,
   },
   checkboxContainer: {
     flexDirection: 'row',

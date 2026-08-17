@@ -1,6 +1,16 @@
 import { DarkTheme, DefaultTheme, ThemeProvider, Stack } from 'expo-router';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, LogBox } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useFonts } from 'expo-font';
+import { useEffect } from 'react';
+import * as SplashScreen from 'expo-splash-screen';
+
+SplashScreen.preventAutoHideAsync();
+
+// Ignore the known upstream Expo Router / React Navigation warning about early linking updates
+LogBox.ignoreLogs([
+  "Can't perform a React state update on a component that hasn't mounted yet",
+]);
 
 const CustomTheme = {
   ...DefaultTheme,
@@ -12,6 +22,20 @@ const CustomTheme = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [loaded, error] = useFonts({
+    Samarkan: require('../../assets/fonts/Samarkan.ttf'),
+  });
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (!loaded && !error) {
+    return null;
+  }
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : CustomTheme}>
       <StatusBar style={colorScheme === 'dark' ? "light" : "dark"} />
@@ -19,3 +43,4 @@ export default function RootLayout() {
     </ThemeProvider>
   );
 }
+

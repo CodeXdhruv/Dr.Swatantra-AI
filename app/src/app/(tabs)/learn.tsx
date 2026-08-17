@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Image, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Search, Book, FileText, Headphones, PlayCircle, MessageSquare, Bookmark, Heart, User, Leaf, Quote, MoreVertical } from 'lucide-react-native';
 import { Colors, Spacing, Radius, Shadows } from '@/constants/theme';
+import { apiService } from '../../services/api';
+import * as Linking from 'expo-linking';
 
 const { width } = Dimensions.get('window');
 
@@ -21,7 +23,7 @@ const FEATURED = [
     type: 'BOOK',
     title: 'The Science of Inner Peace',
     subtitle: 'Discover the path to lasting peace within.',
-    meta: 'Dr. Swatantra Jain',
+    meta: 'Dr. Atmik Jain',
     metaIcon: User,
   },
   {
@@ -76,6 +78,15 @@ const POPULAR = [
 
 export default function LearnScreen() {
   const [activeCategory, setActiveCategory] = useState('all');
+  const [libraryContent, setLibraryContent] = useState<any[]>([]);
+
+  useEffect(() => {
+    async function loadData() {
+      const data = await apiService.fetchLibraryContent();
+      setLibraryContent(data);
+    }
+    loadData();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
@@ -224,7 +235,44 @@ export default function LearnScreen() {
         </View>
 
         <View style={styles.popularList}>
-          {POPULAR.map((item) => (
+          {libraryContent.length > 0 ? libraryContent.map((item) => (
+            <TouchableOpacity 
+              key={item.id} 
+              style={styles.popularItem}
+              onPress={() => {
+                if (item.fileUrl) {
+                  Linking.openURL(item.fileUrl);
+                }
+              }}
+            >
+              <ImageBackground 
+                source={item.coverUrl ? { uri: item.coverUrl } : require('@/assets/images/mountain_bg.png')}
+                style={styles.popularImage}
+                imageStyle={{ borderRadius: Radius.md }}
+              >
+                <View style={styles.popularTypeIconContainer}>
+                  {item.type === 'VIDEO' && <PlayCircle color="#fff" size={12} fill="#000" />}
+                  {item.type === 'AUDIO' && <Headphones color="#fff" size={12} />}
+                  {item.type === 'DOCUMENT' && <FileText color="#fff" size={12} />}
+                  {item.type === 'image' && <Heart color="#fff" size={12} />}
+                  {(!item.type || !['VIDEO', 'AUDIO', 'DOCUMENT', 'image'].includes(item.type)) && <FileText color="#fff" size={12} />}
+                </View>
+              </ImageBackground>
+              <View style={styles.popularContent}>
+                <Text style={styles.popularTitle}>{item.title}</Text>
+                <Text style={styles.popularSubtitle} numberOfLines={1}>{item.type || 'Unknown'}</Text>
+                <Text style={styles.popularMeta}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+              </View>
+              <View style={styles.popularActions}>
+                <TouchableOpacity style={{ marginBottom: 12 }}>
+                  <Bookmark color={Colors.textSecondary} size={20} strokeWidth={1.5} />
+                </TouchableOpacity>
+                <TouchableOpacity>
+                  <MoreVertical color={Colors.textSecondary} size={20} strokeWidth={1.5} />
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          )) : POPULAR.map((item) => (
             <TouchableOpacity key={item.id} style={styles.popularItem}>
               <ImageBackground 
                 source={require('@/assets/images/mountain_bg.png')}

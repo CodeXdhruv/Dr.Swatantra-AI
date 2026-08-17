@@ -15,9 +15,9 @@ const HeroCarousel = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const quotes = [
-    { id: 1, quote: "To heal the planet,\nwe must heal humanity.", author: "— Dr. Swatantra Jain" },
-    { id: 2, quote: "Peace comes from within.\nDo not seek it without.", author: "— Dr. Swatantra Jain" },
-    { id: 3, quote: "Mindfulness is the key\nto a balanced life.", author: "— Dr. Swatantra Jain" }
+    { id: 1, quote: "To heal the planet,\nwe must heal humanity.", author: "— Dr. Atmik Jain" },
+    { id: 2, quote: "Peace comes from within.\nDo not seek it without.", author: "— Dr. Atmik Jain" },
+    { id: 3, quote: "Mindfulness is the key\nto a balanced life.", author: "— Dr. Atmik Jain" }
   ];
 
   useEffect(() => {

@@ -35,7 +35,7 @@ export const useAppStore = create<AppState>()(
       clearStore: () => set({ hasCompletedOnboarding: false, userName: '' }),
     }),
     {
-      name: 'dr-swatantra-ai-storage',
+      name: 'dr-atmik-ai-storage',
       storage: createJSONStorage(() => zustandStorage),
     }
   )

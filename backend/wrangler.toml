@@ -1,0 +1,29 @@
+name = "atmik-ai-backend"
+main = "src/index.ts"
+compatibility_date = "2024-04-05"
+compatibility_flags = [ "nodejs_compat" ]
+
+[ai]
+binding = "AI"
+
+# Bind a D1 database
+[[d1_databases]]
+binding = "DB"
+database_name = "atmik-db"
+database_id = "42f963f6-5318-4747-8e82-66a5068c8483"
+migrations_dir = "migrations"
+
+# Bind an R2 bucket
+# NOTE: You need to enable R2 on the Cloudflare dashboard first!
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "atmik-bucket"
+
+# Bind Vectorize
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "atmik-index-v2"
+
+[vars]
+FIREBASE_PROJECT_ID = "atmik-ai"
+TTS_ENDPOINT = "https://api.sarvam.ai/speech/v1/tts"

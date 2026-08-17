@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, ImageBackground, Image, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { User, Bell, Shield, Moon, Globe, LogOut, ChevronRight, Leaf } from 'lucide-react-native';
+import auth from '@react-native-firebase/auth';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const { width } = Dimensions.get('window');
 
@@ -29,6 +31,37 @@ const FONTS = {
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const [userData, setUserData] = useState({
+    name: 'Loading...',
+    email: '...',
+    photoURL: null as string | null,
+  });
+
+  useEffect(() => {
+    const user = auth().currentUser;
+    if (user) {
+      setUserData({
+        name: user.displayName || 'Atmik User',
+        email: user.email || '',
+        photoURL: user.photoURL,
+      });
+    }
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await auth().signOut();
+      // If they signed in with Google, also sign them out there to clear the session cache
+      try {
+        await GoogleSignin.signOut();
+      } catch (e) {
+        // Ignore Google sign-out errors (e.g. if they used Email/Password instead)
+      }
+      router.replace('/auth');
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   const ACCOUNT_ITEMS = [
     { id: '1', icon: User, title: 'Account Settings', subtitle: 'Manage your personal information' },
@@ -46,14 +79,22 @@ export default function ProfileScreen() {
           {/* Header Profile Section */}
           <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
-              <Image 
-                source={require('@/assets/images/app_icon.png')} 
-                style={styles.avatarImage} 
-                resizeMode="contain" 
-              />
+              {userData.photoURL ? (
+                <Image 
+                  source={{ uri: userData.photoURL }} 
+                  style={styles.avatarImageCircle} 
+                  resizeMode="cover" 
+                />
+              ) : (
+                <Image 
+                  source={require('@/assets/images/app_icon.png')} 
+                  style={styles.avatarImage} 
+                  resizeMode="contain" 
+                />
+              )}
             </View>
             
-            <Text style={styles.name}>Rahul</Text>
+            <Text style={styles.name}>{userData.name}</Text>
             
             <View style={styles.dividerRow}>
               <View style={styles.dividerLine} />
@@ -61,7 +102,7 @@ export default function ProfileScreen() {
               <View style={styles.dividerLine} />
             </View>
             
-            <Text style={styles.email}>rahul@example.com</Text>
+            <Text style={styles.email}>{userData.email}</Text>
             
             <TouchableOpacity style={styles.editProfileButton}>
               <Image source={require('@/assets/images/nav_bar_icon.png')} style={{width: 14, height: 14, tintColor: COLORS.accent, marginRight: 6}} resizeMode="contain" />
@@ -91,7 +132,7 @@ export default function ProfileScreen() {
           <TouchableOpacity 
             style={styles.signOutCard} 
             activeOpacity={0.7}
-            onPress={() => router.replace('/auth')}
+            onPress={handleSignOut}
           >
             <View style={[styles.accountItemIcon, { backgroundColor: COLORS.dangerBg }]}>
               <LogOut color={COLORS.danger} size={20} strokeWidth={1.5} />
@@ -144,6 +185,11 @@ const styles = StyleSheet.create({
   avatarImage: {
     width: 64,
     height: 64,
+  },
+  avatarImageCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   name: {
     fontSize: 28,

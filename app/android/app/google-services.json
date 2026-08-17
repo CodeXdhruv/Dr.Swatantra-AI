@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "460808209690",
+    "project_id": "atmik-ai",
+    "storage_bucket": "atmik-ai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:460808209690:android:3a1d47ee0391160a6b98a3",
+        "android_client_info": {
+          "package_name": "com.atmik.ai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "460808209690-hi6ngb5bk0i4pbvkdsg57ck2l7mnak2g.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.atmik.ai",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "460808209690-bvks3qatoeg67rnbg08r9sd1qifn58ic.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAoUwbCOP6ccejOya_-gU86EFTLuwVUStI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "460808209690-bvks3qatoeg67rnbg08r9sd1qifn58ic.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

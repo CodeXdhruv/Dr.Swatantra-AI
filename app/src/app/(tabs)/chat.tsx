@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  FlatList,
+  Keyboard,
+  ActivityIndicator,
 } from "react-native";
 import {
   GestureHandlerRootView,
@@ -17,6 +20,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Settings2, Mic, Send, Info } from "lucide-react-native";
+import { ChatService } from "../../api";
 import Svg, {
   Path,
   Circle,
@@ -87,6 +91,11 @@ export default function ChatScreen({ isBackground = false }: { isBackground?: bo
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
 
+  const [messages, setMessages] = useState<{ id: string; text: string; role: "user" | "ai" }[]>([]);
+  const [inputText, setInputText] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const flatListRef = useRef<FlatList>(null);
+
   const pulse = useSharedValue(0);
   const ringRotate = useSharedValue(0);
 
@@ -149,6 +158,47 @@ export default function ChatScreen({ isBackground = false }: { isBackground?: bo
       }
     });
 
+  const handleSend = async () => {
+    if (!inputText.trim() || isLoading) return;
+    
+    const userMessage = { id: Date.now().toString(), text: inputText.trim(), role: "user" as const };
+    setMessages((prev) => [...prev, userMessage]);
+    setInputText("");
+    setIsLoading(true);
+    Keyboard.dismiss();
+
+    try {
+      const response = await ChatService.sendTextChatMessage(userMessage.text, "test-user-123");
+      const aiMessage = { 
+        id: (Date.now() + 1).toString(), 
+        text: response.response || "Sorry, I couldn't understand that.", 
+        role: "ai" as const 
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      const errorMessage = { 
+        id: (Date.now() + 1).toString(), 
+        text: "Oops, something went wrong. Please try again.", 
+        role: "ai" as const 
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderMessage = ({ item }: { item: { id: string; text: string; role: "user" | "ai" } }) => {
+    const isUser = item.role === "user";
+    return (
+      <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.aiBubble]}>
+        <Text style={[styles.messageText, isUser ? styles.userMessageText : styles.aiMessageText]}>
+          {item.text}
+        </Text>
+      </View>
+    );
+  };
+
   const animatedScreenStyle = useAnimatedStyle(() => {
     return {
       transform: [{ translateX: translateX.value }],
@@ -183,88 +233,103 @@ export default function ChatScreen({ isBackground = false }: { isBackground?: bo
       </View>
 
       <View style={{ flex: 1, justifyContent: "space-between" }}>
-        {/* Main Orbital UI */}
-        <View style={styles.orbContainer}>
-          <Animated.View
-            style={[styles.outerCircle, { width: 380, height: 380 }]}
-          />
-          <Animated.View
-            style={[styles.outerCircle, { width: 320, height: 320 }]}
-          />
-
-          <Animated.View style={[styles.dottedRingContainer, animatedRing]}>
-            <Svg width={260} height={260}>
-              <Circle
-                cx="130"
-                cy="130"
-                r="129"
-                stroke={GOLD}
-                strokeWidth="1"
-                strokeDasharray="2, 6"
-                fill="none"
-                opacity="0.5"
+        {messages.length === 0 ? (
+          <View style={{ flex: 1, justifyContent: "center" }}>
+            {/* Main Orbital UI */}
+            <View style={styles.orbContainer}>
+              <Animated.View
+                style={[styles.outerCircle, { width: 380, height: 380 }]}
               />
-              <Circle cx="130" cy="1" r="3" fill="#FFF" />
-              <Circle cx="130" cy="1" r="5" fill={GOLD} opacity="0.5" />
-              <Circle cx="1" cy="130" r="3" fill="#FFF" />
-              <Circle cx="1" cy="130" r="5" fill={GOLD} opacity="0.5" />
-              <Circle cx="259" cy="130" r="3" fill="#FFF" />
-              <Circle cx="259" cy="130" r="5" fill={GOLD} opacity="0.5" />
-              <Circle cx="130" cy="259" r="3" fill="#FFF" />
-              <Circle cx="130" cy="259" r="5" fill={GOLD} opacity="0.5" />
-            </Svg>
-          </Animated.View>
+              <Animated.View
+                style={[styles.outerCircle, { width: 320, height: 320 }]}
+              />
 
-          <Animated.View style={[styles.centerGlow, animatedGlow]}>
-            <Svg width="200" height="200">
-              <Defs>
-                <RadialGradient
-                  id="grad"
-                  cx="50%"
-                  cy="50%"
-                  r="50%"
-                  fx="50%"
-                  fy="50%"
-                >
-                  <Stop offset="0%" stopColor="#FFF" stopOpacity="1" />
-                  <Stop offset="50%" stopColor={GOLD} stopOpacity="0.4" />
-                  <Stop offset="100%" stopColor={BG} stopOpacity="0" />
-                </RadialGradient>
-              </Defs>
-              <Circle cx="100" cy="100" r="100" fill="url(#grad)" />
-            </Svg>
-          </Animated.View>
+              <Animated.View style={[styles.dottedRingContainer, animatedRing]}>
+                <Svg width={260} height={260}>
+                  <Circle
+                    cx="130"
+                    cy="130"
+                    r="129"
+                    stroke={GOLD}
+                    strokeWidth="1"
+                    strokeDasharray="2, 6"
+                    fill="none"
+                    opacity="0.5"
+                  />
+                  <Circle cx="130" cy="1" r="3" fill="#FFF" />
+                  <Circle cx="130" cy="1" r="5" fill={GOLD} opacity="0.5" />
+                  <Circle cx="1" cy="130" r="3" fill="#FFF" />
+                  <Circle cx="1" cy="130" r="5" fill={GOLD} opacity="0.5" />
+                  <Circle cx="259" cy="130" r="3" fill="#FFF" />
+                  <Circle cx="259" cy="130" r="5" fill={GOLD} opacity="0.5" />
+                  <Circle cx="130" cy="259" r="3" fill="#FFF" />
+                  <Circle cx="130" cy="259" r="5" fill={GOLD} opacity="0.5" />
+                </Svg>
+              </Animated.View>
 
-          {/* Central Art */}
-          <View style={styles.artWrapper}>
-            <ChatBubbleIcon />
-            <LotusIcon size={120} color={GOLD} />
-            <View style={styles.reflection}>
-              <LotusIcon size={120} color={GOLD} />
+              <Animated.View style={[styles.centerGlow, animatedGlow]}>
+                <Svg width="200" height="200">
+                  <Defs>
+                    <RadialGradient
+                      id="grad"
+                      cx="50%"
+                      cy="50%"
+                      r="50%"
+                      fx="50%"
+                      fy="50%"
+                    >
+                      <Stop offset="0%" stopColor="#FFF" stopOpacity="1" />
+                      <Stop offset="50%" stopColor={GOLD} stopOpacity="0.4" />
+                      <Stop offset="100%" stopColor={BG} stopOpacity="0" />
+                    </RadialGradient>
+                  </Defs>
+                  <Circle cx="100" cy="100" r="100" fill="url(#grad)" />
+                </Svg>
+              </Animated.View>
+
+              {/* Central Art */}
+              <View style={styles.artWrapper}>
+                <ChatBubbleIcon />
+                <LotusIcon size={120} color={GOLD} />
+                <View style={styles.reflection}>
+                  <LotusIcon size={120} color={GOLD} />
+                </View>
+              </View>
+            </View>
+
+            {/* Text Section */}
+            <View style={styles.textSection}>
+              <Text style={styles.assistTitle}>
+                How can I assist you today?
+              </Text>
+              <Text style={styles.assistSubtitle}>
+                Ask anything • Learn anything • Grow together
+              </Text>
+
+              <View style={styles.swipeHint}>
+                <Info size={12} color={GOLD} />
+                <Text style={styles.swipeHintText}>Swipe right for Voice</Text>
+              </View>
+
+              <View style={styles.separator}>
+                <View style={styles.line} />
+                <LotusIcon size={20} color={GOLD} />
+                <View style={styles.line} />
+              </View>
             </View>
           </View>
-        </View>
-
-        {/* Text Section */}
-        <View style={styles.textSection}>
-          <Text style={styles.assistTitle}>
-            How can I assist you today?
-          </Text>
-          <Text style={styles.assistSubtitle}>
-            Ask anything • Learn anything • Grow together
-          </Text>
-
-          <View style={styles.swipeHint}>
-            <Info size={12} color={GOLD} />
-            <Text style={styles.swipeHintText}>Swipe right for Voice</Text>
-          </View>
-
-          <View style={styles.separator}>
-            <View style={styles.line} />
-            <LotusIcon size={20} color={GOLD} />
-            <View style={styles.line} />
-          </View>
-        </View>
+        ) : (
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={item => item.id}
+            renderItem={renderMessage}
+            contentContainerStyle={{ paddingHorizontal: 24, paddingVertical: 20, flexGrow: 1 }}
+            onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            keyboardShouldPersistTaps="handled"
+          />
+        )}
 
         {/* Input Box */}
         <KeyboardAvoidingView
@@ -284,17 +349,24 @@ export default function ChatScreen({ isBackground = false }: { isBackground?: bo
                 placeholder="Type your message..."
                 placeholderTextColor="#A0A0A0"
                 editable={!isBackground}
+                value={inputText}
+                onChangeText={setInputText}
+                onSubmitEditing={handleSend}
               />
               <TouchableOpacity style={styles.micButton}>
                 <Mic color={GOLD} size={22} strokeWidth={1.5} />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.sendButton}>
-                <Send
-                  color="#FFF"
-                  size={16}
-                  strokeWidth={2}
-                  style={{ marginLeft: 2 }}
-                />
+              <TouchableOpacity style={styles.sendButton} onPress={handleSend} disabled={isLoading}>
+                {isLoading ? (
+                  <ActivityIndicator color="#FFF" size="small" />
+                ) : (
+                  <Send
+                    color="#FFF"
+                    size={16}
+                    strokeWidth={2}
+                    style={{ marginLeft: 2 }}
+                  />
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -477,5 +549,33 @@ const styles = StyleSheet.create({
     backgroundColor: GOLD,
     justifyContent: "center",
     alignItems: "center",
+  },
+  messageBubble: {
+    maxWidth: "80%",
+    padding: 12,
+    borderRadius: 20,
+    marginBottom: 16,
+  },
+  userBubble: {
+    alignSelf: "flex-end",
+    backgroundColor: GOLD,
+    borderBottomRightRadius: 4,
+  },
+  aiBubble: {
+    alignSelf: "flex-start",
+    backgroundColor: "#FFF",
+    borderWidth: 1,
+    borderColor: "#F2E8D9",
+    borderBottomLeftRadius: 4,
+  },
+  messageText: {
+    fontSize: 15,
+    lineHeight: 22,
+  },
+  userMessageText: {
+    color: "#FFF",
+  },
+  aiMessageText: {
+    color: NAVY,
   },
 });

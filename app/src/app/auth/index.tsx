@@ -20,7 +20,10 @@ export default function WelcomeScreen() {
             resizeMode="contain"
           />
           <Text style={styles.title}>Welcome to</Text>
-          <Text style={styles.brandTitle}>Dr. Swatantra AI</Text>
+          
+          <View style={styles.wordmarkRow}>
+            <Text style={[styles.samarkanText, { color: '#1C1C1E' }]}>Atmik AI</Text>
+          </View>
 
           <Text style={styles.subtitle}>
             A lifelong companion for health, wisdom, inner growth and universal welfare.
@@ -73,7 +76,7 @@ export default function WelcomeScreen() {
           <Text style={styles.quote}>
             The journey within leads to infinite peace.
           </Text>
-          <Text style={styles.quoteAuthor}>— Dr. Swatantra Jain</Text>
+          <Text style={styles.quoteAuthor}>— Dr. Atmik Jain</Text>
         </View>
 
       </View>
@@ -104,19 +107,31 @@ const styles = StyleSheet.create({
     borderRadius: 32,
   },
   title: {
-    fontSize: 28,
+    fontSize: 16,
     fontWeight: '500',
-    color: Colors.primary,
-    fontFamily: 'serif',
+    color: Colors.textSecondary,
+    marginBottom: 4,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
   },
-  brandTitle: {
-    fontSize: 34,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginTop: 8,
+  wordmarkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 20,
-    fontFamily: 'serif',
-    textAlign: 'center',
+  },
+  samarkanText: {
+    fontFamily: 'Samarkan',
+    fontSize: 56,
+    color: '#1C1C1E',
+    marginTop: 6,
+  },
+  aiText: {
+    fontSize: 42,
+    fontWeight: '300',
+    letterSpacing: 4,
+    marginLeft: 6,
+    marginTop: 12,
   },
   subtitle: {
     fontSize: 14,
