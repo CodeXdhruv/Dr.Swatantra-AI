@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #FAFBFC;
+  --color-surface: #FFFFFF;
+  --color-primary-navy: #24385A;
+  --color-accent-gold: #D6A04A;
+  --color-border-custom: #E8EDF4;
+  --color-success: #62B06E;
+  --color-warning: #D6A04A;
+  --color-danger: #D45B5B;
+
+  --radius-card: 20px;
+  --radius-button: 14px;
+  --radius-input: 12px;
+  --radius-sidebar: 24px;
+
+  --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.04);
+  --shadow-premium: 0 10px 40px rgba(36, 56, 90, 0.05);
+
+  --font-heading: "Cormorant Garamond", Georgia, serif;
+  --font-body: "Manrope", system-ui, sans-serif;
+  --font-ui: "Inter", system-ui, sans-serif;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #E8EDF4;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #D6A04A;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-primary-navy);
+  font-family: var(--font-ui);
+  font-weight: 500;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+}
+
+/* Global Font Weight Adjustments */
+.font-light {
+  font-weight: 500 !important;
+}
+
+.font-normal {
+  font-weight: 500 !important;
+}
+
+.font-medium {
+  font-weight: 600 !important;
+}
+
+.font-semibold {
+  font-weight: 700 !important;
+}
+
+.font-bold {
+  font-weight: 800 !important;
+}
+
