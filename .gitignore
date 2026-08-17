@@ -1,0 +1,12 @@
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+.env
+.wrangler/
+dist/
+build/
+.next/
+.expo/
+*.onnx
+*.onnx.json
