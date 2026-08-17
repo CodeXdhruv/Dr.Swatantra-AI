@@ -37,16 +37,28 @@ chat.post('/', async (c) => {
       });
 
       let fullResponse = "";
+      const decoder = new TextDecoder();
 
       for await (const chunk of aiStream) {
-        if (chunk.response) {
-          const textChunk = chunk.response;
-          fullResponse += textChunk;
-
-          // Stream the raw text back immediately so the UI can type it out
-          await stream.writeSSE({
-            data: JSON.stringify({ type: 'text', content: textChunk }),
-          });
+        const decoded = decoder.decode(chunk as Uint8Array, { stream: true });
+        const lines = decoded.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ') && !line.includes('[DONE]')) {
+            try {
+              const data = JSON.parse(line.substring(6));
+              if (data.response) {
+                const textChunk = data.response;
+                fullResponse += textChunk;
+                
+                await stream.writeSSE({
+                  data: JSON.stringify({ type: 'text', content: textChunk }),
+                });
+              }
+            } catch (e) {
+              // ignore incomplete JSON chunks
+            }
+          }
         }
       }
 

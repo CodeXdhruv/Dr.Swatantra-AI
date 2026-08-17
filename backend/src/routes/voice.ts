@@ -50,40 +50,53 @@ voice.get('/', upgradeWebSocket((c) => {
           let currentSentence = "";
           let fullResponse = "";
           let chunkIndex = 0;
+          const decoder = new TextDecoder();
 
           // 4. Sentence Buffering & TTS Streaming
           for await (const chunk of aiStream) {
-            if (chunk.response) {
-              const textChunk = chunk.response;
-              currentSentence += textChunk;
-              fullResponse += textChunk;
+            const decoded = decoder.decode(chunk as Uint8Array, { stream: true });
+            const lines = decoded.split('\n');
+            
+            for (const line of lines) {
+              if (line.startsWith('data: ') && !line.includes('[DONE]')) {
+                try {
+                  const data = JSON.parse(line.substring(6));
+                  if (data.response) {
+                    const textChunk = data.response;
+                    currentSentence += textChunk;
+                    fullResponse += textChunk;
 
-              // Send live text to client
-              ws.send(JSON.stringify({ type: 'text_stream', text: textChunk }));
+                    // Send live text to client
+                    ws.send(JSON.stringify({ type: 'text_stream', text: textChunk }));
 
-              // Check for sentence boundaries
-              if (/[.?!]\s/.test(currentSentence) || /[.?!]$/.test(currentSentence) || /\n/.test(currentSentence)) {
-                let sentenceToSpeak = currentSentence.trim();
-                currentSentence = ""; 
+                    // Check for sentence boundaries
+                    if (/[.?!]\s/.test(currentSentence) || /[.?!]$/.test(currentSentence) || /\n/.test(currentSentence)) {
+                      let sentenceToSpeak = currentSentence.trim();
+                      currentSentence = ""; 
 
-                // Extract emotion tag if present in this sentence
-                let emotionTag = 'neutral';
-                const emotionMatch = sentenceToSpeak.match(/\[emotion:\s*(.*?)\]/i);
-                if (emotionMatch) {
-                  emotionTag = emotionMatch[1];
-                  sentenceToSpeak = sentenceToSpeak.replace(emotionMatch[0], '').trim();
-                }
+                      // Extract emotion tag if present in this sentence
+                      let emotionTag = 'neutral';
+                      const emotionMatch = sentenceToSpeak.match(/\[emotion:\s*(.*?)\]/i);
+                      if (emotionMatch) {
+                        emotionTag = emotionMatch[1];
+                        sentenceToSpeak = sentenceToSpeak.replace(emotionMatch[0], '').trim();
+                      }
 
-                if (sentenceToSpeak.length > 2) {
-                  // Fire TTS asynchronously, but wait for result to send in order
-                  const audioBase64 = await synthesize(c.env, sentenceToSpeak, emotionTag, lang);
-                  if (audioBase64) {
-                    ws.send(JSON.stringify({ 
-                      type: 'tts_audio', 
-                      index: chunkIndex++, 
-                      audioBase64 
-                    }));
+                      if (sentenceToSpeak.length > 2) {
+                        // Fire TTS asynchronously, but wait for result to send in order
+                        const audioBase64 = await synthesize(c.env, sentenceToSpeak, emotionTag, lang);
+                        if (audioBase64) {
+                          ws.send(JSON.stringify({ 
+                            type: 'tts_audio', 
+                            index: chunkIndex++, 
+                            audioBase64 
+                          }));
+                        }
+                      }
+                    }
                   }
+                } catch (e) {
+                  // ignore JSON parse errors
                 }
               }
             }

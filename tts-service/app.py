@@ -46,14 +46,34 @@ def tts(req: TTSRequest):
     if not voice:
         return {"error": f"Voice for language '{req.language}' not loaded."}, 500
 
-    # Piper doesn't natively support dynamic pitch/speed at synthesis time in the simple API, 
-    # but the ONNX model is highly optimized for natural speech.
+    # Map emotion tags to speech synthesis parameters
+    # length_scale: >1 is slower, <1 is faster
+    # noise_scale: pitch variation/expression
+    
+    length_scale = 1.0
+    noise_scale = 0.667
+    noise_w = 0.8
+    
+    emotion = req.emotion.lower().strip()
+    
+    if emotion in ["calm", "empathetic"]:
+        length_scale = 1.2    # Slower, more deliberate
+        noise_scale = 0.4     # Less pitch variance, smoother
+    elif emotion in ["joyful", "encouraging"]:
+        length_scale = 0.85   # Slightly faster
+        noise_scale = 0.8     # More dynamic pitch variance
     
     wav_io = io.BytesIO()
     
-    # Synthesize speech to WAV format
+    # Synthesize speech to WAV format with emotion parameters
     with wave.open(wav_io, "wb") as wav_file:
-        voice.synthesize(req.inputs, wav_file)
+        voice.synthesize(
+            req.inputs, 
+            wav_file, 
+            length_scale=length_scale, 
+            noise_scale=noise_scale, 
+            noise_w=noise_w
+        )
         
     # Return audio bytes
     return Response(content=wav_io.getvalue(), media_type="audio/wav")

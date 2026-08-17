@@ -9,6 +9,7 @@ import libraryRoutes from './routes/library';
 import voiceRoutes from './routes/voice';
 import chatRoutes from './routes/chat';
 import migrateRoutes from './routes/migrate';
+import adminRoutes from './routes/admin';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -27,6 +28,7 @@ app.route('/api/library', libraryRoutes);
 app.route('/api/voice-chat', voiceRoutes);
 app.route('/api/chat', chatRoutes);
 app.route('/api/migrate', migrateRoutes);
+app.route('/api/admin', adminRoutes);
 
 // Error handling
 app.onError((err, c) => {
