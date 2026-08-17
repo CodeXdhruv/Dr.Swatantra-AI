@@ -1,4 +1,4 @@
-gets from fastapi import FastAPI, Response
+from fastapi import FastAPI, Response
 from pydantic import BaseModel
 import wave
 import io
