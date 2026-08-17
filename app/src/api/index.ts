@@ -13,16 +13,51 @@ export const AuthService = {
 };
 
 export const ChatService = {
-  // Note: sendVoiceChatMessage has been removed. Voice chat is now handled via WebSocket using the useVoiceChat hook.
-
   /**
    * Sends a text message to the standard Text Chat RAG pipeline.
+   * Parses the SSE stream to extract the final response text.
    */
   sendTextChatMessage: async (text: string, userId: string) => {
-    return apiFetch('/chat', {
+    const { apiFetch, API_BASE_URL } = require('./client');
+    const auth = require('@react-native-firebase/auth').default;
+    
+    let token = '';
+    const currentUser = auth().currentUser;
+    if (currentUser) {
+      token = await currentUser.getIdToken();
+    }
+
+    const response = await fetch(`${API_BASE_URL}/chat`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({ text, userId }),
     });
+
+    const responseText = await response.text();
+    
+    // Parse SSE stream format
+    const lines = responseText.split('\n');
+    let final_text = '';
+    
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        try {
+          const data = JSON.parse(line.substring(6));
+          if (data.type === 'done') {
+            final_text = data.final_text;
+          } else if (data.type === 'error') {
+            throw new Error(data.message);
+          }
+        } catch (e) {
+          // ignore invalid JSON lines
+        }
+      }
+    }
+    
+    return { response: final_text };
   }
 };
 
