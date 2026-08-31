@@ -1,0 +1,3 @@
+ALTER TABLE Content ADD COLUMN author TEXT;
+ALTER TABLE Content ADD COLUMN description TEXT;
+ALTER TABLE Content ADD COLUMN readTime INTEGER;
