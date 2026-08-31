@@ -1,7 +1,7 @@
 "use client";
 
 import { useAdminStore } from "@/store/adminStore";
-import { Search, Bell, HelpCircle, ExternalLink } from "lucide-react";
+import { Search, Bell, HelpCircle, ExternalLink, UserCircle } from "lucide-react";
 import { useEffect } from "react";
 
 export default function Topbar() {
@@ -67,14 +67,13 @@ export default function Topbar() {
         <LinkButton />
 
         {/* User Mini Profile Avatar */}
-        <div className="relative">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={currentAdmin?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80"}
-            alt="Admin Avatar"
-            className="w-9 h-9 rounded-full object-cover border border-border-custom"
-          />
-          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-success rounded-full border-2 border-white" />
+        <div className="flex items-center gap-2.5 p-1.5 pl-3 rounded-full hover:bg-white/60 transition-colors border border-border-custom bg-white/40 cursor-pointer">
+          <span className="text-xs font-semibold text-primary-navy hidden sm:block font-ui pr-1">
+            {currentAdmin ? currentAdmin.name : 'System'}
+          </span>
+          <div className="w-8 h-8 flex items-center justify-center rounded-full bg-primary-navy/5 border border-border-custom text-primary-navy flex-shrink-0">
+            <UserCircle size={18} className="stroke-[1.5]" />
+          </div>
         </div>
       </div>
     </header>

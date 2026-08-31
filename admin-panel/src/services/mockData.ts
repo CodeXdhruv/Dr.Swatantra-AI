@@ -44,13 +44,13 @@ export interface Tag {
 
 export interface User {
   id: string;
-  name: string;
+  name?: string;
   email: string;
-  avatar: string;
-  role: 'Super Admin' | 'Editor' | 'Viewer';
-  status: 'Active' | 'Inactive';
-  lastLogin: string;
-  permissions: string[];
+  avatar?: string;
+  role: 'ADMIN' | 'USER';
+  status?: 'Active' | 'Inactive';
+  lastLogin?: string;
+  permissions?: string[];
 }
 
 export interface MediaItem {
@@ -294,48 +294,8 @@ export const initialTags: Tag[] = [
   { id: "t6", name: "Karma", slug: "karma", color: "#45818E", count: 14 }
 ];
 
-export const initialUsers: User[] = [
-  {
-    id: "u1",
-    name: "Arjun Dev",
-    email: "arjun@atmik.ai",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80",
-    role: "Super Admin",
-    status: "Active",
-    lastLogin: "2 mins ago",
-    permissions: ["all"]
-  },
-  {
-    id: "u2",
-    name: "Dr. Atmik Jain",
-    email: "dratmik@atmik.ai",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150&h=150&q=80",
-    role: "Super Admin",
-    status: "Active",
-    lastLogin: "1 day ago",
-    permissions: ["all"]
-  },
-  {
-    id: "u3",
-    name: "Rohan Sharma",
-    email: "rohan@atmik.ai",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80",
-    role: "Editor",
-    status: "Active",
-    lastLogin: "3 hours ago",
-    permissions: ["content.read", "content.write", "media.upload"]
-  },
-  {
-    id: "u4",
-    name: "Priya Patel",
-    email: "priya@atmik.ai",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&h=150&q=80",
-    role: "Viewer",
-    status: "Inactive",
-    lastLogin: "1 week ago",
-    permissions: ["content.read"]
-  }
-];
+export const initialUsers: User[] = [];
+
 
 export const initialMedia: MediaItem[] = [
   {

@@ -3,9 +3,9 @@ import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDwiUwDPZh-ieBCYB5bUX-dAUpZANlxUoE",
-  authDomain: "atmik-ai.firebaseapp.com",
-  projectId: "atmik-ai",
-  storageBucket: "atmik-ai.firebasestorage.app",
+  authDomain: "swatantra-ai.firebaseapp.com",
+  projectId: "swatantra-ai",
+  storageBucket: "swatantra-ai.firebasestorage.app",
   messagingSenderId: "114419958748",
   appId: "1:114419958748:web:dummy"
 };
