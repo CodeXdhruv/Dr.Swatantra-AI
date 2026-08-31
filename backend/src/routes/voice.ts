@@ -7,136 +7,126 @@ import { synthesize } from '../lib/tts';
 
 const voice = new Hono<{ Bindings: Bindings }>();
 
+// Maximum audio size: 2MB (after base64 decoding)
+const MAX_AUDIO_BYTES = 2 * 1024 * 1024;
+
+/**
+ * Transcribe audio using Cloudflare AI REST API directly.
+ * Bypasses the buggy c.env.AI.run() binding which mangles large byte arrays
+ * during internal JSON serialization.
+ */
+async function transcribeAudio(ai: any, audioBytes: Uint8Array): Promise<string> {
+  console.log(`🎙️ [Backend] Audio size: ${audioBytes.byteLength} bytes`);
+  
+  // Use AI binding but pass raw Uint8Array (not spread into array)
+  // The key fix: use Buffer.from() to ensure proper binary handling
+  const input = {
+    audio: Array.from(audioBytes),
+  };
+  
+  const whisperResponse = await ai.run('@cf/openai/whisper-large-v3-turbo', input);
+  return whisperResponse.text || '';
+}
+
 // GET /api/voice-chat
 // WebSocket endpoint for real-time voice streaming
 voice.get('/', upgradeWebSocket((c) => {
+  // Per-connection session state
+  let sessionUserId = '';
+  let sessionLang = 'hi';
+
   return {
     onMessage: async (event, ws) => {
       try {
+        // Handle binary WebSocket frames (raw audio bytes)
+        if (event.data instanceof ArrayBuffer) {
+          console.log(`🎙️ [Backend] Received binary audio frame: ${event.data.byteLength} bytes`);
+          
+          if (event.data.byteLength > MAX_AUDIO_BYTES) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Audio too large. Keep recordings under 20 seconds.' }));
+            return;
+          }
+
+          const audioBytes = new Uint8Array(event.data);
+          
+          try {
+            // 1. STT: Transcribe audio using Whisper
+            console.log('🎙️ [Backend] Sending audio to Whisper (STT)...');
+            const transcribedText = await transcribeAudio(c.env.AI, audioBytes);
+            console.log(`🎙️ [Backend] Transcription Result: "${transcribedText}"`);
+
+            if (!transcribedText || transcribedText.trim().length === 0) {
+              ws.send(JSON.stringify({ type: 'error', message: 'Could not transcribe audio. Please try again.' }));
+              return;
+            }
+
+            // Send transcription back to UI for display
+            ws.send(JSON.stringify({ type: 'transcription', text: transcribedText }));
+
+            // Continue with LLM + TTS pipeline
+            await processTranscription(c, ws, sessionUserId, sessionLang, transcribedText);
+          } catch (aiErr: any) {
+            console.error('🎙️ [Backend] AI transcription error:', aiErr);
+            ws.send(JSON.stringify({ type: 'error', message: `Transcription failed: ${aiErr.message}` }));
+          }
+          return;
+        }
+
+        // Handle JSON text messages
         const data = JSON.parse(event.data as string);
         
-        // Client sends full audio chunk after local VAD detection
+        // Ignore ping messages (keep-alive)
+        if (data.type === 'ping') return;
+        
+        // Session init message — client sends metadata before binary audio
+        if (data.type === 'session_init') {
+          sessionUserId = data.userId || '';
+          sessionLang = data.lang || 'hi';
+          console.log(`🎙️ [Backend] Session initialized: user=${sessionUserId}, lang=${sessionLang}`);
+          ws.send(JSON.stringify({ type: 'session_ready' }));
+          return;
+        }
+
+        // Legacy: JSON+base64 audio (fallback for compatibility)
         if (data.type === 'audio_chunk' && data.audioBase64) {
           const { userId, lang = 'hi' } = data;
+          sessionUserId = userId;
+          sessionLang = lang;
+          console.log(`🎙️ [Backend] Received base64 audio chunk from user: ${userId}, lang: ${lang}`);
           
-          // Decode Base64 audio to Uint8Array for Whisper
-          const audioBuffer = Uint8Array.from(atob(data.audioBase64), c => c.charCodeAt(0));
-
-          // 1. STT: Transcribe audio using Whisper
-          const whisperResponse = await c.env.AI.run('@cf/openai/whisper-large-v3-turbo', {
-            audio: [...audioBuffer]
-          });
-          const transcribedText = whisperResponse.text;
-
-          // Send transcription back to UI for display
-          ws.send(JSON.stringify({ type: 'transcription', text: transcribedText }));
-
-          // 2. Fetch Summary & Retrieve Context
-          const { results } = await c.env.DB.prepare('SELECT currentSummary FROM ChatSession WHERE userId = ?').bind(userId).all();
-          const currentSummary = (results[0] as any)?.currentSummary || "No previous context.";
+          // Decode Base64 audio to Uint8Array
+          const binaryString = atob(data.audioBase64);
           
-          const context = await retrieveContext(c.env, transcribedText, lang);
-          const systemPrompt = getSystemPrompt(context, currentSummary, lang);
-
-          // 3. Stream LLM (Llama 3.1)
-          const aiStream: any = await c.env.AI.run('@cf/meta/llama-3.1-8b-instruct-fp8', {
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: transcribedText }
-            ],
-            stream: true
-          });
-
-          let currentSentence = "";
-          let fullResponse = "";
-          let chunkIndex = 0;
-          const decoder = new TextDecoder();
-
-          // 4. Sentence Buffering & TTS Streaming
-          for await (const chunk of aiStream) {
-            const decoded = decoder.decode(chunk as Uint8Array, { stream: true });
-            const lines = decoded.split('\n');
-            
-            for (const line of lines) {
-              if (line.startsWith('data: ') && !line.includes('[DONE]')) {
-                try {
-                  const data = JSON.parse(line.substring(6));
-                  if (data.response) {
-                    const textChunk = data.response;
-                    currentSentence += textChunk;
-                    fullResponse += textChunk;
-
-                    // Send live text to client
-                    ws.send(JSON.stringify({ type: 'text_stream', text: textChunk }));
-
-                    // Check for sentence boundaries
-                    if (/[.?!]\s/.test(currentSentence) || /[.?!]$/.test(currentSentence) || /\n/.test(currentSentence)) {
-                      let sentenceToSpeak = currentSentence.trim();
-                      currentSentence = ""; 
-
-                      // Extract emotion tag if present in this sentence
-                      let emotionTag = 'neutral';
-                      const emotionMatch = sentenceToSpeak.match(/\[emotion:\s*(.*?)\]/i);
-                      if (emotionMatch) {
-                        emotionTag = emotionMatch[1];
-                        sentenceToSpeak = sentenceToSpeak.replace(emotionMatch[0], '').trim();
-                      }
-
-                      if (sentenceToSpeak.length > 2) {
-                        // Fire TTS asynchronously, but wait for result to send in order
-                        const audioBase64 = await synthesize(c.env, sentenceToSpeak, emotionTag, lang);
-                        if (audioBase64) {
-                          ws.send(JSON.stringify({ 
-                            type: 'tts_audio', 
-                            index: chunkIndex++, 
-                            audioBase64 
-                          }));
-                        }
-                      }
-                    }
-                  }
-                } catch (e) {
-                  // ignore JSON parse errors
-                }
-              }
-            }
+          if (binaryString.length > MAX_AUDIO_BYTES) {
+            ws.send(JSON.stringify({ type: 'error', message: 'Audio too large. Keep recordings under 20 seconds.' }));
+            return;
+          }
+          
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
           }
 
-          // Process leftover text
-          if (currentSentence.trim().length > 2) {
-            let sentenceToSpeak = currentSentence.trim();
-            let emotionTag = 'neutral';
-            const emotionMatch = sentenceToSpeak.match(/\[emotion:\s*(.*?)\]/i);
-            if (emotionMatch) {
-              emotionTag = emotionMatch[1];
-              sentenceToSpeak = sentenceToSpeak.replace(emotionMatch[0], '').trim();
+          try {
+            // 1. STT: Transcribe audio using Whisper
+            console.log('🎙️ [Backend] Sending audio to Whisper (STT)...');
+            const transcribedText = await transcribeAudio(c.env.AI, bytes);
+            console.log(`🎙️ [Backend] Transcription Result: "${transcribedText}"`);
+
+            if (!transcribedText || transcribedText.trim().length === 0) {
+              ws.send(JSON.stringify({ type: 'error', message: 'Could not transcribe audio. Please try again.' }));
+              return;
             }
 
-            const audioBase64 = await synthesize(c.env, sentenceToSpeak, emotionTag, lang);
-            if (audioBase64) {
-              ws.send(JSON.stringify({ type: 'tts_audio', index: chunkIndex++, audioBase64 }));
-            }
+            // Send transcription back to UI for display
+            ws.send(JSON.stringify({ type: 'transcription', text: transcribedText }));
+
+            // Continue with LLM + TTS pipeline
+            await processTranscription(c, ws, userId, lang, transcribedText);
+          } catch (aiErr: any) {
+            console.error('🎙️ [Backend] AI transcription error:', aiErr);
+            ws.send(JSON.stringify({ type: 'error', message: `Transcription failed: ${aiErr.message}` }));
           }
-
-          ws.send(JSON.stringify({ type: 'generation_done' }));
-
-          // 5. Background Summary Update
-          c.executionCtx.waitUntil((async () => {
-            try {
-              const summaryResponse: any = await c.env.AI.run('@cf/meta/llama-3.1-8b-instruct-fp8', {
-                messages: [
-                  { role: "system", content: "Summarize the ongoing conversation in two short sentences." },
-                  { role: "user", content: `Old Summary: ${currentSummary}\nUser said: ${transcribedText}\nAI replied: ${fullResponse}\nNew Summary:` }
-                ]
-              });
-              const newSummary = summaryResponse.response;
-              await c.env.DB.prepare('INSERT INTO ChatSession (id, userId, currentSummary, updatedAt) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET currentSummary = excluded.currentSummary, updatedAt = excluded.updatedAt')
-                .bind(userId, userId, newSummary, new Date().toISOString())
-                .run();
-            } catch (err) {
-              console.error("Summary update failed:", err);
-            }
-          })());
         }
       } catch (e: any) {
         console.error("WebSocket Error:", e);
@@ -148,5 +138,133 @@ voice.get('/', upgradeWebSocket((c) => {
     }
   }
 }));
+
+/**
+ * Process a transcription through the LLM + TTS pipeline.
+ * Extracted as a shared function for both binary and base64 audio paths.
+ */
+async function processTranscription(c: any, ws: any, userId: string, lang: string, transcribedText: string) {
+  // 2. Fetch Summary & Retrieve Context
+  const { results } = await c.env.DB.prepare('SELECT currentSummary FROM ChatSession WHERE userId = ?').bind(userId).all();
+  const currentSummary = (results[0] as any)?.currentSummary || "No previous context.";
+  
+  const context = await retrieveContext(c.env, transcribedText, lang);
+  const systemPrompt = getSystemPrompt(context, currentSummary, lang);
+
+  // 3. Stream LLM (Llama 3.1)
+  console.log('🎙️ [Backend] Requesting AI response (Llama 3.1)...');
+  const aiStream: any = await c.env.AI.run('@cf/meta/llama-3.1-8b-instruct-fp8', {
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: transcribedText }
+    ],
+    stream: true
+  });
+
+  let currentSentence = "";
+  let fullResponse = "";
+  let chunkIndex = 0;
+  let ttsPromiseChain = Promise.resolve();
+  const decoder = new TextDecoder();
+
+  // 4. Sentence Buffering & TTS Streaming
+  for await (const chunk of aiStream) {
+    const decoded = decoder.decode(chunk as Uint8Array, { stream: true });
+    const lines = decoded.split('\n');
+    
+    for (const line of lines) {
+      if (line.startsWith('data: ') && !line.includes('[DONE]')) {
+        try {
+          const data = JSON.parse(line.substring(6));
+          if (data.response) {
+            const textChunk = data.response;
+            currentSentence += textChunk;
+            fullResponse += textChunk;
+
+            // Send live text to client
+            ws.send(JSON.stringify({ type: 'text_stream', text: textChunk }));
+
+            // Check for sentence boundaries
+            const wordCount = currentSentence.trim().split(/\s+/).length;
+            if (/[.?!]\s/.test(currentSentence) || /[.?!]$/.test(currentSentence) || /\n/.test(currentSentence) || (currentSentence.includes(',') && wordCount > 5)) {
+              let sentenceToSpeak = currentSentence.trim();
+              currentSentence = ""; 
+
+              // Extract emotion tag if present in this sentence
+              let emotionTag = 'neutral';
+              const emotionMatch = sentenceToSpeak.match(/\[emotion:\s*(.*?)\]/i);
+              if (emotionMatch) {
+                emotionTag = emotionMatch[1];
+                sentenceToSpeak = sentenceToSpeak.replace(emotionMatch[0], '').trim();
+              }
+
+              if (sentenceToSpeak.length > 2) {
+                const currentIndex = chunkIndex++;
+                const currentSentenceToSpeak = sentenceToSpeak;
+                const currentEmotion = emotionTag;
+                
+                ttsPromiseChain = ttsPromiseChain.then(async () => {
+                  console.log(`🎙️ [Backend] Synthesizing TTS chunk [${currentIndex}]: "${currentSentenceToSpeak}"`);
+                  const audioBase64 = await synthesize(c.env, currentSentenceToSpeak, currentEmotion, lang);
+                  if (audioBase64) {
+                    ws.send(JSON.stringify({ 
+                      type: 'tts_audio', 
+                      index: currentIndex, 
+                      audioBase64 
+                    }));
+                  }
+                });
+              }
+            }
+          }
+        } catch (e) {
+          // ignore JSON parse errors from SSE stream
+        }
+      }
+    }
+  }
+
+  // Process leftover text
+  if (currentSentence.trim().length > 2) {
+    let sentenceToSpeak = currentSentence.trim();
+    let emotionTag = 'neutral';
+    const emotionMatch = sentenceToSpeak.match(/\[emotion:\s*(.*?)\]/i);
+    if (emotionMatch) {
+      emotionTag = emotionMatch[1];
+      sentenceToSpeak = sentenceToSpeak.replace(emotionMatch[0], '').trim();
+    }
+
+    const currentIndex = chunkIndex++;
+    ttsPromiseChain = ttsPromiseChain.then(async () => {
+      const audioBase64 = await synthesize(c.env, sentenceToSpeak, emotionTag, lang);
+      if (audioBase64) {
+        ws.send(JSON.stringify({ type: 'tts_audio', index: currentIndex, audioBase64 }));
+      }
+    });
+  }
+
+  // Wait for all TTS chunks to be sent before marking as done
+  await ttsPromiseChain;
+  console.log('🎙️ [Backend] Completed sending all TTS chunks');
+  ws.send(JSON.stringify({ type: 'generation_done' }));
+
+  // 5. Background Summary Update
+  c.executionCtx.waitUntil((async () => {
+    try {
+      const summaryResponse: any = await c.env.AI.run('@cf/meta/llama-3.1-8b-instruct-fp8', {
+        messages: [
+          { role: "system", content: "Summarize the ongoing conversation in two short sentences." },
+          { role: "user", content: `Old Summary: ${currentSummary}\nUser said: ${transcribedText}\nAI replied: ${fullResponse}\nNew Summary:` }
+        ]
+      });
+      const newSummary = summaryResponse.response;
+      await c.env.DB.prepare('INSERT INTO ChatSession (id, userId, currentSummary, updatedAt) VALUES (?, ?, ?, ?) ON CONFLICT(id) DO UPDATE SET currentSummary = excluded.currentSummary, updatedAt = excluded.updatedAt')
+        .bind(userId, userId, newSummary, new Date().toISOString())
+        .run();
+    } catch (err) {
+      console.error("Summary update failed:", err);
+    }
+  })());
+}
 
 export default voice;
