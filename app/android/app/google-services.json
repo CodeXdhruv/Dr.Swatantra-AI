@@ -1,41 +1,49 @@
 {
   "project_info": {
-    "project_number": "460808209690",
-    "project_id": "atmik-ai",
-    "storage_bucket": "atmik-ai.firebasestorage.app"
+    "project_number": "114419958748",
+    "project_id": "swatantra-ai",
+    "storage_bucket": "swatantra-ai.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:460808209690:android:3a1d47ee0391160a6b98a3",
+        "mobilesdk_app_id": "1:114419958748:android:c47824dac3720dfbaa4519",
         "android_client_info": {
-          "package_name": "com.atmik.ai"
+          "package_name": "swatantra.ai"
         }
       },
       "oauth_client": [
         {
-          "client_id": "460808209690-hi6ngb5bk0i4pbvkdsg57ck2l7mnak2g.apps.googleusercontent.com",
+          "client_id": "114419958748-e273tau170srbrg6gtac1uidft9v4to3.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.atmik.ai",
+            "package_name": "swatantra.ai",
+            "certificate_hash": "ddc83a108a2be41347dc09b39641b56f438bb49f"
+          }
+        },
+        {
+          "client_id": "114419958748-qjr62sclkhp3bmpil79qm6488te9b3cq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "swatantra.ai",
             "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
         },
         {
-          "client_id": "460808209690-bvks3qatoeg67rnbg08r9sd1qifn58ic.apps.googleusercontent.com",
+          "client_id": "114419958748-7gasra4os0847ig60en259s5920nd21q.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAoUwbCOP6ccejOya_-gU86EFTLuwVUStI"
+          "current_key": "AIzaSyDwiUwDPZh-ieBCYB5bUX-dAUpZANlxUoE"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "460808209690-bvks3qatoeg67rnbg08r9sd1qifn58ic.apps.googleusercontent.com",
+              "client_id": "114419958748-7gasra4os0847ig60en259s5920nd21q.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

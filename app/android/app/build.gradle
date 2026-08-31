@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.atmik.ai'
+    namespace 'swatantra.ai'
     defaultConfig {
-        applicationId 'com.atmik.ai'
+        applicationId 'swatantra.ai'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -15,12 +15,13 @@ import {
   initialComments,
   initialActivityLogs
 } from '../services/mockData';
+import { apiService } from '../services/api';
 
 interface AdminState {
   // Authentication
   isAuthenticated: boolean;
   currentAdmin: User | null;
-  login: (email: string) => boolean;
+  login: (user: Partial<User>) => void;
   logout: () => void;
 
   // Data Collections
@@ -28,6 +29,7 @@ interface AdminState {
   categories: Category[];
   tags: Tag[];
   users: User[];
+  fetchUsers: () => Promise<void>;
   mediaLibrary: MediaItem[];
   comments: Comment[];
   activityLogs: ActivityLog[];
@@ -59,8 +61,7 @@ interface AdminState {
 
   // User Actions
   toggleUserStatus: (id: string) => void;
-  updateUserRole: (id: string, role: User['role']) => void;
-  inviteUser: (name: string, email: string, role: User['role']) => void;
+  updateUserRole: (id: string, role: User['role']) => Promise<void>;
 
   // UI States
   sidebarCollapsed: boolean;
@@ -90,8 +91,14 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   // Authentication
   isAuthenticated: false,
   currentAdmin: null,
-  login: (email: string) => {
-    const admin = initialUsers.find(u => u.email === email && u.role !== 'Viewer') || initialUsers[0];
+  login: (user: Partial<User>) => {
+    const admin = {
+      id: user.id || 'temp',
+      name: user.name || user.email?.split('@')[0] || 'Admin',
+      email: user.email || '',
+      role: user.role || 'ADMIN',
+      avatar: user.avatar || `https://images.unsplash.com/photo-${Math.random() > 0.5 ? '1534528741775-53994a69daeb' : '1507003211169-0a1dd7228f2d'}?auto=format&fit=crop&w=150&h=150&q=80`,
+    } as User;
     set({ isAuthenticated: true, currentAdmin: admin });
     
     // Add auth log
@@ -110,7 +117,25 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   contentList: [],
   categories: [],
   tags: [],
-  users: initialUsers,
+  users: [],
+  fetchUsers: async () => {
+    try {
+      const usersData = await apiService.fetchUsers();
+      const mappedUsers = usersData.map((u: any) => ({
+        id: u.id,
+        name: u.email.split('@')[0], // Fallback name
+        email: u.email,
+        role: u.role,
+        status: 'Active',
+        avatar: `https://ui-avatars.com/api/?name=${u.email.split('@')[0]}&background=random`,
+        lastLogin: 'Recently',
+        permissions: u.role === 'ADMIN' ? ['ALL_ACCESS'] : ['READ_ONLY']
+      }));
+      set({ users: mappedUsers });
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  },
   mediaLibrary: [],
   comments: [],
   activityLogs: [],
@@ -337,26 +362,17 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     const user = get().users.find(u => u.id === id);
     get().addLog('Update', `Toggled status of user "${user?.name}" to ${user?.status}`);
   },
-  updateUserRole: (id, role) => {
-    set(state => ({
-      users: state.users.map(u => u.id === id ? { ...u, role } : u)
-    }));
-    const user = get().users.find(u => u.id === id);
-    get().addLog('Update', `Updated user "${user?.name}" role to ${role}`);
-  },
-  inviteUser: (name, email, role) => {
-    const newUser: User = {
-      id: Math.random().toString(),
-      name,
-      email,
-      avatar: `https://images.unsplash.com/photo-${Math.random() > 0.5 ? '1534528741775-53994a69daeb' : '1507003211169-0a1dd7228f2d'}?auto=format&fit=crop&w=150&h=150&q=80`,
-      role,
-      status: 'Active',
-      lastLogin: 'Never',
-      permissions: role === 'Editor' ? ['content.read', 'content.write', 'media.upload'] : ['content.read']
-    };
-    set(state => ({ users: [...state.users, newUser] }));
-    get().addLog('Update', `Invited new user "${name}" as ${role}`);
+  updateUserRole: async (id, role) => {
+    try {
+      await apiService.updateUserRole(id, role);
+      set(state => ({
+        users: state.users.map(u => u.id === id ? { ...u, role } : u)
+      }));
+      const user = get().users.find(u => u.id === id);
+      get().addLog('Update', `Updated user "${user?.name || user?.email}" role to ${role}`);
+    } catch (error) {
+      console.error('Failed to update user role:', error);
+    }
   },
 
   // UI States
