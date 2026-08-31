@@ -15,7 +15,7 @@ export default function SignUpScreen() {
   
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: '460808209690-bvks3qatoeg67rnbg08r9sd1qifn58ic.apps.googleusercontent.com',
+      webClientId: '114419958748-7gasra4os0847ig60en259s5920nd21q.apps.googleusercontent.com',
     });
   }, []);
   const [agreedToTerms, setAgreedToTerms] = useState(false);

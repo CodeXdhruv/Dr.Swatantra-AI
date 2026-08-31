@@ -13,6 +13,8 @@ import {
 } from "react-native-gesture-handler";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import auth from '@react-native-firebase/auth';
+import { useVoiceChat } from "../hooks/useVoiceChat";
 import {
   ArrowLeft,
   Settings2,
@@ -74,6 +76,9 @@ export default function VoiceScreen({ isBackground = false }: { isBackground?: b
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
+  
+  const userId = auth().currentUser?.uid || 'anonymous';
+  const { isConnected, isRecording, transcription, aiText, error, startRecording, stopRecording } = useVoiceChat(userId, 'hi');
 
   // Animation values
   const pulse = useSharedValue(0);
@@ -101,7 +106,16 @@ export default function VoiceScreen({ isBackground = false }: { isBackground?: b
         -1,
         false,
       );
+    }
 
+    // Slide in on mount if from swipe
+    if (params.fromSwipe && !isBackground) {
+      translateX.value = withSpring(0, { damping: 22, stiffness: 250, mass: 0.5, overshootClamping: true });
+    }
+  }, [isBackground]);
+
+  useEffect(() => {
+    if (!isBackground && isRecording) {
       // Quick pulse for the microphone
       micPulse.value = withRepeat(
         withSequence(
@@ -111,13 +125,10 @@ export default function VoiceScreen({ isBackground = false }: { isBackground?: b
         -1,
         true,
       );
+    } else {
+      micPulse.value = withTiming(0);
     }
-
-    // Slide in on mount if from swipe
-    if (params.fromSwipe && !isBackground) {
-      translateX.value = withSpring(0, { damping: 22, stiffness: 250, mass: 0.5, overshootClamping: true });
-    }
-  }, [isBackground]);
+  }, [isBackground, isRecording]);
 
   const animatedGlow = useAnimatedStyle(() => {
     return {
@@ -258,9 +269,16 @@ export default function VoiceScreen({ isBackground = false }: { isBackground?: b
 
           {/* Status Text */}
           <View style={styles.statusContainer}>
-            <Text style={styles.listeningText}>Listening...</Text>
-            <Text style={styles.tapToStopText}>Tap to stop</Text>
-            <Text style={styles.timerText}>00:12</Text>
+            {error ? (
+              <Text style={[styles.listeningText, { color: 'red' }]}>{error}</Text>
+            ) : (
+              <>
+                <Text style={styles.listeningText} numberOfLines={3} ellipsizeMode="tail">
+                  {isRecording ? (transcription || "Listening...") : (aiText || transcription || "Tap mic to speak")}
+                </Text>
+                {isRecording && <Text style={styles.tapToStopText}>Tap to stop</Text>}
+              </>
+            )}
 
             <View style={styles.swipeHint}>
               <Info size={12} color={GOLD} />
@@ -278,7 +296,10 @@ export default function VoiceScreen({ isBackground = false }: { isBackground?: b
               {/* Mic Waveform decoration */}
               <Animated.View style={[styles.micPulseRing, animatedMic]} />
 
-              <TouchableOpacity style={styles.micButton}>
+              <TouchableOpacity 
+                style={[styles.micButton, isRecording && { backgroundColor: '#E04F5F' }]} 
+                onPress={() => isRecording ? stopRecording() : startRecording()}
+              >
                 <Mic color="#FFF" size={32} strokeWidth={1.5} />
               </TouchableOpacity>
             </View>
