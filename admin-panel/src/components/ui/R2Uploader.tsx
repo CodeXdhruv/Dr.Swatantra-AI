@@ -72,9 +72,9 @@ export default function R2Uploader({
         size: sizeStr,
         url: publicUrl
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload failed:", error);
-      alert("Failed to upload file. Please try again.");
+      alert(`Failed to upload file. Error: ${error.message}`);
     } finally {
       setUploading(false);
       setProgress(0);
@@ -101,7 +101,7 @@ export default function R2Uploader({
             {acceptType === "image" ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={value.url.startsWith("http") ? "/mock/science-of-soul.jpg" : value.url}
+                src={value.url}
                 alt="Upload preview"
                 className="w-full h-full object-cover rounded-lg"
                 onError={(e) => {

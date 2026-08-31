@@ -17,7 +17,8 @@ import {
   ChevronRight,
   LogOut,
   ChevronDown,
-  Plus
+  Plus,
+  UserCircle
 } from "lucide-react";
 import { useState } from "react";
 
@@ -170,12 +171,9 @@ export default function Sidebar() {
           onClick={() => setProfilePopover(!profilePopover)}
           className="flex items-center gap-3 p-2.5 rounded-sidebar hover:bg-primary-navy/[0.02] cursor-pointer border border-transparent hover:border-border-custom transition-all"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={currentAdmin?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80"}
-            alt="Profile Avatar"
-            className="w-10 h-10 rounded-full object-cover border border-border-custom"
-          />
+          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary-navy/5 border border-border-custom text-primary-navy flex-shrink-0">
+            <UserCircle size={22} className="stroke-[1.5]" />
+          </div>
           {!sidebarCollapsed && (
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-primary-navy truncate font-ui">

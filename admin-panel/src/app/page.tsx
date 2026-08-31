@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { useAdminStore } from "@/store/adminStore";
 import { motion } from "framer-motion";
 import { ShieldCheck, Eye, EyeOff, Lock, Mail } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
@@ -15,6 +16,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
+  const { login } = useAdminStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +44,13 @@ export default function LoginPage() {
         await signOut(auth);
         throw new Error("Unauthorized: Admin access required.");
       }
+
+      login({ 
+        id: data.id, 
+        name: user.email?.split('@')[0] || "Admin", 
+        email: user.email || "", 
+        role: data.role as 'ADMIN' | 'USER'
+      });
 
       toast.success("Login successful!");
       router.push("/dashboard");
@@ -106,14 +115,9 @@ export default function LoginPage() {
 
           {/* Password Field */}
           <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-primary-navy/80 uppercase tracking-wide font-ui">
-                Password
-              </label>
-              <a href="#" className="text-xs text-accent-gold hover:underline font-bold font-ui">
-                Forgot Password?
-              </a>
-            </div>
+            <label className="text-xs font-bold text-primary-navy/80 uppercase tracking-wide font-ui">
+              Password
+            </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-primary-navy/40">
                 <Lock size={18} />
@@ -133,6 +137,11 @@ export default function LoginPage() {
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
+            </div>
+            <div className="flex justify-end">
+              <a href="#" className="text-xs text-accent-gold hover:underline font-bold font-ui">
+                Forgot Password?
+              </a>
             </div>
           </div>
 
