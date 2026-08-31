@@ -24,8 +24,38 @@ export default function DashboardLayout({
 
   useEffect(() => {
     setMounted(true);
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        if (!useAdminStore.getState().currentAdmin) {
+          try {
+            const token = await user.getIdToken();
+            const res = await fetch('https://atmik-ai-backend.swatantra-backend.workers.dev/api/auth/sync', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                firebaseUid: user.uid,
+                email: user.email,
+              })
+            });
+            const data = await res.json();
+            if (data.role === 'ADMIN') {
+              useAdminStore.getState().login({ 
+                id: data.id, 
+                name: user.email?.split('@')[0] || "Admin", 
+                email: user.email || "", 
+                role: data.role as 'ADMIN' | 'USER'
+              });
+            } else {
+              router.push("/");
+              return;
+            }
+          } catch (e) {
+            console.error("Failed to hydrate user session", e);
+          }
+        }
         setIsFirebaseAuthenticated(true);
       } else {
         setIsFirebaseAuthenticated(false);

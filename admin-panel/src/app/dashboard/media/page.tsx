@@ -163,12 +163,7 @@ export default function MediaLibraryPage() {
                 {file.type === "image" ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={
-                      file.name === "science-of-soul.jpg" ? "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=200&h=150&q=80" :
-                      file.name === "meditation-cover.jpg" ? "https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&w=200&h=150&q=80" :
-                      file.name === "inner-peace.jpg" ? "https://images.unsplash.com/photo-1544396821-4dd40b938ad3?auto=format&fit=crop&w=200&h=150&q=80" :
-                      "https://images.unsplash.com/photo-1472289065668-ce650ac443d2?auto=format&fit=crop&w=200&h=150&q=80"
-                    }
+                    src={file.url}
                     alt={file.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />

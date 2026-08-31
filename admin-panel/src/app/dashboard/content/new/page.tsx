@@ -23,7 +23,7 @@ import { apiService } from "@/services/api";
 import Link from "next/link";
 import toast, { Toaster } from "react-hot-toast";
 
-type ContentType = 'Book' | 'Article' | 'Audio' | 'Video' | 'Meditation' | 'Quote';
+type ContentType = 'Book' | 'Article' | 'Quote';
 
 export default function AddContentPage() {
   const router = useRouter();
@@ -31,36 +31,25 @@ export default function AddContentPage() {
 
   // Form State
   const [type, setType] = useState<ContentType>("Book");
-  const [title, setTitle] = useState("The Science of Soul");
-  const [subtitle, setSubtitle] = useState("Understanding the deeper self");
-  const [author, setAuthor] = useState("Dr. Atmik Jain");
+  const [title, setTitle] = useState("");
+  const [subtitle, setSubtitle] = useState("");
+  const [author, setAuthor] = useState("");
   const [language, setLanguage] = useState("English");
   const [category, setCategory] = useState("Spirituality");
-  const [selectedTags, setSelectedTags] = useState<string[]>(["Soul", "Science", "Wisdom"]);
-  const [description, setDescription] = useState("<p>A profound exploration of the soul through the lens of modern science and ancient wisdom. This book bridges the gap between spirituality and scientific understanding to help you discover your true essence.</p>");
-  const [quoteText, setQuoteText] = useState("The soul is not something you find, it is something you remember.");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [description, setDescription] = useState("");
+  const [quoteText, setQuoteText] = useState("");
   const [featured, setFeatured] = useState(true);
   const [schedulePublish, setSchedulePublish] = useState(false);
   const [status, setStatus] = useState<"Draft" | "Published" | "Archived">("Published");
 
   // File Upload State
-  const [thumbnail, setThumbnail] = useState<{ name: string; size: string; url: string } | undefined>({
-    name: "science-of-soul.jpg",
-    size: "400 KB",
-    url: "/mock/science-of-soul.jpg"
-  });
-  const [pdfFile, setPdfFile] = useState<{ name: string; size: string; url: string } | undefined>({
-    name: "the-science-of-soul.pdf",
-    size: "4.8 MB",
-    url: "https://r2.atmik.ai/books/science-of-soul.pdf"
-  });
+  const [thumbnail, setThumbnail] = useState<{ name: string; size: string; url: string } | undefined>(undefined);
+  const [pdfFile, setPdfFile] = useState<{ name: string; size: string; url: string } | undefined>(undefined);
 
   const contentTypes = [
     { name: "Book" as ContentType, icon: Book },
     { name: "Article" as ContentType, icon: FileText },
-    { name: "Audio" as ContentType, icon: Headphones },
-    { name: "Video" as ContentType, icon: Video },
-    { name: "Meditation" as ContentType, icon: Sparkles },
     { name: "Quote" as ContentType, icon: QuoteIcon }
   ];
 
@@ -70,14 +59,22 @@ export default function AddContentPage() {
       return;
     }
 
+    if (!isDraft && type === "Book" && !pdfFile?.url) {
+      toast.error("Please upload the book PDF file.");
+      return;
+    }
+
     try {
       // 1. Save to Cloudflare D1
-      if (!isDraft && pdfFile?.url) {
+      if (!isDraft) {
         await apiService.saveContentMetadata({
           title,
           type: type.toUpperCase(), // 'VIDEO', 'DOCUMENT', etc.
           coverUrl: thumbnail?.url,
-          fileUrl: pdfFile.url
+          fileUrl: pdfFile?.url || "text-only",
+          description,
+          author,
+          readTime: 5 // Default for now
         });
       }
 
@@ -297,10 +294,9 @@ export default function AddContentPage() {
               </div>
             )}
 
-            {/* Description (TipTap editor) */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-semibold text-primary-navy/60 uppercase tracking-wider font-ui">
-                Description
+                {type === 'Article' ? 'Article Content (Rich Text)' : 'Description'}
               </label>
               <TipTapEditor value={description} onChange={setDescription} />
             </div>
@@ -414,7 +410,7 @@ export default function AddContentPage() {
             
             {/* Thumbnail */}
             <R2Uploader
-              label="Thumbnail Image *"
+              label="Thumbnail Image (Optional)"
               acceptType="image"
               value={thumbnail}
               onUploadSuccess={setThumbnail}
@@ -422,10 +418,10 @@ export default function AddContentPage() {
             />
 
             {/* Resource file */}
-            {type !== "Quote" && (
+            {type === "Book" && (
               <R2Uploader
-                label={type === "Book" ? "Book/PDF File *" : type === "Audio" ? "Audio Resource File *" : "Video File *"}
-                acceptType={type === "Book" ? "pdf" : type === "Audio" ? "audio" : "video"}
+                label="Book PDF File *"
+                acceptType="pdf"
                 value={pdfFile}
                 onUploadSuccess={setPdfFile}
                 onRemove={() => setPdfFile(undefined)}
@@ -447,10 +443,10 @@ export default function AddContentPage() {
                 
                 {/* Image Cover */}
                 <div className="w-full aspect-[4/5] bg-primary-navy/5 border border-border-custom rounded-lg overflow-hidden relative flex items-center justify-center">
-                  {thumbnail ? (
+                  {thumbnail && thumbnail.url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={thumbnail.url.startsWith("http") ? "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&h=160&q=80" : thumbnail.url}
+                      src={thumbnail.url}
                       alt="Thumbnail cover preview"
                       className="w-full h-full object-cover"
                     />
