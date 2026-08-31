@@ -109,7 +109,7 @@ export default function EditContentPage({ params }: { params: Promise<{ id: stri
       featured,
       quoteText: type === "Quote" || type === "Book" ? quoteText : undefined,
       description,
-      thumbnail: thumbnail?.url || "/mock/placeholder.jpg",
+      thumbnail: thumbnail?.url || "",
       fileUrl: pdfFile?.url,
       fileName: pdfFile?.name,
       fileSize: pdfFile?.size
@@ -469,10 +469,10 @@ export default function EditContentPage({ params }: { params: Promise<{ id: stri
                 
                 {/* Image Cover */}
                 <div className="w-full aspect-[4/5] bg-primary-navy/5 border border-border-custom rounded-lg overflow-hidden relative flex items-center justify-center">
-                  {thumbnail ? (
+                  {thumbnail && thumbnail.url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={thumbnail.url.startsWith("http") ? "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=120&h=160&q=80" : thumbnail.url}
+                      src={thumbnail.url}
                       alt="Thumbnail cover preview"
                       className="w-full h-full object-cover"
                     />
