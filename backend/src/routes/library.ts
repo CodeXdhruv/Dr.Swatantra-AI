@@ -7,16 +7,36 @@ const library = new Hono<{ Bindings: Bindings, Variables: { user: any } }>();
 
 // Auth middleware
 library.use('*', async (c, next) => {
+  // Allow public access to files so Images and Audio players can stream them directly
+  if (c.req.path.startsWith('/api/library/file/')) {
+    await next();
+    return;
+  }
+
   const authHeader = c.req.header('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
 
   const token = authHeader.split('Bearer ')[1];
-  const payload = await verifyFirebaseToken(token, c.env.FIREBASE_PROJECT_ID);
+  
+  if (token === 'temp-user-token') {
+    // Keep this bypass ONLY for the mobile app right now since mobile app doesn't have Firebase Auth fully setup yet
+    c.set('user', { sub: 'dev-user' });
+    await next();
+    return;
+  }
+
+
+  let payload;
+  try {
+    payload = await verifyFirebaseToken(token, c.env.FIREBASE_PROJECT_ID);
+  } catch (err: any) {
+    return c.json({ error: `Verification threw: ${err.message}` }, 401);
+  }
 
   if (!payload || !payload.sub) {
-    return c.json({ error: 'Invalid or expired token' }, 401);
+    return c.json({ error: `Invalid or expired token. verifyFirebaseToken returned null.` }, 401);
   }
 
   // Check if user has ADMIN role in D1 database
@@ -25,7 +45,10 @@ library.use('*', async (c, next) => {
     .all();
 
   if (results.length === 0 || results[0].role !== 'ADMIN') {
-    return c.json({ error: 'Forbidden: Admins only' }, 403);
+    // Enforce ADMIN role only for modifications (POST/PUT/DELETE)
+    if (c.req.method !== 'GET') {
+      return c.json({ error: 'Forbidden: Admins only' }, 403);
+    }
   }
 
   c.set('user', payload);
@@ -39,11 +62,14 @@ library.post('/upload', async (c) => {
     const formData = await c.req.parseBody();
     const file = formData['file'];
     
-    if (!(file instanceof File)) {
-      return c.json({ error: 'No file provided' }, 400);
+    // In some environments, instanceof File fails for FormData entries, so we also check if it has a size and name
+    if (!file || typeof file === 'string' || !('size' in (file as any))) {
+      console.error('Invalid file upload. Received:', file);
+      return c.json({ error: 'No file provided or invalid file format' }, 400);
     }
     
-    const fileKey = `${crypto.randomUUID()}-${file.name}`;
+    const fileObj = file as File;
+    const fileKey = `${crypto.randomUUID()}-${fileObj.name}`;
     
     // Upload directly using the R2 binding
     await c.env.R2.put(fileKey, await file.arrayBuffer(), {
@@ -85,7 +111,7 @@ library.get('/file/:fileKey', async (c) => {
 // Saves the uploaded media metadata to D1
 library.post('/content', async (c) => {
   try {
-    const { title, type, coverUrl, fileUrl } = await c.req.json();
+    const { title, type, coverUrl, fileUrl, description, author, readTime } = await c.req.json();
     
     if (!title || !type || !fileUrl) {
       return c.json({ error: 'Missing required fields' }, 400);
@@ -95,8 +121,8 @@ library.post('/content', async (c) => {
     const createdAt = new Date().toISOString();
 
     await c.env.DB.prepare(
-      'INSERT INTO Content (id, title, type, coverUrl, fileUrl, createdAt) VALUES (?, ?, ?, ?, ?, ?)'
-    ).bind(id, title, type, coverUrl || null, fileUrl, createdAt).run();
+      'INSERT INTO Content (id, title, type, coverUrl, fileUrl, createdAt, description, author, readTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(id, title, type, coverUrl || null, fileUrl, createdAt, description || null, author || null, readTime || null).run();
 
     return c.json({ success: true, message: 'Content added successfully', id }, 201);
   } catch (error: any) {

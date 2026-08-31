@@ -1,7 +1,67 @@
 import { Hono } from 'hono';
 import { Bindings } from '../types/env';
+import { verifyFirebaseToken } from '../utils/auth';
 
-const admin = new Hono<{ Bindings: Bindings }>();
+const admin = new Hono<{ Bindings: Bindings, Variables: { user: any } }>();
+
+// Auth middleware for all admin routes
+admin.use('*', async (c, next) => {
+  const authHeader = c.req.header('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return c.json({ error: 'Unauthorized' }, 401);
+  }
+
+  const token = authHeader.split('Bearer ')[1];
+  const payload = await verifyFirebaseToken(token, c.env.FIREBASE_PROJECT_ID);
+
+  if (!payload || !payload.sub) {
+    return c.json({ error: 'Invalid or expired token' }, 401);
+  }
+
+  // Check if user has ADMIN role in D1 database
+  const { results } = await c.env.DB.prepare('SELECT role FROM User WHERE firebaseUid = ?')
+    .bind(payload.sub)
+    .all();
+
+  if (results.length === 0 || results[0].role !== 'ADMIN') {
+    return c.json({ error: 'Forbidden: Admins only' }, 403);
+  }
+
+  c.set('user', payload);
+  await next();
+});
+
+// GET /api/admin/users
+// Fetch all users
+admin.get('/users', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare('SELECT id, firebaseUid, email, role FROM User ORDER BY email ASC').all();
+    return c.json({ success: true, data: results });
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+// PUT /api/admin/users/:id/role
+// Update a user's role
+admin.put('/users/:id/role', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const { role } = await c.req.json();
+
+    if (role !== 'ADMIN' && role !== 'USER') {
+      return c.json({ error: 'Invalid role. Must be ADMIN or USER.' }, 400);
+    }
+
+    await c.env.DB.prepare('UPDATE User SET role = ? WHERE id = ?')
+      .bind(role, id)
+      .run();
+
+    return c.json({ success: true, message: 'User role updated successfully' });
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
 
 // POST /api/admin/ingest
 // Receives an array of chunks (strings) and ingests them into Vectorize

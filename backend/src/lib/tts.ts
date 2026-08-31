@@ -1,4 +1,5 @@
 import { Bindings } from '../types/env';
+import { Buffer } from 'node:buffer';
 
 export async function synthesize(env: Bindings, text: string, emotionTag: string = 'neutral', lang: string = 'en'): Promise<string | null> {
   try {
@@ -23,12 +24,7 @@ export async function synthesize(env: Bindings, text: string, emotionTag: string
 
     if (ttsResponse.ok) {
       const audioBuffer = await ttsResponse.arrayBuffer();
-      const uint8Array = new Uint8Array(audioBuffer);
-      let binaryString = "";
-      for (let i = 0; i < uint8Array.byteLength; i++) {
-        binaryString += String.fromCharCode(uint8Array[i]);
-      }
-      return btoa(binaryString); // Return Base64
+      return Buffer.from(audioBuffer).toString('base64');
     } else {
       console.error("TTS Error:", await ttsResponse.text());
       return null;
