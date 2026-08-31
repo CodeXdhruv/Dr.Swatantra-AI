@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { API_BASE_URL } from '../api/client';
-import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
+import { requestRecordingPermissionsAsync, setAudioModeAsync, createAudioPlayer, useAudioRecorder, RecordingPresets, AudioPlayer } from 'expo-audio';
+import * as FileSystem from 'expo-file-system/legacy';
 
 interface VoiceMessage {
   type: 'transcription' | 'text_stream' | 'tts_audio' | 'generation_done' | 'error';
@@ -19,9 +19,27 @@ export function useVoiceChat(userId: string, lang: string = 'hi') {
   const [error, setError] = useState<string | null>(null);
   
   const wsRef = useRef<WebSocket | null>(null);
-  const recordingRef = useRef<Audio.Recording | null>(null);
-  const soundQueueRef = useRef<Audio.Sound[]>([]);
+  const recorder = useAudioRecorder({
+    sampleRate: 16000,
+    numberOfChannels: 1,
+    bitRate: 16000,
+    extension: '.m4a',
+    android: {
+      outputFormat: 'mpeg4',
+      audioEncoder: 'aac',
+    },
+    ios: {
+      audioQuality: 0,
+      outputFormat: 'aac ',
+    },
+    web: {
+      mimeType: 'audio/webm',
+    },
+    isMeteringEnabled: true,
+  });
+  const soundQueueRef = useRef<AudioPlayer[]>([]);
   const isPlayingRef = useRef(false);
+  const silenceStartRef = useRef<number | null>(null);
 
   // Initialize WebSocket
   const connectWebSocket = useCallback(() => {
@@ -31,6 +49,7 @@ export function useVoiceChat(userId: string, lang: string = 'hi') {
     const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
+      console.log('🗣️ [VoiceChat] WebSocket Connected');
       setIsConnected(true);
       setError(null);
     };
@@ -41,21 +60,26 @@ export function useVoiceChat(userId: string, lang: string = 'hi') {
         
         switch (data.type) {
           case 'transcription':
+            console.log('🗣️ [VoiceChat] Received Transcription (STT):', data.text);
             setTranscription(data.text || '');
             setAiText(''); // Clear previous AI text
             break;
           case 'text_stream':
+            console.log('🗣️ [VoiceChat] Received AI Text Stream chunk');
             setAiText((prev) => prev + data.text);
             break;
           case 'tts_audio':
+            console.log('🗣️ [VoiceChat] Received Audio Response (TTS)');
             if (data.audioBase64) {
               await queueAudioPlayback(data.audioBase64);
             }
             break;
           case 'generation_done':
+            console.log('🗣️ [VoiceChat] AI Response Generation Done');
             // Generation finished
             break;
           case 'error':
+            console.error('🗣️ [VoiceChat] Server Error:', data.message);
             setError(data.message || 'Unknown server error');
             break;
         }
@@ -85,12 +109,49 @@ export function useVoiceChat(userId: string, lang: string = 'hi') {
     };
   }, [connectWebSocket]);
 
+  // Keep connection alive to prevent Cloudflare from dropping idle WebSockets
+  useEffect(() => {
+    let pingInterval: NodeJS.Timeout;
+    if (isConnected) {
+      pingInterval = setInterval(() => {
+        if (wsRef.current?.readyState === WebSocket.OPEN) {
+          wsRef.current.send(JSON.stringify({ type: 'ping' }));
+        }
+      }, 25000); // Send ping every 25 seconds
+    }
+    return () => clearInterval(pingInterval);
+  }, [isConnected]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRecording) {
+      silenceStartRef.current = null;
+      interval = setInterval(() => {
+        const status = recorder.getStatus();
+        if (status.metering !== undefined) {
+          // -45 dB is a good baseline for silence, though this might need tuning
+          if (status.metering < -45) {
+            if (silenceStartRef.current === null) {
+              silenceStartRef.current = Date.now();
+            } else if (Date.now() - silenceStartRef.current > 1500) {
+              // 1.5 seconds of silence -> cut recording
+              stopRecording();
+            }
+          } else {
+            silenceStartRef.current = null; // reset if sound detected
+          }
+        }
+      }, 100);
+    }
+    return () => clearInterval(interval);
+  }, [isRecording]);
+
   const queueAudioPlayback = async (base64Audio: string) => {
     try {
       const uri = FileSystem.cacheDirectory + `temp_audio_${Date.now()}.wav`;
       await FileSystem.writeAsStringAsync(uri, base64Audio, { encoding: FileSystem.EncodingType.Base64 });
       
-      const { sound } = await Audio.Sound.createAsync({ uri });
+      const sound = createAudioPlayer(uri);
       soundQueueRef.current.push(sound);
       
       playNextAudio();
@@ -106,20 +167,20 @@ export function useVoiceChat(userId: string, lang: string = 'hi') {
     const sound = soundQueueRef.current.shift();
     
     if (sound) {
-      sound.setOnPlaybackStatusUpdate(async (status) => {
+      sound.addListener('playbackStatusUpdate', (status) => {
         if (status.isLoaded && status.didJustFinish) {
-          await sound.unloadAsync();
+          sound.remove();
           isPlayingRef.current = false;
           playNextAudio();
         }
       });
-      await sound.playAsync();
+      sound.play();
     }
   };
 
   const stopAllAudio = async () => {
     for (const sound of soundQueueRef.current) {
-      await sound.unloadAsync();
+      sound.remove();
     }
     soundQueueRef.current = [];
     isPlayingRef.current = false;
@@ -127,33 +188,42 @@ export function useVoiceChat(userId: string, lang: string = 'hi') {
 
   const startRecording = async () => {
     try {
-      await Audio.requestPermissionsAsync();
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
+      console.log('🗣️ [VoiceChat] startRecording called');
+      
+      // Auto-reconnect if the connection was dropped
+      if (wsRef.current?.readyState !== WebSocket.OPEN && wsRef.current?.readyState !== WebSocket.CONNECTING) {
+        console.log('🗣️ [VoiceChat] WebSocket dropped, reconnecting...');
+        connectWebSocket();
+      }
+
+      await requestRecordingPermissionsAsync();
+      await setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
       });
 
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      recordingRef.current = recording;
+      await recorder.prepareToRecordAsync();
+      recorder.record();
+      
       setIsRecording(true);
       stopAllAudio(); // Stop AI if speaking
     } catch (err) {
-      console.error('Failed to start recording', err);
+      console.error('🗣️ [VoiceChat] Failed to start recording', err);
       setError('Recording failed');
     }
   };
 
   const stopRecording = async () => {
-    if (!recordingRef.current) return;
-    
+    console.log('🗣️ [VoiceChat] stopRecording called');
     setIsRecording(false);
     try {
-      await recordingRef.current.stopAndUnloadAsync();
-      const uri = recordingRef.current.getURI();
+      await recorder.stop();
+      const uri = recorder.uri;
       
+      console.log('🗣️ [VoiceChat] Recording stopped. URI:', uri);
+
       if (uri && wsRef.current?.readyState === WebSocket.OPEN) {
+        console.log('🗣️ [VoiceChat] Sending audio to backend for STT...');
         // Read file as base64
         const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 });
         
@@ -164,9 +234,8 @@ export function useVoiceChat(userId: string, lang: string = 'hi') {
           audioBase64: base64
         }));
       }
-      recordingRef.current = null;
     } catch (err) {
-      console.error('Failed to stop recording', err);
+      console.error('🗣️ [VoiceChat] Failed to stop recording', err);
     }
   };
 
