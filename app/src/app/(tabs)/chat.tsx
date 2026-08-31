@@ -21,6 +21,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ArrowLeft, Settings2, Mic, Send, Info } from "lucide-react-native";
 import { ChatService } from "../../api";
+import { API_BASE_URL } from "../../api/client";
+import auth from '@react-native-firebase/auth';
+import EventSource from "react-native-sse";
 import Svg, {
   Path,
   Circle,
@@ -168,22 +171,55 @@ export default function ChatScreen({ isBackground = false }: { isBackground?: bo
     Keyboard.dismiss();
 
     try {
-      const response = await ChatService.sendTextChatMessage(userMessage.text, "test-user-123");
-      const aiMessage = { 
-        id: (Date.now() + 1).toString(), 
-        text: response.response || "Sorry, I couldn't understand that.", 
-        role: "ai" as const 
-      };
+      // Add empty AI message placeholder
+      const aiMessageId = (Date.now() + 1).toString();
+      const aiMessage = { id: aiMessageId, text: "", role: "ai" as const };
       setMessages((prev) => [...prev, aiMessage]);
+
+      const currentUser = auth().currentUser;
+      const token = currentUser ? await currentUser.getIdToken() : '';
+
+      const es = new EventSource(`${API_BASE_URL}/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ text: userMessage.text, userId: currentUser?.uid || "test-user-123" }),
+      });
+
+      es.addEventListener("message", (event) => {
+        if (event.data) {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'text') {
+              setMessages((prev) => prev.map(msg => 
+                msg.id === aiMessageId ? { ...msg, text: msg.text + data.content } : msg
+              ));
+            } else if (data.type === 'done') {
+              setMessages((prev) => prev.map(msg => 
+                msg.id === aiMessageId ? { ...msg, text: data.final_text } : msg
+              ));
+              es.close();
+              setIsLoading(false);
+            }
+          } catch (e) {
+            console.error("Parse error", e);
+          }
+        }
+      });
+
+      es.addEventListener("error", (event) => {
+        console.error("SSE error", event);
+        es.close();
+        setMessages((prev) => prev.map(msg => 
+          msg.id === aiMessageId && !msg.text ? { ...msg, text: "Oops, something went wrong." } : msg
+        ));
+        setIsLoading(false);
+      });
+
     } catch (error) {
       console.error("Error sending message:", error);
-      const errorMessage = { 
-        id: (Date.now() + 1).toString(), 
-        text: "Oops, something went wrong. Please try again.", 
-        role: "ai" as const 
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
       setIsLoading(false);
     }
   };

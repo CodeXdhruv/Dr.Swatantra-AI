@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ChevronDown, ChevronUp, Check, Plus, Circle, CheckCircle2, Feather, Heart, Sun } from 'lucide-react-native';
+import { usePracticeStore } from '../../store/usePracticeStore';
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -40,24 +41,24 @@ const FONTS = {
 
 export default function DailyPracticeScreen() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
-
-  // Habits State
-  const [habits, setHabits] = useState([
-    { id: '1', label: 'Meditation', completed: false },
-    { id: '2', label: 'Drink Water', completed: true },
-    { id: '3', label: 'Walk', completed: false },
-    { id: '4', label: 'Read Wisdom', completed: false },
-    { id: '5', label: 'Journal', completed: false },
-  ]);
   const [showAddHabit, setShowAddHabit] = useState(false);
 
-  // Journal State
-  const [journalText, setJournalText] = useState('');
-  const [journalSaved, setJournalSaved] = useState(false);
+  // Global State
+  const {
+    habits,
+    setHabits,
+    toggleHabit,
+    addHabit,
+    journalText,
+    journalSaved,
+    setJournalText,
+    setJournalSaved,
+    gratitudes,
+    updateGratitude,
+  } = usePracticeStore();
+
   const currentPrompt = "What brought peace today?";
 
-  // Gratitude State
-  const [gratitudes, setGratitudes] = useState(['', '', '']);
   const isGratitudeComplete = gratitudes.every(g => g.trim().length > 0);
 
   const toggleExpand = (card: string) => {
@@ -75,21 +76,11 @@ export default function DailyPracticeScreen() {
     }
   };
 
-  const toggleHabit = (id: string) => {
-    setHabits(habits.map(h => h.id === id ? { ...h, completed: !h.completed } : h));
-  };
-
   const completedHabits = habits.filter(h => h.completed).length;
 
   const saveJournal = () => {
     setJournalSaved(true);
     toggleExpand('journal');
-  };
-
-  const updateGratitude = (text: string, index: number) => {
-    const newG = [...gratitudes];
-    newG[index] = text;
-    setGratitudes(newG);
   };
 
   return (
@@ -160,7 +151,7 @@ export default function DailyPracticeScreen() {
                         style={styles.habitChip}
                         onPress={() => {
                           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                          setHabits([...habits, { id: Math.random().toString(), label: chip, completed: false }]);
+                          addHabit(chip);
                           setShowAddHabit(false);
                         }}
                       >

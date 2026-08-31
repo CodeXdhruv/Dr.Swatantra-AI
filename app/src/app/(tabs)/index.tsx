@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ImageBackground, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { FlashList } from '@shopify/flash-list';
-import { MotiView } from 'moti';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Colors, Spacing, Radius, Shadows } from '@/constants/theme';
-import { Search, Bell, Lightbulb, CheckCircle2, Edit3, Heart, ChevronRight, Play } from 'lucide-react-native';
+import { Search, Bell, Lightbulb, CheckCircle2, Edit3, Heart, ChevronRight } from 'lucide-react-native';
+import { usePracticeStore } from '../../store/usePracticeStore';
+import { apiService } from '../../services/api';
+import * as Linking from 'expo-linking';
 
 
 const { width } = Dimensions.get('window');
@@ -74,6 +76,24 @@ const HeroCarousel = () => {
 };
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const { habits, journalSaved, gratitudes } = usePracticeStore();
+  
+  const completedHabits = habits.filter(h => h.completed).length;
+  const isGratitudeComplete = gratitudes.every(g => g.trim().length > 0);
+
+  const [recommendedContent, setRecommendedContent] = useState<any[]>([]);
+
+  useFocusEffect(
+    useCallback(() => {
+      async function loadData() {
+        const data = await apiService.fetchLibraryContent();
+        setRecommendedContent(data.slice(0, 5));
+      }
+      loadData();
+    }, [])
+  );
+
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <StatusBar style="dark" />
@@ -108,24 +128,24 @@ export default function HomeScreen() {
             <Text style={{ color: Colors.textSecondary, letterSpacing: 2 }}>•••</Text>
           </View>
           <View style={styles.practiceContainer}>
-            <TouchableOpacity style={styles.practiceItem}>
-              <CheckCircle2 color={Colors.primary} size={20} />
+            <TouchableOpacity style={styles.practiceItem} onPress={() => router.push('/(tabs)/health')}>
+              <CheckCircle2 color={completedHabits === habits.length ? Colors.accent : Colors.primary} size={20} />
               <Text style={styles.practiceTitle}>Daily Habits</Text>
-              <Text style={styles.practiceStatus}>2/5 completed</Text>
+              <Text style={styles.practiceStatus}>{completedHabits}/{habits.length} completed</Text>
               <ChevronRight color={Colors.textSecondary} size={16} />
             </TouchableOpacity>
             <View style={styles.practiceDivider} />
-            <TouchableOpacity style={styles.practiceItem}>
-              <Edit3 color={Colors.primary} size={20} />
+            <TouchableOpacity style={styles.practiceItem} onPress={() => router.push('/(tabs)/health')}>
+              <Edit3 color={journalSaved ? Colors.accent : Colors.primary} size={20} />
               <Text style={styles.practiceTitle}>Journal Reflection</Text>
-              <Text style={styles.practiceStatus}>Write your thoughts</Text>
+              <Text style={styles.practiceStatus}>{journalSaved ? 'Completed' : 'Write your thoughts'}</Text>
               <ChevronRight color={Colors.textSecondary} size={16} />
             </TouchableOpacity>
             <View style={styles.practiceDivider} />
-            <TouchableOpacity style={styles.practiceItem}>
-              <Heart color={Colors.primary} size={20} />
+            <TouchableOpacity style={styles.practiceItem} onPress={() => router.push('/(tabs)/health')}>
+              <Heart color={isGratitudeComplete ? Colors.accent : Colors.primary} size={20} />
               <Text style={styles.practiceTitle}>Gratitude</Text>
-              <Text style={styles.practiceStatus}>3 things to be grateful for</Text>
+              <Text style={styles.practiceStatus}>{isGratitudeComplete ? 'Completed' : '3 things to be grateful for'}</Text>
               <ChevronRight color={Colors.textSecondary} size={16} />
             </TouchableOpacity>
           </View>
@@ -135,41 +155,32 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recommended for You</Text>
-            <Text style={styles.viewAllAction}>View all</Text>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/learn')}>
+              <Text style={styles.viewAllAction}>View all</Text>
+            </TouchableOpacity>
           </View>
-          <View style={{ minHeight: 150 }}>
-            <FlashList
-              data={[
-                { title: 'Inner Peace\nMeditation', subtitle: '12 Min • Guided', hasPlay: true },
-                { title: 'The Power of\nGratitude', subtitle: 'Article • 5 Min Read', hasPlay: false },
-                { title: '16 Health\nChallenges', subtitle: 'Day 4 of 16', hasPlay: false },
-              ]}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalScroll}
-              estimatedItemSize={240}
-              renderItem={({ item, index }) => (
-                <MotiView
-                  from={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: 'timing', duration: 700, delay: index * 150 }}
-                  style={styles.recommendedCard}
+          <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            contentContainerStyle={styles.horizontalScroll}
+          >
+            {recommendedContent.map((item) => (
+              <TouchableOpacity key={item.id} style={styles.recommendedCard} onPress={() => { if (item.fileUrl) Linking.openURL(item.fileUrl); }}>
+                <ImageBackground 
+                  source={item.coverUrl ? { uri: item.coverUrl } : require('@/assets/images/mountain_bg.png')}
+                  style={{ height: 120, width: '100%' }}
                 >
-                  <View style={styles.recommendedImagePlaceholder}>
-                    {item.hasPlay && (
-                      <View style={styles.playButtonOverlay}>
-                        <Play color={Colors.surface} size={16} fill={Colors.surface} />
-                      </View>
-                    )}
+                  <View style={{ position: 'absolute', bottom: 8, left: 8, backgroundColor: 'rgba(0,0,0,0.5)', padding: 4, borderRadius: 4 }}>
+                    <Text style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>{item.type || 'CONTENT'}</Text>
                   </View>
-                  <View style={styles.recommendedContent}>
-                    <Text style={styles.recommendedTitle}>{item.title}</Text>
-                    <Text style={styles.recommendedSubtitle}>{item.subtitle}</Text>
-                  </View>
-                </MotiView>
-              )}
-            />
-          </View>
+                </ImageBackground>
+                <View style={styles.recommendedContent}>
+                  <Text style={styles.recommendedTitle} numberOfLines={1}>{item.title}</Text>
+                  <Text style={styles.recommendedSubtitle}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
         </View>
 
       </ScrollView>
