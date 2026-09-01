@@ -13,6 +13,7 @@ import Animated, {
   useDerivedValue,
 } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
+import auth from '@react-native-firebase/auth';
 
 const { width, height } = Dimensions.get('window');
 const CX = width / 2;
@@ -21,6 +22,14 @@ const ORBIT_RADIUS = width * 0.35;
 
 export function SplashScreen() {
   const router = useRouter();
+  const userRef = React.useRef(auth().currentUser);
+
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged((user) => {
+      userRef.current = user;
+    });
+    return unsubscribe;
+  }, []);
 
   // Animation values
   const particleY = useSharedValue(height + 20); // Starts below screen
@@ -38,27 +47,27 @@ export function SplashScreen() {
   useEffect(() => {
     // Sequence orchestration
     // 1. Light appears and rises
-    particleOpacity.value = withTiming(1, { duration: 800 });
-    particleY.value = withTiming(CY, { duration: 2500, easing: Easing.bezier(0.25, 1, 0.5, 1) }, (finished) => {
+    particleOpacity.value = withTiming(1, { duration: 250 });
+    particleY.value = withTiming(CY, { duration: 500, easing: Easing.bezier(0.25, 1, 0.5, 1) }, (finished) => {
       if (finished) {
         // 2. Ripple expands
-        rippleRadius.value = withTiming(150, { duration: 1500, easing: Easing.out(Easing.ease) });
+        rippleRadius.value = withTiming(150, { duration: 400, easing: Easing.out(Easing.ease) });
         rippleOpacity.value = withSequence(
-          withTiming(0.4, { duration: 200 }),
-          withTiming(0, { duration: 1300 })
+          withTiming(0.4, { duration: 150 }),
+          withTiming(0, { duration: 250 })
         );
-        particleOpacity.value = withTiming(0, { duration: 300 });
+        particleOpacity.value = withTiming(0, { duration: 200 });
 
         // 3. Wordmark fades in
-        wordmarkOpacity.value = withDelay(400, withTiming(1, { duration: 1500 }));
+        wordmarkOpacity.value = withDelay(150, withTiming(1, { duration: 400 }));
 
         // 4. Orbit appears and particle moves
-        orbitOpacity.value = withDelay(1000, withTiming(0.3, { duration: 1000 }));
-        orbitParticleOpacity.value = withDelay(1000, withTiming(1, { duration: 1000 }));
+        orbitOpacity.value = withDelay(250, withTiming(0.3, { duration: 400 }));
+        orbitParticleOpacity.value = withDelay(250, withTiming(1, { duration: 400 }));
 
         orbitAngle.value = withDelay(
-          1200,
-          withTiming(Math.PI * 1.5, { duration: 3000, easing: Easing.inOut(Easing.ease) }, (finished2) => {
+          200,
+          withTiming(Math.PI * 1.5, { duration: 500, easing: Easing.inOut(Easing.ease) }, (finished2) => {
             if (finished2) {
               // 5. Transition to Home
               runOnJS(navigateToAuth)();
@@ -72,8 +81,12 @@ export function SplashScreen() {
   const navigateToAuth = () => {
     // Add a slight delay before replacing to let the user absorb the logo
     setTimeout(() => {
-      router.replace('/auth');
-    }, 800);
+      if (userRef.current) {
+        router.replace('/(tabs)');
+      } else {
+        router.replace('/onboarding');
+      }
+    }, 50);
   };
 
   // Skia derived values
