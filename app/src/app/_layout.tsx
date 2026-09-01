@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
 import { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
+import { usePushNotifications } from '../hooks/usePushNotifications';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -22,6 +23,7 @@ const CustomTheme = {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  usePushNotifications();
   const [loaded, error] = useFonts({
     Samarkan: require('../../assets/fonts/Samarkan.ttf'),
   });
