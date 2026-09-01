@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS User (
     id TEXT PRIMARY KEY,
     firebaseUid TEXT UNIQUE NOT NULL,
     email TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'USER'
+    role TEXT NOT NULL DEFAULT 'USER',
+    pushToken TEXT
 );
 
 CREATE TABLE IF NOT EXISTS Content (
@@ -22,4 +23,14 @@ CREATE TABLE IF NOT EXISTS ChatSession (
     currentSummary TEXT,
     updatedAt TEXT NOT NULL,
     FOREIGN KEY (userId) REFERENCES User(id)
+);
+
+CREATE TABLE IF NOT EXISTS Notification (
+    id TEXT PRIMARY KEY,
+    userId TEXT,
+    title TEXT NOT NULL,
+    body TEXT NOT NULL,
+    type TEXT NOT NULL,
+    createdAt TEXT NOT NULL,
+    FOREIGN KEY (userId) REFERENCES User(id) ON DELETE CASCADE
 );
