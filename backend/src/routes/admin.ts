@@ -104,4 +104,57 @@ admin.post('/ingest', async (c) => {
   return c.json({ success: true, message: `Successfully embedded and inserted ${inserted} chunks into atmik-index-v2.` });
 });
 
+// POST /api/admin/notify
+// Send a push notification to all users
+admin.post('/notify', async (c) => {
+  try {
+    const { title, body, type = 'BROADCAST' } = await c.req.json();
+
+    if (!title || !body) {
+      return c.json({ error: 'Missing title or body' }, 400);
+    }
+
+    // 1. Fetch all push tokens
+    const { results } = await c.env.DB.prepare('SELECT pushToken FROM User WHERE pushToken IS NOT NULL').all();
+    const tokens = results.map((r: any) => r.pushToken).filter(Boolean);
+
+    if (tokens.length === 0) {
+      return c.json({ success: true, message: 'No devices registered for push notifications.' });
+    }
+
+    // 2. Save notification to DB for the in-app inbox
+    const notificationId = crypto.randomUUID();
+    await c.env.DB.prepare(
+      'INSERT INTO Notification (id, userId, title, body, type, createdAt) VALUES (?, NULL, ?, ?, ?, ?)'
+    )
+    .bind(notificationId, title, body, type, new Date().toISOString())
+    .run();
+
+    // 3. Send to Expo Push API
+    // Expo recommends chunking if there are > 100 tokens, but for now we do one fetch
+    const messages = tokens.map(token => ({
+      to: token,
+      sound: 'default',
+      title,
+      body,
+      data: { type, id: notificationId },
+    }));
+
+    const response = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Accept-encoding': 'gzip, deflate',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(messages),
+    });
+
+    const data = await response.json();
+    return c.json({ success: true, message: `Push notifications sent to ${tokens.length} devices`, expoData: data });
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
 export default admin;

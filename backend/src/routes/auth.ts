@@ -38,4 +38,24 @@ auth.post('/sync', async (c) => {
   }
 });
 
+// POST /api/auth/push-token
+// Save the Expo push token for a user
+auth.post('/push-token', async (c) => {
+  try {
+    const { firebaseUid, pushToken } = await c.req.json();
+
+    if (!firebaseUid || !pushToken) {
+      return c.json({ error: 'Missing firebaseUid or pushToken' }, 400);
+    }
+
+    await c.env.DB.prepare('UPDATE User SET pushToken = ? WHERE firebaseUid = ?')
+      .bind(pushToken, firebaseUid)
+      .run();
+
+    return c.json({ success: true, message: 'Push token updated successfully' });
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
 export default auth;

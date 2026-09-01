@@ -124,6 +124,43 @@ library.post('/content', async (c) => {
       'INSERT INTO Content (id, title, type, coverUrl, fileUrl, createdAt, description, author, readTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ).bind(id, title, type, coverUrl || null, fileUrl, createdAt, description || null, author || null, readTime || null).run();
 
+    // Trigger Push Notification automatically
+    try {
+      const { results } = await c.env.DB.prepare('SELECT pushToken FROM User WHERE pushToken IS NOT NULL').all();
+      const tokens = results.map((r: any) => r.pushToken).filter(Boolean);
+
+      if (tokens.length > 0) {
+        const notifTitle = 'New Content Available!';
+        const notifBody = `${title} is now available in the library.`;
+        const notificationId = crypto.randomUUID();
+
+        // Save to Notification inbox
+        await c.env.DB.prepare(
+          'INSERT INTO Notification (id, userId, title, body, type, createdAt) VALUES (?, NULL, ?, ?, ?, ?)'
+        ).bind(notificationId, notifTitle, notifBody, 'CONTENT', new Date().toISOString()).run();
+
+        const messages = tokens.map(token => ({
+          to: token,
+          sound: 'default',
+          title: notifTitle,
+          body: notifBody,
+          data: { type: 'CONTENT', id: notificationId, contentId: id },
+        }));
+
+        await fetch('https://exp.host/--/api/v2/push/send', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Accept-encoding': 'gzip, deflate',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(messages),
+        });
+      }
+    } catch (e) {
+      console.error('Failed to send automatic notification:', e);
+    }
+
     return c.json({ success: true, message: 'Content added successfully', id }, 201);
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
