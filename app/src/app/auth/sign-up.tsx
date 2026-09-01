@@ -12,7 +12,7 @@ import { AuthService } from '@/api';
 
 export default function SignUpScreen() {
   const router = useRouter();
-  
+
   useEffect(() => {
     GoogleSignin.configure({
       webClientId: '114419958748-7gasra4os0847ig60en259s5920nd21q.apps.googleusercontent.com',
@@ -30,17 +30,17 @@ export default function SignUpScreen() {
       setError('Please fill in all fields');
       return;
     }
-    
+
     setIsLoading(true);
     setError('');
 
     try {
       // 1. Create user in Firebase
       const userCredential = await auth().createUserWithEmailAndPassword(email, password);
-      
+
       // 2. Update Firebase Display Name
       await userCredential.user.updateProfile({ displayName: name });
-      
+
       // 3. Sync user to our Cloudflare D1 Database (non-blocking)
       AuthService.syncUser(userCredential.user.uid, email, name).catch(console.error);
 
@@ -62,14 +62,14 @@ export default function SignUpScreen() {
       const signInResult = await GoogleSignin.signIn();
       const idToken = signInResult.data?.idToken;
       if (!idToken) throw new Error('No ID token found');
-      
+
       const googleCredential = auth.GoogleAuthProvider.credential(idToken);
       const userCredential = await auth().signInWithCredential(googleCredential);
-      
+
       // Sync to database non-blocking
       AuthService.syncUser(
-        userCredential.user.uid, 
-        userCredential.user.email || '', 
+        userCredential.user.uid,
+        userCredential.user.email || '',
         userCredential.user.displayName || ''
       ).catch(console.error);
 
@@ -84,106 +84,104 @@ export default function SignUpScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-      <Image 
-        source={require('@/assets/images/quote_illustration.png')} 
-        style={styles.bottomBg} 
+      <Image
+        source={require('@/assets/images/quote_illustration.png')}
+        style={styles.bottomBg}
         resizeMode="cover"
       />
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.content}>
           <View style={styles.header}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.backButton}
               onPress={() => router.back()}
             >
               <ArrowLeft color={Colors.textPrimary} size={24} />
             </TouchableOpacity>
           </View>
-          
-          <View style={styles.logoContainer}>
-            <Image 
-              source={require('@/assets/images/app_icon.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
-          
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>Create Your Account</Text>
-            <Text style={styles.subtitle}>Start your journey with{'\n'}Dr. Atmik AI</Text>
-          </View>
-          
-          <View style={styles.formContainer}>
-            {error ? <Text style={styles.errorText}>{error}</Text> : null}
-            <Input 
-              label="Full Name"
-              placeholder="Enter your full name"
-              autoCapitalize="words"
-              value={name}
-              onChangeText={setName}
-              leftIcon={<User color={Colors.textSecondary} size={20} />}
-            />
-            
-            <Input 
-              label="Email Address"
-              placeholder="Enter your email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={email}
-              onChangeText={setEmail}
-              leftIcon={<Mail color={Colors.textSecondary} size={20} />}
-            />
-            
-            <Input 
-              label="Password"
-              placeholder="Create a strong password"
-              isPassword
-              value={password}
-              onChangeText={setPassword}
-              leftIcon={<Lock color={Colors.textSecondary} size={20} />}
-            />
-            
 
-            <TouchableOpacity 
-              style={styles.checkboxContainer}
-              onPress={() => setAgreedToTerms(!agreedToTerms)}
-              activeOpacity={0.8}
-            >
-              {agreedToTerms ? (
-                <CheckSquare color={Colors.primary} size={20} style={{ marginRight: 12 }} />
-              ) : (
-                <Square color={Colors.textSecondary} size={20} style={{ marginRight: 12 }} />
-              )}
-              <Text style={styles.termsText}>
-                I agree to the <Text style={styles.linkText}>Terms of Service</Text> and <Text style={styles.linkText}>Privacy Policy</Text>
-              </Text>
-            </TouchableOpacity>
-            
-            <Button 
-              title={isLoading ? "Creating Account..." : "Create Account"} 
-              style={styles.signUpButton}
-              disabled={!agreedToTerms || isLoading}
-              onPress={handleSignUp}
-            />
-          </View>
-          
-          <View style={styles.dividerContainer}>
-            <View style={styles.divider} />
-            <Text style={styles.dividerText}>or sign up with</Text>
-            <View style={styles.divider} />
-          </View>
-          
-          <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignUp} disabled={isLoading}>
-              <Image 
-                source={require('@/assets/images/google.png')}
-                style={{ width: 24, height: 24 }}
-                resizeMode="contain"
+          <View style={{ flex: 1, justifyContent: 'center', paddingBottom: 40 }}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>Create Your Account</Text>
+              <Text style={styles.subtitle}>Start your journey with</Text>
+            </View>
+
+            <View style={[styles.logoContainer, { marginBottom: 32 }]}>
+              <Text style={{ fontFamily: 'Samarkan', fontSize: 48, color: '#1C1C1E', textAlign: 'center' }}>Atmik AI</Text>
+            </View>
+
+            <View style={styles.formContainer}>
+              {error ? <Text style={styles.errorText}>{error}</Text> : null}
+              <Input
+                label="Full Name"
+                placeholder="Enter your full name"
+                autoCapitalize="words"
+                value={name}
+                onChangeText={setName}
+                leftIcon={<User color={Colors.textSecondary} size={20} />}
               />
-            </TouchableOpacity>
+
+              <Input
+                label="Email Address"
+                placeholder="Enter your email"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+                leftIcon={<Mail color={Colors.textSecondary} size={20} />}
+              />
+
+              <Input
+                label="Password"
+                placeholder="Create a strong password"
+                isPassword
+                value={password}
+                onChangeText={setPassword}
+                leftIcon={<Lock color={Colors.textSecondary} size={20} />}
+              />
+
+
+              <TouchableOpacity
+                style={styles.checkboxContainer}
+                onPress={() => setAgreedToTerms(!agreedToTerms)}
+                activeOpacity={0.8}
+              >
+                {agreedToTerms ? (
+                  <CheckSquare color={Colors.primary} size={20} style={{ marginRight: 12 }} />
+                ) : (
+                  <Square color={Colors.textSecondary} size={20} style={{ marginRight: 12 }} />
+                )}
+                <Text style={styles.termsText}>
+                  I agree to the <Text style={styles.linkText}>Terms of Service</Text> and <Text style={styles.linkText}>Privacy Policy</Text>
+                </Text>
+              </TouchableOpacity>
+
+              <Button
+                title={isLoading ? "Creating Account..." : "Create Account"}
+                style={styles.signUpButton}
+                disabled={!agreedToTerms || isLoading}
+                onPress={handleSignUp}
+              />
+            </View>
+
+            <View style={styles.dividerContainer}>
+              <View style={styles.divider} />
+              <Text style={styles.dividerText}>or sign up with</Text>
+              <View style={styles.divider} />
+            </View>
+
+            <View style={styles.socialContainer}>
+              <TouchableOpacity style={styles.socialButton} onPress={handleGoogleSignUp} disabled={isLoading}>
+                <Image
+                  source={require('@/assets/images/google.png')}
+                  style={{ width: 24, height: 24 }}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </KeyboardAvoidingView>

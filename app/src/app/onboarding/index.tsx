@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { Colors, Spacing } from '@/constants/theme';
+import { ArrowRight } from 'lucide-react-native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -65,7 +66,7 @@ export default function OnboardingScreen() {
             <SafeAreaView style={styles.safeArea}>
               <View style={styles.contentContainer}>
                 {/* Center text below the lotus, which is part of the illustration */}
-                <View style={[styles.textContainer, { justifyContent: 'center', alignItems: 'center', marginTop: 310 }]}>
+                <View style={[styles.textContainer, { justifyContent: 'center', alignItems: 'center', marginTop: 220 }]}>
                   <View style={styles.titleRowCentered}>
                     <Text style={[styles.title, { textAlign: 'center', fontSize: 36 }]}>Awaken. Understand.{'\n'}Transform</Text>
                     <View style={[styles.dot, { marginBottom: 12 }]} />
@@ -76,13 +77,54 @@ export default function OnboardingScreen() {
                     Thoughtful insights and timeless{'\n'}practices for a meaningful life.
                   </Text>
                 </View>
+              </View>
+            </SafeAreaView>
+          </ImageBackground>
+        </View>
 
-                <View style={styles.footer}>
+        {/* Screen 3 */}
+        <View style={{ width, height }}>
+          <ImageBackground
+            source={require('@/assets/images/onboarding_third.png')}
+            style={styles.backgroundImage}
+            resizeMode="cover"
+          >
+            <SafeAreaView style={styles.safeArea}>
+              <View style={styles.contentContainer}>
+                <View style={[styles.textContainer, { justifyContent: 'center', alignItems: 'center', marginTop: 440 }]}>
+                  <View style={styles.titleRowCentered}>
+                    <Text style={[styles.title, { textAlign: 'center', fontSize: 40, lineHeight: 48 }]}>
+                      Your journey{'\n'}begins here
+                    </Text>
+                    <View style={[styles.dot, { marginBottom: 12 }]} />
+                  </View>
+
+                  {/* Special Divider */}
+                  <View style={[styles.specialDividerContainer, { marginVertical: 12 }]}>
+                    <View style={styles.specialDividerLine} />
+                    <View style={styles.specialDividerDot} />
+                    <View style={styles.specialDividerLine} />
+                  </View>
+
+                  <Text style={[styles.subtitle, { textAlign: 'center', marginTop: 8, fontSize: 16, lineHeight: 26 }]}>
+                    A space for reflection, wisdom and{'\n'}meaningful discovery — with <Text style={{ fontWeight: '700', color: '#0F265C' }}>Atmik AI.</Text>
+                  </Text>
+                </View>
+
+                <View style={[styles.footerAuth, { paddingBottom: 60, marginTop: 40 }]}>
                   <TouchableOpacity
-                    style={styles.nextButton}
-                    onPress={() => router.push('/auth')}
+                    style={styles.primaryButton}
+                    onPress={() => router.push('/auth/sign-in')}
                   >
-                    <Text style={styles.nextButtonText}>Continue</Text>
+                    <Text style={styles.primaryButtonText}>Sign In</Text>
+                    <ArrowRight color="#fff" size={20} style={{ marginLeft: 8 }} />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.secondaryButton}
+                    onPress={() => router.push('/auth/sign-up')}
+                  >
+                    <Text style={styles.secondaryButtonText}>Create a new account</Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -91,18 +133,20 @@ export default function OnboardingScreen() {
         </View>
       </ScrollView>
 
-      {/* Pagination Indicators (Optional but good for carousels) */}
-      <View style={styles.paginationContainer}>
-        {[0, 1].map((index) => (
-          <View
-            key={index}
-            style={[
-              styles.paginationDot,
-              activeIndex === index && styles.paginationDotActive,
-            ]}
-          />
-        ))}
-      </View>
+      {/* Pagination Indicators */}
+      {activeIndex !== 2 && (
+        <View style={styles.paginationContainer}>
+          {[0, 1, 2].map((index) => (
+            <View
+              key={index}
+              style={[
+                styles.paginationDot,
+                activeIndex === index && styles.paginationDotActive,
+              ]}
+            />
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -137,7 +181,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   title: {
-    fontSize: 32, // Slightly smaller to fit "Awaken. Understand. Transform."
+    fontSize: 32,
     fontWeight: '600',
     color: '#0F265C', // Dark blue
     fontFamily: 'serif',
@@ -153,30 +197,58 @@ const styles = StyleSheet.create({
   divider: {
     width: 40,
     height: 2,
-    backgroundColor: '#D4AF37', // Gold line
+    backgroundColor: '#D4AF37',
     marginTop: 20,
     marginBottom: 24,
   },
+  specialDividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 24,
+  },
+  specialDividerLine: {
+    width: 24,
+    height: 2,
+    backgroundColor: '#D4AF37',
+  },
+  specialDividerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#D4AF37',
+    marginHorizontal: 8,
+  },
   subtitle: {
-    fontSize: 16, // Slightly smaller
+    fontSize: 16,
     color: '#64748B', // Slate gray
     lineHeight: 24,
     fontFamily: 'sans-serif',
   },
-  footer: {
-    paddingBottom: Spacing.xl,
+  footerAuth: {
+    paddingBottom: Spacing.xl * 2,
     alignItems: 'center',
-  },
-  nextButton: {
-    backgroundColor: '#0F265C',
-    paddingVertical: 16,
-    paddingHorizontal: 48,
-    borderRadius: 30,
     width: '100%',
-    alignItems: 'center',
   },
-  nextButtonText: {
+  primaryButton: {
+    backgroundColor: '#0F265C',
+    paddingVertical: 18,
+    borderRadius: 12,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  primaryButtonText: {
     color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  secondaryButton: {
+    paddingVertical: 12,
+  },
+  secondaryButtonText: {
+    color: '#0F265C',
     fontSize: 16,
     fontWeight: '600',
   },

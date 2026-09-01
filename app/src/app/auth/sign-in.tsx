@@ -109,18 +109,15 @@ export default function SignInScreen() {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.logoContainer}>
-            <Image
-              source={require('@/assets/images/app_icon.png')}
-              style={styles.logo}
-              resizeMode="contain"
-            />
-          </View>
+          <View style={{ flex: 1, justifyContent: 'center', paddingBottom: 40 }}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>Welcome Back</Text>
+              <Text style={styles.subtitle}>Sign in to continue your journey</Text>
+            </View>
 
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue your journey</Text>
-          </View>
+            <View style={[styles.logoContainer, { marginBottom: 32 }]}>
+              <Text style={{ fontFamily: 'Samarkan', fontSize: 48, color: '#1C1C1E', textAlign: 'center' }}>Atmik AI</Text>
+            </View>
 
           <View style={styles.formContainer}>
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -155,12 +152,6 @@ export default function SignInScreen() {
               onPress={handleSignIn}
             />
 
-            <Button
-              title="Demo Login (Bypass Auth)"
-              variant="outline"
-              style={styles.demoButton}
-              onPress={() => router.replace('/(tabs)')}
-            />
           </View>
 
           <View style={styles.dividerContainer}>
@@ -186,6 +177,7 @@ export default function SignInScreen() {
             <TouchableOpacity onPress={() => router.push('/auth/sign-up')}>
               <Text style={styles.signUpText}>Create Account</Text>
             </TouchableOpacity>
+          </View>
           </View>
         </View>
       </KeyboardAvoidingView>
