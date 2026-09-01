@@ -10,6 +10,7 @@ import voiceRoutes from './routes/voice';
 import chatRoutes from './routes/chat';
 import migrateRoutes from './routes/migrate';
 import adminRoutes from './routes/admin';
+import notificationsRoutes from './routes/notifications';
 
 const app = new Hono<{ Bindings: Bindings }>();
 
@@ -148,6 +149,7 @@ app.route('/api/voice-chat', voiceRoutes);
 app.route('/api/chat', chatRoutes);
 app.route('/api/migrate', migrateRoutes);
 app.route('/api/admin', adminRoutes);
+app.route('/api/notifications', notificationsRoutes);
 
 // Error handling
 app.onError((err, c) => {
