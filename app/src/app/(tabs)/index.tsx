@@ -17,9 +17,9 @@ const HeroCarousel = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const quotes = [
-    { id: 1, quote: "To heal the planet,\nwe must heal humanity.", author: "— Dr. Atmik Jain" },
-    { id: 2, quote: "Peace comes from within.\nDo not seek it without.", author: "— Dr. Atmik Jain" },
-    { id: 3, quote: "Mindfulness is the key\nto a balanced life.", author: "— Dr. Atmik Jain" }
+    { id: 1, quote: "To heal the planet,\nwe must heal humanity.", author: "— Dr. Swatantra Jain" },
+    { id: 2, quote: "Peace comes from within.\nDo not seek it without.", author: "— Dr. Swatantra Jain" },
+    { id: 3, quote: "Mindfulness is the key\nto a balanced life.", author: "— Dr. Swatantra Jain" }
   ];
 
   useEffect(() => {
@@ -48,7 +48,7 @@ const HeroCarousel = () => {
         {quotes.map((item, index) => (
           <View key={item.id} style={[styles.heroCard, { width: width - Spacing.lg * 2 }]}>
             <ImageBackground
-              source={require('@/assets/images/quote_illustration.png')}
+              source={require('@/assets/images/quotes_card_new.png')}
               style={styles.heroBackground}
               imageStyle={{ borderRadius: Radius.lg, resizeMode: 'cover' }}
             >
