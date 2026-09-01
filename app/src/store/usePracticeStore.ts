@@ -37,6 +37,9 @@ interface PracticeState {
   gratitudes: string[];
   setGratitudes: (gratitudes: string[]) => void;
   updateGratitude: (text: string, index: number) => void;
+
+  lastUpdated: number;
+  checkAndResetDaily: () => void;
 }
 
 export const usePracticeStore = create<PracticeState>()(
@@ -68,6 +71,22 @@ export const usePracticeStore = create<PracticeState>()(
         const newG = [...state.gratitudes];
         newG[index] = text;
         return { gratitudes: newG };
+      }),
+      
+      lastUpdated: new Date().setHours(0, 0, 0, 0),
+      checkAndResetDaily: () => set((state) => {
+        const today = new Date().setHours(0, 0, 0, 0);
+        if (!state.lastUpdated || state.lastUpdated < today) {
+          // It's a new day! Reset completions but keep the habit list
+          return {
+            habits: state.habits.map(h => ({ ...h, completed: false })),
+            journalText: '',
+            journalSaved: false,
+            gratitudes: ['', '', ''],
+            lastUpdated: today,
+          };
+        }
+        return {};
       }),
     }),
     {

@@ -12,6 +12,8 @@ import {
   KeyboardAvoidingView
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { ChevronDown, ChevronUp, Check, Plus, Circle, CheckCircle2, Feather, Heart, Sun } from 'lucide-react-native';
 import { usePracticeStore } from '../../store/usePracticeStore';
 
@@ -55,7 +57,14 @@ export default function DailyPracticeScreen() {
     setJournalSaved,
     gratitudes,
     updateGratitude,
+    checkAndResetDaily,
   } = usePracticeStore();
+
+  useFocusEffect(
+    React.useCallback(() => {
+      checkAndResetDaily();
+    }, [checkAndResetDaily])
+  );
 
   const currentPrompt = "What brought peace today?";
 
