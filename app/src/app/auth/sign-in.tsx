@@ -91,7 +91,7 @@ export default function SignInScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <Image
-        source={require('@/assets/images/quote_illustration.png')}
+        source={require('@/assets/images/quotes_background.png')}
         style={styles.bottomBg}
         resizeMode="cover"
       />

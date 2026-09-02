@@ -63,7 +63,8 @@ export default function SignUpScreen() {
       const idToken = signInResult.data?.idToken;
       if (!idToken) throw new Error('No ID token found');
 
-      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const tokens = await GoogleSignin.getTokens();
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken, tokens.accessToken);
       const userCredential = await auth().signInWithCredential(googleCredential);
 
       // Sync to database non-blocking
@@ -85,7 +86,7 @@ export default function SignUpScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
       <Image
-        source={require('@/assets/images/quote_illustration.png')}
+        source={require('@/assets/images/quotes_background.png')}
         style={styles.bottomBg}
         resizeMode="cover"
       />
