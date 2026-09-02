@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Colors, Spacing, Radius, Shadows } from '@/constants/theme';
-import { Search, Bell, Lightbulb, CheckCircle2, Edit3, Heart, ChevronRight } from 'lucide-react-native';
+import { Bell, Lightbulb, CheckCircle2, Check, Edit3, Edit2, Heart, ChevronRight, Bookmark } from 'lucide-react-native';
 import { usePracticeStore } from '../../store/usePracticeStore';
 import { apiService } from '../../services/api';
 import * as Linking from 'expo-linking';
@@ -48,9 +48,9 @@ const HeroCarousel = () => {
         {quotes.map((item, index) => (
           <View key={item.id} style={[styles.heroCard, { width: width - Spacing.lg * 2 }]}>
             <ImageBackground
-              source={require('@/assets/images/quotes_card_new.png')}
+              source={require('@/assets/images/quotes_background.png')}
               style={styles.heroBackground}
-              imageStyle={{ borderRadius: Radius.lg, resizeMode: 'cover' }}
+              imageStyle={{ borderRadius: Radius.lg - 0.5, resizeMode: 'cover' }}
             >
               <View style={styles.heroContent}>
                 <View style={{ width: '65%' }}>
@@ -109,9 +109,6 @@ export default function HomeScreen() {
           </View>
           <View style={styles.headerRight}>
             <TouchableOpacity style={styles.iconButton}>
-              <Search color={Colors.textPrimary} size={20} strokeWidth={1.5} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
               <View style={styles.notificationDot} />
               <Bell color={Colors.textPrimary} size={20} strokeWidth={1.5} />
             </TouchableOpacity>
@@ -125,28 +122,50 @@ export default function HomeScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Your Daily Practice</Text>
-            <Text style={{ color: Colors.textSecondary, letterSpacing: 2 }}>•••</Text>
+            <TouchableOpacity onPress={() => router.push('/(tabs)/health')}>
+              <Text style={styles.viewAllAction}>View all {'>'}</Text>
+            </TouchableOpacity>
           </View>
-          <View style={styles.practiceContainer}>
-            <TouchableOpacity style={styles.practiceItem} onPress={() => router.push('/(tabs)/health')}>
-              <CheckCircle2 color={completedHabits === habits.length ? Colors.accent : Colors.primary} size={20} />
-              <Text style={styles.practiceTitle}>Daily Habits</Text>
-              <Text style={styles.practiceStatus}>{completedHabits}/{habits.length} completed</Text>
-              <ChevronRight color={Colors.textSecondary} size={16} />
+          <View style={styles.practiceGridRow}>
+            {/* Daily Habits */}
+            <TouchableOpacity style={styles.practiceCardBox} onPress={() => router.push('/(tabs)/health')}>
+              <View style={[styles.iconBadge, { backgroundColor: '#E8F0FE' }]}>
+                <Check color="#4285F4" size={20} strokeWidth={2.5} />
+              </View>
+              <Text style={styles.practiceCardTitle}>Daily Habits</Text>
+              <View style={{ flex: 1 }} />
+              <View style={styles.practiceCardFooter}>
+                <Text style={styles.practiceCardSubtitle}>{completedHabits} / {habits.length} completed</Text>
+                <View style={styles.progressBarContainer}>
+                  <View style={[styles.progressBarFill, { width: habits.length ? `${(completedHabits / habits.length) * 100}%` : '0%' }]} />
+                </View>
+              </View>
             </TouchableOpacity>
-            <View style={styles.practiceDivider} />
-            <TouchableOpacity style={styles.practiceItem} onPress={() => router.push('/(tabs)/health')}>
-              <Edit3 color={journalSaved ? Colors.accent : Colors.primary} size={20} />
-              <Text style={styles.practiceTitle}>Journal Reflection</Text>
-              <Text style={styles.practiceStatus}>{journalSaved ? 'Completed' : 'Write your thoughts'}</Text>
-              <ChevronRight color={Colors.textSecondary} size={16} />
+
+            {/* Journal Reflection */}
+            <TouchableOpacity style={styles.practiceCardBox} onPress={() => router.push('/(tabs)/health')}>
+              <View style={[styles.iconBadge, { backgroundColor: '#F3E8FF' }]}>
+                <Edit2 color="#9333EA" size={20} strokeWidth={2.5} />
+              </View>
+              <Text style={styles.practiceCardTitle}>Journal Reflection</Text>
+              <View style={{ flex: 1 }} />
+              <View style={styles.practiceCardFooterRow}>
+                <Text style={styles.practiceCardSubtitle} numberOfLines={1}>{journalSaved ? 'Completed' : 'Write your thoughts'}</Text>
+                <ChevronRight color={Colors.textSecondary} size={14} />
+              </View>
             </TouchableOpacity>
-            <View style={styles.practiceDivider} />
-            <TouchableOpacity style={styles.practiceItem} onPress={() => router.push('/(tabs)/health')}>
-              <Heart color={isGratitudeComplete ? Colors.accent : Colors.primary} size={20} />
-              <Text style={styles.practiceTitle}>Gratitude</Text>
-              <Text style={styles.practiceStatus}>{isGratitudeComplete ? 'Completed' : '3 things to be grateful for'}</Text>
-              <ChevronRight color={Colors.textSecondary} size={16} />
+
+            {/* Gratitude */}
+            <TouchableOpacity style={styles.practiceCardBox} onPress={() => router.push('/(tabs)/health')}>
+              <View style={[styles.iconBadge, { backgroundColor: '#FEF3C7' }]}>
+                <Heart color="#D97706" size={20} strokeWidth={2.5} />
+              </View>
+              <Text style={styles.practiceCardTitle}>Gratitude</Text>
+              <View style={{ flex: 1 }} />
+              <View style={styles.practiceCardFooterRow}>
+                <Text style={styles.practiceCardSubtitle} numberOfLines={1}>{isGratitudeComplete ? 'Completed' : '3 things to be grateful for'}</Text>
+                <ChevronRight color={Colors.textSecondary} size={14} />
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -156,31 +175,67 @@ export default function HomeScreen() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Recommended for You</Text>
             <TouchableOpacity onPress={() => router.push('/(tabs)/learn')}>
-              <Text style={styles.viewAllAction}>View all</Text>
+              <Text style={styles.viewAllAction}>View all {'>'}</Text>
             </TouchableOpacity>
           </View>
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
-            contentContainerStyle={styles.horizontalScroll}
-          >
-            {recommendedContent.map((item) => (
-              <TouchableOpacity key={item.id} style={styles.recommendedCard} onPress={() => { if (item.fileUrl) Linking.openURL(item.fileUrl); }}>
-                <ImageBackground 
-                  source={item.coverUrl ? { uri: item.coverUrl } : require('@/assets/images/mountain_bg.png')}
-                  style={{ height: 120, width: '100%' }}
-                >
-                  <View style={{ position: 'absolute', bottom: 8, left: 8, backgroundColor: 'rgba(0,0,0,0.5)', padding: 4, borderRadius: 4 }}>
-                    <Text style={{ color: '#fff', fontSize: 10, fontWeight: 'bold' }}>{item.type || 'CONTENT'}</Text>
+          
+          <View style={styles.pillContainer}>
+            <TouchableOpacity style={[styles.pill, styles.pillActive]}>
+              <Text style={styles.pillTextActive}>For You</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.pill}>
+              <Text style={styles.pillText}>Books</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.pill}>
+              <Text style={styles.pillText}>Articles</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.recommendationGrid}>
+            {/* Left Column - Featured Book */}
+            <View style={styles.recommendationLeftCol}>
+              <TouchableOpacity style={styles.featuredBookCard}>
+                <View style={styles.bookTag}>
+                  <Text style={styles.bookTagText}>BOOK</Text>
+                </View>
+                <Image
+                  source={require('@/assets/images/mountain_bg.png')}
+                  style={styles.featuredBookImage}
+                  resizeMode="cover"
+                />
+                <View style={styles.featuredBookContent}>
+                  <Text style={styles.featuredBookTitle}>The Power of Mindful Living</Text>
+                  <View style={styles.featuredBookFooterRow}>
+                    <Text style={styles.featuredBookAuthor}>Dr. Swatantra Jain</Text>
+                    <Bookmark color={Colors.textSecondary} size={16} />
                   </View>
-                </ImageBackground>
-                <View style={styles.recommendedContent}>
-                  <Text style={styles.recommendedTitle} numberOfLines={1}>{item.title}</Text>
-                  <Text style={styles.recommendedSubtitle}>{new Date(item.createdAt).toLocaleDateString()}</Text>
                 </View>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+            </View>
+
+            {/* Right Column - Articles List */}
+            <View style={styles.recommendationRightCol}>
+              {[
+                { title: 'The Art of Letting Go', time: '5 min read', img: require('@/assets/images/mountain_bg.png') },
+                { title: 'Finding Clarity in Everyday Life', time: '7 min read', img: require('@/assets/images/quotes_background.png') },
+                { title: 'Building Better Habits for Peaceful Living', time: '6 min read', img: require('@/assets/images/quotes_background.png') }
+              ].map((article, index) => (
+                <TouchableOpacity key={index} style={styles.articleListItem}>
+                  <View style={styles.articleListContent}>
+                    <View style={styles.articleTag}>
+                      <Text style={styles.articleTagText}>ARTICLE</Text>
+                    </View>
+                    <Text style={styles.articleListTitle} numberOfLines={2}>{article.title}</Text>
+                    <Text style={styles.articleListTime}>{article.time}</Text>
+                  </View>
+                  <View style={styles.articleListRight}>
+                    <Bookmark color={Colors.textSecondary} size={14} style={{ marginBottom: 4 }} />
+                    <Image source={article.img} style={styles.articleListThumbnail} />
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
         </View>
 
       </ScrollView>
@@ -260,7 +315,14 @@ const styles = StyleSheet.create({
     height: 220,
     borderRadius: Radius.lg,
     overflow: 'hidden',
-    backgroundColor: '#EAF0F6', // Fallback color
+    backgroundColor: 'transparent',
+    borderWidth: 0.5,
+    borderColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
   },
   heroBackground: { flex: 1 },
   heroContent: {
@@ -486,6 +548,202 @@ const styles = StyleSheet.create({
   recommendedSubtitle: {
     fontSize: 12,
     color: Colors.textSecondary,
+  },
+  practiceGridRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.lg,
+    gap: 8,
+  },
+  practiceCardBox: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: Radius.md,
+    padding: Spacing.sm,
+    ...Shadows.soft,
+    alignItems: 'center',
+    height: 120,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  iconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  practiceCardTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.primary,
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  practiceCardFooter: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  practiceCardSubtitle: {
+    fontSize: 10,
+    color: Colors.textSecondary,
+    marginBottom: 4,
+  },
+  progressBarContainer: {
+    width: '100%',
+    height: 4,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#4285F4',
+    borderRadius: 2,
+  },
+  practiceCardFooterRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  pillContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+    gap: 8,
+  },
+  pill: {
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+  },
+  pillActive: {
+    backgroundColor: '#E8F0FE',
+  },
+  pillText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: Colors.textSecondary,
+  },
+  pillTextActive: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4285F4',
+  },
+  recommendationGrid: {
+    flexDirection: 'row',
+    paddingHorizontal: Spacing.lg,
+    gap: 12,
+  },
+  recommendationLeftCol: {
+    flex: 0.45,
+  },
+  recommendationRightCol: {
+    flex: 0.55,
+    gap: 12,
+  },
+  featuredBookCard: {
+    height: '100%',
+    minHeight: 220,
+    borderRadius: Radius.md,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    padding: Spacing.sm,
+    justifyContent: 'space-between',
+    ...Shadows.soft,
+  },
+  bookTag: {
+    backgroundColor: '#24385A',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    marginBottom: 8,
+  },
+  bookTagText: {
+    color: '#FFFFFF',
+    fontSize: 9,
+    fontWeight: '700',
+  },
+  featuredBookImage: {
+    width: '100%',
+    height: 100,
+    borderRadius: Radius.sm,
+    marginBottom: 12,
+  },
+  featuredBookContent: {
+    justifyContent: 'flex-end',
+  },
+  featuredBookTitle: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.primary,
+    marginBottom: 4,
+  },
+  featuredBookFooterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 4,
+  },
+  featuredBookAuthor: {
+    fontSize: 10,
+    color: Colors.textSecondary,
+  },
+  articleListItem: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: Radius.md,
+    padding: Spacing.sm,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    ...Shadows.soft,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 70,
+  },
+  articleListContent: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  articleTag: {
+    backgroundColor: '#E8F0FE',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginBottom: 4,
+  },
+  articleTagText: {
+    color: '#4285F4',
+    fontSize: 8,
+    fontWeight: '700',
+  },
+  articleListTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.primary,
+    marginBottom: 2,
+  },
+  articleListTime: {
+    fontSize: 10,
+    color: Colors.textSecondary,
+  },
+  articleListRight: {
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    height: '100%',
+  },
+  articleListThumbnail: {
+    width: 36,
+    height: 36,
+    borderRadius: 4,
+    resizeMode: 'cover',
   },
   fab: {
     position: 'absolute',
