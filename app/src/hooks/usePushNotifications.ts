@@ -6,15 +6,6 @@ import Constants from 'expo-constants';
 import auth from '@react-native-firebase/auth';
 import { LocalNotificationService } from '../services/LocalNotificationService';
 
-// This is how notifications should behave when the app is foregrounded
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
-
 export function usePushNotifications() {
   const [expoPushToken, setExpoPushToken] = useState<string | undefined>();
   const [notification, setNotification] = useState<Notifications.Notification | false>(false);
@@ -22,6 +13,15 @@ export function usePushNotifications() {
   const responseListener = useRef<Notifications.Subscription>();
 
   useEffect(() => {
+    // Set handler inside the effect so it's stable across Fast Refresh
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+      }),
+    });
+
     registerForPushNotificationsAsync().then(token => {
       setExpoPushToken(token);
       // If we have a token and user is logged in, sync it to our backend
@@ -44,12 +44,10 @@ export function usePushNotifications() {
     });
 
     return () => {
-      if (notificationListener.current) {
-        Notifications.removeNotificationSubscription(notificationListener.current);
-      }
-      if (responseListener.current) {
-        Notifications.removeNotificationSubscription(responseListener.current);
-      }
+      // .remove() is the correct API in expo-notifications v0.28+
+      // Notifications.removeNotificationSubscription() was removed
+      notificationListener.current?.remove();
+      responseListener.current?.remove();
     };
   }, []);
 
