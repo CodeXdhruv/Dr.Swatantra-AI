@@ -17,7 +17,14 @@ export const GlassTabBar = ({ state, descriptors, navigation }: BottomTabBarProp
   }
 
   return (
-    <View style={styles.container}>
+    <>
+      <LinearGradient
+        colors={['transparent', 'rgba(252, 250, 248, 0.8)', '#FCFAF8']}
+        locations={[0, 0.4, 1]}
+        style={styles.gradientBg}
+        pointerEvents="none"
+      />
+      <View style={styles.container}>
       <BlurView intensity={80} tint="light" style={[StyleSheet.absoluteFill, styles.blurContainer]} />
       <View style={styles.tabBar}>
         {state.routes.map((route, index) => {
@@ -79,10 +86,18 @@ export const GlassTabBar = ({ state, descriptors, navigation }: BottomTabBarProp
         })}
       </View>
     </View>
+    </>
   );
 };
 
 const styles = StyleSheet.create({
+  gradientBg: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 120, // Tall enough to cover the tab bar and the gap, fading upwards
+  },
   container: {
     position: 'absolute',
     bottom: 16,
