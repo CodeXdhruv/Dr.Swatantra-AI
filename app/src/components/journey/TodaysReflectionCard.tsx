@@ -160,7 +160,7 @@ export const TodaysReflectionCard = ({ data }: { data: ExperienceData }) => {
           <Text style={styles.helper}>{data.helperText}</Text>
         </View>
         <TouchableOpacity style={styles.tapToBeginBtn} onPress={flipToBack} activeOpacity={0.9}>
-          <Text style={styles.tapToBeginText}>Tap to begin →</Text>
+          <Text style={styles.tapToBeginText}>Flip ↺</Text>
         </TouchableOpacity>
       </Animated.View>
 
@@ -241,10 +241,13 @@ const styles = StyleSheet.create({
   container: {
     height: 380,
     marginHorizontal: Spacing.lg,
-    marginBottom: Spacing.xl,
   },
   card: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 380,
     backgroundColor: '#F9F3EA',
     borderRadius: Radius.lg,
     padding: Spacing.lg,
@@ -265,6 +268,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 8,
   },
   question: {
@@ -273,11 +277,13 @@ const styles = StyleSheet.create({
     color: '#1B2D4F',
     lineHeight: 38,
     marginBottom: 16,
+    textAlign: 'center',
   },
   helper: {
     fontSize: 14,
     color: '#8A7E6E',
     lineHeight: 20,
+    textAlign: 'center',
   },
   tapToBeginBtn: {
     alignSelf: 'flex-end',
@@ -285,9 +291,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   tapToBeginText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1B2D4F',
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#8A7E6E',
+    letterSpacing: 0.5,
   },
   backContentContainer: {
     flex: 1,
