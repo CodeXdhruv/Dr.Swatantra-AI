@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "type": "inner_journey_content",
+  "todaysReflection": [
+    {
+      "id": "worry_07",
+      "theme": "worry",
+      "series": "emotional_awareness",
+      "day": 7,
+      "questionType": "text",
+      "responseType": "text",
+      "question": "What is occupying your mind right now?",
+      "helperText": "Take a moment to pause and listen.",
+      "backHelperText": "There is nothing you need to get right.",
+      "responseConfiguration": {
+        "atmik_response_template": "Sometimes simply noticing what's heavy is the first step toward lightness."
+      }
+    },
+    {
+      "id": "clarity_01",
+      "theme": "clarity",
+      "series": "emotional_awareness",
+      "day": 8,
+      "questionType": "text",
+      "responseType": "choice",
+      "question": "What are you carrying today?",
+      "helperText": "Take a moment to pause and listen.",
+      "backHelperText": "What feels heaviest?",
+      "options": ["Expectations", "Doubt", "Responsibility", "Fatigue"],
+      "responseConfiguration": {
+        "atmik_response_template": "You don't have to carry {choice} all by yourself today. It's okay to put it down for a moment."
+      }
+    }
+  ],
+  "lookWithin": [
+    {
+      "id": "lw_01",
+      "prompt": "What do you need a little more of today?",
+      "options": ["Space", "Clarity", "Courage", "Rest"],
+      "responses": {
+        "Space": "Perhaps you don't need to solve everything today. A little space can be meaningful too.",
+        "Clarity": "Clarity often comes when we stop trying so hard to find it. Just breathe.",
+        "Courage": "You have survived 100% of your hardest days. The courage is already within you.",
+        "Rest": "It is not a weakness to rest. It is how you heal."
+      }
+    }
+  ],
+  "talkToAtmik": {
+    "prompts": [
+      "Something I'm feeling",
+      "Something I'm thinking about",
+      "Something I don't understand",
+      "Something I need perspective on",
+      "Just talk with me"
+    ]
+  },
+  "thoughtsToCarry": [
+    {
+      "id": "wis_01",
+      "text": "Not everything that asks for your attention deserves your energy."
+    },
+    {
+      "id": "wis_02",
+      "text": "Peace comes from within. Do not seek it without."
+    }
+  ]
+}
