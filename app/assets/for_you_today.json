@@ -1,0 +1,1137 @@
+{
+  "schemaVersion": 1,
+  "contentType": "for_you_today_micro_experience",
+  "selection": {
+    "strategy": "local_history_then_deterministic_fallback",
+    "avoidRepeats": true,
+    "historyLimit": 30,
+    "storageKey": "@atmik/for_you_today/history_v1"
+  },
+  "experiences": [
+    {
+      "id": "let_go_01",
+      "label": "LET IT GO",
+      "question": "What can you leave behind today?",
+      "helper": "Tap one to release it.",
+      "releaseOptions": [
+        "Worry",
+        "Comparison",
+        "Control"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you like to make space for?",
+      "spaceOptions": [
+        "Peace",
+        "Clarity",
+        "Joy"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed {first_choice} and made space for {second_choice}. Let that be enough for this moment.",
+          "You chose to set down {first_choice} and welcome {second_choice}. Carry that choice gently into your day.",
+          "You let {first_choice} become a little lighter, and chose {second_choice} in its place. Stay with that feeling.",
+          "Today you made room by releasing {first_choice} and choosing {second_choice}. Nothing more needs to be added."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_02",
+      "label": "LET IT GO",
+      "question": "What doesn't need your energy today?",
+      "helper": "Choose one to set down.",
+      "releaseOptions": [
+        "Overthinking",
+        "Pressure",
+        "Doubt"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What deserves your energy instead?",
+      "spaceOptions": [
+        "Presence",
+        "Purpose",
+        "Kindness"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "A small release can create a surprising amount of space. You left {first_choice} behind and chose {second_choice}.",
+          "You don't have to carry {first_choice} all day. You chose {second_choice}; let it quietly guide this moment.",
+          "You noticed {first_choice}, then turned toward {second_choice}. That shift is yours to keep.",
+          "You made one small inner choice today: less {first_choice}, more {second_choice}. Let it unfold naturally."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_03",
+      "label": "RELEASE",
+      "question": "What are you ready to loosen your grip on?",
+      "helper": "There is nothing to fix. Just choose.",
+      "releaseOptions": [
+        "Expectations",
+        "Regret",
+        "Fear"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would feel good to welcome in?",
+      "spaceOptions": [
+        "Ease",
+        "Courage",
+        "Warmth"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "Perhaps today doesn't need more effort—just a little less {first_choice} and a little more {second_choice}.",
+          "You gave yourself permission to loosen your hold on {first_choice} and make room for {second_choice}.",
+          "There is something gentle in that choice: releasing {first_choice} without needing to fight it, and welcoming {second_choice}.",
+          "For today, let {first_choice} rest. Give a little more room to {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_04",
+      "label": "SET DOWN",
+      "question": "What are you carrying that you don't need right now?",
+      "helper": "Tap one and let it rest.",
+      "releaseOptions": [
+        "Tension",
+        "Judgment",
+        "Urgency"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you rather carry today?",
+      "spaceOptions": [
+        "Calm",
+        "Curiosity",
+        "Patience"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed what was weighing on you and chose what matters more: {second_choice}. Keep that awareness close.",
+          "You released {first_choice}. Now there is a little more room for {second_choice}.",
+          "From {first_choice} to {second_choice}—a small shift, but a meaningful one.",
+          "You don't need to make this moment bigger than it is. You simply noticed {first_choice} and chose {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_05",
+      "label": "BREATHE",
+      "question": "What thought can wait until tomorrow?",
+      "helper": "Give yourself permission to pause it.",
+      "releaseOptions": [
+        "A decision",
+        "A problem",
+        "An answer"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What can you notice instead?",
+      "spaceOptions": [
+        "This moment",
+        "Your breath",
+        "Something beautiful"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed {first_choice} and made space for {second_choice}. Let that be enough for this moment.",
+          "You chose to set down {first_choice} and welcome {second_choice}. Carry that choice gently into your day.",
+          "You let {first_choice} become a little lighter, and chose {second_choice} in its place. Stay with that feeling.",
+          "Today you made room by releasing {first_choice} and choosing {second_choice}. Nothing more needs to be added."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_06",
+      "label": "UNCLUTTER",
+      "question": "What mental noise could become quieter today?",
+      "helper": "Choose the one you'd like to soften.",
+      "releaseOptions": [
+        "Shoulds",
+        "What-ifs",
+        "Opinions"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you like to hear more clearly?",
+      "spaceOptions": [
+        "Yourself",
+        "Your values",
+        "Your intuition"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "A small release can create a surprising amount of space. You left {first_choice} behind and chose {second_choice}.",
+          "You don't have to carry {first_choice} all day. You chose {second_choice}; let it quietly guide this moment.",
+          "You noticed {first_choice}, then turned toward {second_choice}. That shift is yours to keep.",
+          "You made one small inner choice today: less {first_choice}, more {second_choice}. Let it unfold naturally."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_07",
+      "label": "PAUSE",
+      "question": "What are you trying too hard to control?",
+      "helper": "Choose one and loosen your hold.",
+      "releaseOptions": [
+        "The outcome",
+        "Others",
+        "The timing"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "Where could you allow a little more trust?",
+      "spaceOptions": [
+        "The process",
+        "Yourself",
+        "Life"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "Perhaps today doesn't need more effort—just a little less {first_choice} and a little more {second_choice}.",
+          "You gave yourself permission to loosen your hold on {first_choice} and make room for {second_choice}.",
+          "There is something gentle in that choice: releasing {first_choice} without needing to fight it, and welcoming {second_choice}.",
+          "For today, let {first_choice} rest. Give a little more room to {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_08",
+      "label": "SOFTEN",
+      "question": "Where could you be a little gentler with yourself?",
+      "helper": "Choose what you can put down.",
+      "releaseOptions": [
+        "Self-criticism",
+        "Perfection",
+        "Guilt"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you like to offer yourself?",
+      "spaceOptions": [
+        "Compassion",
+        "Acceptance",
+        "Rest"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed what was weighing on you and chose what matters more: {second_choice}. Keep that awareness close.",
+          "You released {first_choice}. Now there is a little more room for {second_choice}.",
+          "From {first_choice} to {second_choice}—a small shift, but a meaningful one.",
+          "You don't need to make this moment bigger than it is. You simply noticed {first_choice} and chose {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_09",
+      "label": "CLEAR",
+      "question": "What expectation can you release today?",
+      "helper": "You don't have to live up to everything.",
+      "releaseOptions": [
+        "Being perfect",
+        "Being understood",
+        "Having it all figured out"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What feels more important than the expectation?",
+      "spaceOptions": [
+        "Authenticity",
+        "Connection",
+        "Learning"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed {first_choice} and made space for {second_choice}. Let that be enough for this moment.",
+          "You chose to set down {first_choice} and welcome {second_choice}. Carry that choice gently into your day.",
+          "You let {first_choice} become a little lighter, and chose {second_choice} in its place. Stay with that feeling.",
+          "Today you made room by releasing {first_choice} and choosing {second_choice}. Nothing more needs to be added."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_10",
+      "label": "RESET",
+      "question": "What can you stop replaying for a moment?",
+      "helper": "Let the past stay where it is.",
+      "releaseOptions": [
+        "A mistake",
+        "A conversation",
+        "A missed chance"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you rather give your attention to?",
+      "spaceOptions": [
+        "Today",
+        "What you learned",
+        "What is possible"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "A small release can create a surprising amount of space. You left {first_choice} behind and chose {second_choice}.",
+          "You don't have to carry {first_choice} all day. You chose {second_choice}; let it quietly guide this moment.",
+          "You noticed {first_choice}, then turned toward {second_choice}. That shift is yours to keep.",
+          "You made one small inner choice today: less {first_choice}, more {second_choice}. Let it unfold naturally."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_11",
+      "label": "LIGHTEN",
+      "question": "What burden could you make smaller today?",
+      "helper": "You don't need to remove everything. Just one thing.",
+      "releaseOptions": [
+        "A deadline",
+        "A responsibility",
+        "A worry"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What small thing would help you feel lighter?",
+      "spaceOptions": [
+        "One breath",
+        "One boundary",
+        "One pause"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "Perhaps today doesn't need more effort—just a little less {first_choice} and a little more {second_choice}.",
+          "You gave yourself permission to loosen your hold on {first_choice} and make room for {second_choice}.",
+          "There is something gentle in that choice: releasing {first_choice} without needing to fight it, and welcoming {second_choice}.",
+          "For today, let {first_choice} rest. Give a little more room to {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_12",
+      "label": "RETURN",
+      "question": "What has pulled you away from yourself lately?",
+      "helper": "Choose one to set aside for now.",
+      "releaseOptions": [
+        "Distraction",
+        "People-pleasing",
+        "Busyness"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would help you return to yourself?",
+      "spaceOptions": [
+        "Silence",
+        "Honesty",
+        "Stillness"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed what was weighing on you and chose what matters more: {second_choice}. Keep that awareness close.",
+          "You released {first_choice}. Now there is a little more room for {second_choice}.",
+          "From {first_choice} to {second_choice}—a small shift, but a meaningful one.",
+          "You don't need to make this moment bigger than it is. You simply noticed {first_choice} and chose {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_13",
+      "label": "UNHOLD",
+      "question": "What are you holding onto because you're afraid to let go?",
+      "helper": "No judgment. Just notice.",
+      "releaseOptions": [
+        "An old story",
+        "A fear",
+        "A version of yourself"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "Who are you becoming instead?",
+      "spaceOptions": [
+        "More honest",
+        "More free",
+        "More present"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed {first_choice} and made space for {second_choice}. Let that be enough for this moment.",
+          "You chose to set down {first_choice} and welcome {second_choice}. Carry that choice gently into your day.",
+          "You let {first_choice} become a little lighter, and chose {second_choice} in its place. Stay with that feeling.",
+          "Today you made room by releasing {first_choice} and choosing {second_choice}. Nothing more needs to be added."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_14",
+      "label": "UNRUSH",
+      "question": "What are you rushing that could unfold in its own time?",
+      "helper": "Choose one and take the pressure off.",
+      "releaseOptions": [
+        "Success",
+        "Healing",
+        "Answers"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you like to give more time to?",
+      "spaceOptions": [
+        "Growth",
+        "Understanding",
+        "Being"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "A small release can create a surprising amount of space. You left {first_choice} behind and chose {second_choice}.",
+          "You don't have to carry {first_choice} all day. You chose {second_choice}; let it quietly guide this moment.",
+          "You noticed {first_choice}, then turned toward {second_choice}. That shift is yours to keep.",
+          "You made one small inner choice today: less {first_choice}, more {second_choice}. Let it unfold naturally."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_15",
+      "label": "NOTICE",
+      "question": "What feeling have you been avoiding?",
+      "helper": "You don't need to explain it. Just choose.",
+      "releaseOptions": [
+        "Sadness",
+        "Anger",
+        "Loneliness"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What could help you meet that feeling gently?",
+      "spaceOptions": [
+        "Acceptance",
+        "Patience",
+        "Understanding"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "Perhaps today doesn't need more effort—just a little less {first_choice} and a little more {second_choice}.",
+          "You gave yourself permission to loosen your hold on {first_choice} and make room for {second_choice}.",
+          "There is something gentle in that choice: releasing {first_choice} without needing to fight it, and welcoming {second_choice}.",
+          "For today, let {first_choice} rest. Give a little more room to {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_16",
+      "label": "CHOOSE",
+      "question": "Which pressure can you put down today?",
+      "helper": "One small release is enough.",
+      "releaseOptions": [
+        "Proving yourself",
+        "Keeping up",
+        "Being available"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you choose if there were less pressure?",
+      "spaceOptions": [
+        "Freedom",
+        "Rest",
+        "Truth"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed what was weighing on you and chose what matters more: {second_choice}. Keep that awareness close.",
+          "You released {first_choice}. Now there is a little more room for {second_choice}.",
+          "From {first_choice} to {second_choice}—a small shift, but a meaningful one.",
+          "You don't need to make this moment bigger than it is. You simply noticed {first_choice} and chose {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_17",
+      "label": "FREE",
+      "question": "What opinion of you no longer needs to define you?",
+      "helper": "Let one outside voice become quieter.",
+      "releaseOptions": [
+        "Someone's judgment",
+        "An old label",
+        "A comparison"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "How would you like to see yourself?",
+      "spaceOptions": [
+        "Clearly",
+        "Kindly",
+        "Honestly"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed {first_choice} and made space for {second_choice}. Let that be enough for this moment.",
+          "You chose to set down {first_choice} and welcome {second_choice}. Carry that choice gently into your day.",
+          "You let {first_choice} become a little lighter, and chose {second_choice} in its place. Stay with that feeling.",
+          "Today you made room by releasing {first_choice} and choosing {second_choice}. Nothing more needs to be added."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_18",
+      "label": "SIMPLIFY",
+      "question": "What could be simpler today?",
+      "helper": "Choose one place to remove a little complexity.",
+      "releaseOptions": [
+        "Your schedule",
+        "Your thoughts",
+        "Your expectations"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would simplicity give you?",
+      "spaceOptions": [
+        "Time",
+        "Peace",
+        "Focus"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "A small release can create a surprising amount of space. You left {first_choice} behind and chose {second_choice}.",
+          "You don't have to carry {first_choice} all day. You chose {second_choice}; let it quietly guide this moment.",
+          "You noticed {first_choice}, then turned toward {second_choice}. That shift is yours to keep.",
+          "You made one small inner choice today: less {first_choice}, more {second_choice}. Let it unfold naturally."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_19",
+      "label": "TRUST",
+      "question": "What uncertainty are you trying to solve too early?",
+      "helper": "Some answers need time.",
+      "releaseOptions": [
+        "The future",
+        "Someone's response",
+        "The next step"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What can you trust yourself to handle when it arrives?",
+      "spaceOptions": [
+        "Change",
+        "The unknown",
+        "Whatever comes"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "Perhaps today doesn't need more effort—just a little less {first_choice} and a little more {second_choice}.",
+          "You gave yourself permission to loosen your hold on {first_choice} and make room for {second_choice}.",
+          "There is something gentle in that choice: releasing {first_choice} without needing to fight it, and welcoming {second_choice}.",
+          "For today, let {first_choice} rest. Give a little more room to {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_20",
+      "label": "REST",
+      "question": "What could you stop doing for a little while?",
+      "helper": "Rest is allowed.",
+      "releaseOptions": [
+        "Checking",
+        "Fixing",
+        "Performing"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What kind of space do you need?",
+      "spaceOptions": [
+        "Quiet",
+        "Rest",
+        "Breathing room"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed what was weighing on you and chose what matters more: {second_choice}. Keep that awareness close.",
+          "You released {first_choice}. Now there is a little more room for {second_choice}.",
+          "From {first_choice} to {second_choice}—a small shift, but a meaningful one.",
+          "You don't need to make this moment bigger than it is. You simply noticed {first_choice} and chose {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_21",
+      "label": "FORGIVE",
+      "question": "What small resentment could you stop feeding today?",
+      "helper": "Not for anyone else. For your own peace.",
+      "releaseOptions": [
+        "An old hurt",
+        "A disappointment",
+        "A grudge"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you rather protect?",
+      "spaceOptions": [
+        "Your peace",
+        "Your heart",
+        "Your energy"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed {first_choice} and made space for {second_choice}. Let that be enough for this moment.",
+          "You chose to set down {first_choice} and welcome {second_choice}. Carry that choice gently into your day.",
+          "You let {first_choice} become a little lighter, and chose {second_choice} in its place. Stay with that feeling.",
+          "Today you made room by releasing {first_choice} and choosing {second_choice}. Nothing more needs to be added."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_22",
+      "label": "BEGIN AGAIN",
+      "question": "What can you stop defining yourself by?",
+      "helper": "One old definition can be released.",
+      "releaseOptions": [
+        "Your past",
+        "Your mistakes",
+        "Your limitations"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you like to define yourself by now?",
+      "spaceOptions": [
+        "Growth",
+        "Courage",
+        "Character"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "A small release can create a surprising amount of space. You left {first_choice} behind and chose {second_choice}.",
+          "You don't have to carry {first_choice} all day. You chose {second_choice}; let it quietly guide this moment.",
+          "You noticed {first_choice}, then turned toward {second_choice}. That shift is yours to keep.",
+          "You made one small inner choice today: less {first_choice}, more {second_choice}. Let it unfold naturally."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_23",
+      "label": "GROUND",
+      "question": "What is pulling your attention away from this moment?",
+      "helper": "Set one distraction down.",
+      "releaseOptions": [
+        "The phone",
+        "The future",
+        "The past"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What is here right now?",
+      "spaceOptions": [
+        "Breath",
+        "Life",
+        "Stillness"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "Perhaps today doesn't need more effort—just a little less {first_choice} and a little more {second_choice}.",
+          "You gave yourself permission to loosen your hold on {first_choice} and make room for {second_choice}.",
+          "There is something gentle in that choice: releasing {first_choice} without needing to fight it, and welcoming {second_choice}.",
+          "For today, let {first_choice} rest. Give a little more room to {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_24",
+      "label": "UNCOMPARE",
+      "question": "Whose journey are you measuring yours against?",
+      "helper": "You can return to your own path.",
+      "releaseOptions": [
+        "Someone else's success",
+        "Someone else's pace",
+        "Someone else's life"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you notice on your own path?",
+      "spaceOptions": [
+        "Progress",
+        "Possibility",
+        "Gratitude"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed what was weighing on you and chose what matters more: {second_choice}. Keep that awareness close.",
+          "You released {first_choice}. Now there is a little more room for {second_choice}.",
+          "From {first_choice} to {second_choice}—a small shift, but a meaningful one.",
+          "You don't need to make this moment bigger than it is. You simply noticed {first_choice} and chose {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_25",
+      "label": "REFOCUS",
+      "question": "What deserves less attention from you today?",
+      "helper": "Choose one place to withdraw your energy.",
+      "releaseOptions": [
+        "Noise",
+        "Drama",
+        "Distraction"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What deserves more of your attention?",
+      "spaceOptions": [
+        "What matters",
+        "Someone you love",
+        "Yourself"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed {first_choice} and made space for {second_choice}. Let that be enough for this moment.",
+          "You chose to set down {first_choice} and welcome {second_choice}. Carry that choice gently into your day.",
+          "You let {first_choice} become a little lighter, and chose {second_choice} in its place. Stay with that feeling.",
+          "Today you made room by releasing {first_choice} and choosing {second_choice}. Nothing more needs to be added."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_26",
+      "label": "ALLOW",
+      "question": "What are you resisting that you could simply acknowledge?",
+      "helper": "You don't have to agree with it. Just notice it.",
+      "releaseOptions": [
+        "A change",
+        "A feeling",
+        "A reality"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What becomes possible when you stop fighting the moment?",
+      "spaceOptions": [
+        "Acceptance",
+        "Choice",
+        "Calm"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "A small release can create a surprising amount of space. You left {first_choice} behind and chose {second_choice}.",
+          "You don't have to carry {first_choice} all day. You chose {second_choice}; let it quietly guide this moment.",
+          "You noticed {first_choice}, then turned toward {second_choice}. That shift is yours to keep.",
+          "You made one small inner choice today: less {first_choice}, more {second_choice}. Let it unfold naturally."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_27",
+      "label": "LISTEN",
+      "question": "What inner signal have you been ignoring?",
+      "helper": "Trust yourself enough to notice.",
+      "releaseOptions": [
+        "A boundary",
+        "A need",
+        "A truth"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would listening to yourself look like?",
+      "spaceOptions": [
+        "Saying no",
+        "Taking a pause",
+        "Speaking honestly"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "Perhaps today doesn't need more effort—just a little less {first_choice} and a little more {second_choice}.",
+          "You gave yourself permission to loosen your hold on {first_choice} and make room for {second_choice}.",
+          "There is something gentle in that choice: releasing {first_choice} without needing to fight it, and welcoming {second_choice}.",
+          "For today, let {first_choice} rest. Give a little more room to {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_28",
+      "label": "RESET",
+      "question": "What can you give yourself permission not to finish today?",
+      "helper": "Not everything has to be completed.",
+      "releaseOptions": [
+        "A task",
+        "A decision",
+        "A conversation"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you rather protect?",
+      "spaceOptions": [
+        "Your energy",
+        "Your peace",
+        "Your evening"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed what was weighing on you and chose what matters more: {second_choice}. Keep that awareness close.",
+          "You released {first_choice}. Now there is a little more room for {second_choice}.",
+          "From {first_choice} to {second_choice}—a small shift, but a meaningful one.",
+          "You don't need to make this moment bigger than it is. You simply noticed {first_choice} and chose {second_choice}."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_29",
+      "label": "OPEN",
+      "question": "What possibility have you quietly closed yourself to?",
+      "helper": "You don't need to act. Just reopen the door.",
+      "releaseOptions": [
+        "Trying again",
+        "Changing direction",
+        "Asking for help"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you like to stay open to?",
+      "spaceOptions": [
+        "Change",
+        "Connection",
+        "Surprise"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "You noticed {first_choice} and made space for {second_choice}. Let that be enough for this moment.",
+          "You chose to set down {first_choice} and welcome {second_choice}. Carry that choice gently into your day.",
+          "You let {first_choice} become a little lighter, and chose {second_choice} in its place. Stay with that feeling.",
+          "Today you made room by releasing {first_choice} and choosing {second_choice}. Nothing more needs to be added."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    },
+    {
+      "id": "let_go_30",
+      "label": "BE HERE",
+      "question": "What can you stop carrying into this moment?",
+      "helper": "Leave one thing at the door.",
+      "releaseOptions": [
+        "Yesterday",
+        "Tomorrow",
+        "Other people's expectations"
+      ],
+      "transitionLabel": "MAKE SPACE",
+      "secondQuestion": "What would you like to be fully here for?",
+      "spaceOptions": [
+        "This moment",
+        "Yourself",
+        "Someone you love"
+      ],
+      "completion": {
+        "title": "A little more space.",
+        "message_template": null,
+        "message_templates": [
+          "A small release can create a surprising amount of space. You left {first_choice} behind and chose {second_choice}.",
+          "You don't have to carry {first_choice} all day. You chose {second_choice}; let it quietly guide this moment.",
+          "You noticed {first_choice}, then turned toward {second_choice}. That shift is yours to keep.",
+          "You made one small inner choice today: less {first_choice}, more {second_choice}. Let it unfold naturally."
+        ],
+        "message_selection": {
+          "strategy": "deterministic_from_selected_choices",
+          "formula": "(firstChoiceIndex + secondChoiceIndex + experienceIndex) % message_templates.length",
+          "fallbackIndex": 0
+        }
+      },
+      "response_messages": {
+        "first_choice": {},
+        "second_choice": {}
+      }
+    }
+  ],
+  "response_logic": {
+    "selection_flow": [
+      "user selects first choice",
+      "show second question",
+      "user selects second choice",
+      "resolve response_messages.first_choice[firstChoiceId]",
+      "resolve response_messages.second_choice[secondChoiceId]",
+      "resolve completion.message_template using both selected choice labels"
+    ],
+    "fallback": "If a response-specific message is unavailable, show: You noticed something within yourself today. That awareness is enough for now.",
+    "completion_message": {
+      "do_not_use_single_template": true,
+      "instruction": "After the second choice, select one entry from the experience's completion.message_templates using the deterministic formula. Replace {first_choice} and {second_choice} with the selected option labels. Do not randomly change the message on re-render; the same completed interaction should remain stable during that session."
+    }
+  }
+}
