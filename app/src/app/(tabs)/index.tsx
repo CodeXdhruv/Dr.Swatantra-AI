@@ -4,10 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Colors, Spacing, Radius, Shadows } from '@/constants/theme';
-import { Bell, Lightbulb, CheckCircle2, Check, Edit3, Edit2, Heart, ChevronRight, Bookmark } from 'lucide-react-native';
+import { Bell, Lightbulb, CheckCircle2, Check, Edit3, Edit2, Heart, ChevronRight, Bookmark, Sprout } from 'lucide-react-native';
 import { usePracticeStore } from '../../store/usePracticeStore';
 import { apiService } from '../../services/api';
 import * as Linking from 'expo-linking';
+import { RecommendedSection } from '../../components/RecommendedSection';
+import { LetItGoCard } from '../../components/LetItGoCard';
 
 
 const { width } = Dimensions.get('window');
@@ -88,7 +90,7 @@ export default function HomeScreen() {
     useCallback(() => {
       async function loadData() {
         const data = await apiService.fetchLibraryContent();
-        setRecommendedContent(data.slice(0, 5));
+        setRecommendedContent(data);
       }
       loadData();
     }, [])
@@ -118,132 +120,43 @@ export default function HomeScreen() {
         {/* Daily Inspiration Hero */}
         <HeroCarousel />
 
-        {/* Your Daily Practice */}
+        {/* For You Today */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Your Daily Practice</Text>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/health')}>
-              <Text style={styles.viewAllAction}>View all {'>'}</Text>
-            </TouchableOpacity>
+          <View style={styles.forYouHeader}>
+            <Sprout color={Colors.accent} size={24} strokeWidth={2} />
+            <View>
+              <Text style={styles.forYouTitle}>For You Today</Text>
+              <Text style={styles.forYouSubtitle}>A small moment for yourself.</Text>
+            </View>
           </View>
-          <View style={styles.practiceGridRow}>
-            {/* Daily Habits */}
-            <TouchableOpacity style={styles.practiceCardBox} onPress={() => router.push('/(tabs)/health')}>
-              <View style={[styles.iconBadge, { backgroundColor: '#E8F0FE' }]}>
-                <Check color="#4285F4" size={20} strokeWidth={2.5} />
-              </View>
-              <Text style={styles.practiceCardTitle}>Daily Habits</Text>
-              <View style={{ flex: 1 }} />
-              <View style={styles.practiceCardFooter}>
-                <Text style={styles.practiceCardSubtitle}>{completedHabits} / {habits.length} completed</Text>
-                <View style={styles.progressBarContainer}>
-                  <View style={[styles.progressBarFill, { width: habits.length ? `${(completedHabits / habits.length) * 100}%` : '0%' }]} />
-                </View>
-              </View>
-            </TouchableOpacity>
-
-            {/* Journal Reflection */}
-            <TouchableOpacity style={styles.practiceCardBox} onPress={() => router.push('/(tabs)/health')}>
-              <View style={[styles.iconBadge, { backgroundColor: '#F3E8FF' }]}>
-                <Edit2 color="#9333EA" size={20} strokeWidth={2.5} />
-              </View>
-              <Text style={styles.practiceCardTitle}>Journal Reflection</Text>
-              <View style={{ flex: 1 }} />
-              <View style={styles.practiceCardFooterRow}>
-                <Text style={styles.practiceCardSubtitle} numberOfLines={1}>{journalSaved ? 'Completed' : 'Write your thoughts'}</Text>
-                <ChevronRight color={Colors.textSecondary} size={14} />
-              </View>
-            </TouchableOpacity>
-
-            {/* Gratitude */}
-            <TouchableOpacity style={styles.practiceCardBox} onPress={() => router.push('/(tabs)/health')}>
-              <View style={[styles.iconBadge, { backgroundColor: '#FEF3C7' }]}>
-                <Heart color="#D97706" size={20} strokeWidth={2.5} />
-              </View>
-              <Text style={styles.practiceCardTitle}>Gratitude</Text>
-              <View style={{ flex: 1 }} />
-              <View style={styles.practiceCardFooterRow}>
-                <Text style={styles.practiceCardSubtitle} numberOfLines={1}>{isGratitudeComplete ? 'Completed' : '3 things to be grateful for'}</Text>
-                <ChevronRight color={Colors.textSecondary} size={14} />
-              </View>
-            </TouchableOpacity>
-          </View>
+          
+          <LetItGoCard />
         </View>
 
         {/* Recommended for You */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recommended for You</Text>
-            <TouchableOpacity onPress={() => router.push('/(tabs)/learn')}>
-              <Text style={styles.viewAllAction}>View all {'>'}</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <View style={styles.pillContainer}>
-            <TouchableOpacity style={[styles.pill, styles.pillActive]}>
-              <Text style={styles.pillTextActive}>For You</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.pill}>
-              <Text style={styles.pillText}>Books</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.pill}>
-              <Text style={styles.pillText}>Articles</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.recommendationGrid}>
-            {/* Left Column - Featured Book */}
-            <View style={styles.recommendationLeftCol}>
-              <TouchableOpacity style={styles.featuredBookCard}>
-                <View style={styles.bookTag}>
-                  <Text style={styles.bookTagText}>BOOK</Text>
-                </View>
-                <Image
-                  source={require('@/assets/images/mountain_bg.png')}
-                  style={styles.featuredBookImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.featuredBookContent}>
-                  <Text style={styles.featuredBookTitle}>The Power of Mindful Living</Text>
-                  <View style={styles.featuredBookFooterRow}>
-                    <Text style={styles.featuredBookAuthor}>Dr. Swatantra Jain</Text>
-                    <Bookmark color={Colors.textSecondary} size={16} />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </View>
-
-            {/* Right Column - Articles List */}
-            <View style={styles.recommendationRightCol}>
-              {[
-                { title: 'The Art of Letting Go', time: '5 min read', img: require('@/assets/images/mountain_bg.png') },
-                { title: 'Finding Clarity in Everyday Life', time: '7 min read', img: require('@/assets/images/quotes_background.png') },
-                { title: 'Building Better Habits for Peaceful Living', time: '6 min read', img: require('@/assets/images/quotes_background.png') }
-              ].map((article, index) => (
-                <TouchableOpacity key={index} style={styles.articleListItem}>
-                  <View style={styles.articleListContent}>
-                    <View style={styles.articleTag}>
-                      <Text style={styles.articleTagText}>ARTICLE</Text>
-                    </View>
-                    <Text style={styles.articleListTitle} numberOfLines={2}>{article.title}</Text>
-                    <Text style={styles.articleListTime}>{article.time}</Text>
-                  </View>
-                  <View style={styles.articleListRight}>
-                    <Bookmark color={Colors.textSecondary} size={14} style={{ marginBottom: 4 }} />
-                    <Image source={article.img} style={styles.articleListThumbnail} />
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
-        </View>
+        <RecommendedSection
+          content={recommendedContent}
+          onViewAll={() => router.push('/(tabs)/learn')}
+          onPressBook={(item) => {
+            if (item.fileUrl) {
+              router.push({ pathname: '/reader', params: { url: item.fileUrl, title: item.title } });
+            }
+          }}
+          onPressArticle={(item) => {
+            if (item.fileUrl && item.fileUrl !== 'text-only') {
+              Linking.openURL(item.fileUrl);
+            } else {
+              router.push({
+                pathname: '/article',
+                params: { title: item.title, description: item.description, coverUrl: item.coverUrl, author: item.author, readTime: item.readTime },
+              });
+            }
+          }}
+        />
 
       </ScrollView>
 
-      {/* Floating Action Button (FAB) */}
-      <TouchableOpacity style={styles.fab}>
-        <Heart color={Colors.accent} size={24} />
-      </TouchableOpacity>
+
     </SafeAreaView>
   );
 }
@@ -273,12 +186,14 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   greeting: {
-    fontSize: 20,
+    // Matches Practice tab: 24px, serif, 500
+    fontSize: 24,
     fontWeight: '500',
     color: Colors.primary,
     fontFamily: 'serif',
   },
   subGreeting: {
+    // Matches Practice tab: 14px, muted
     fontSize: 14,
     color: Colors.textSecondary,
     marginTop: 2,
@@ -309,7 +224,7 @@ const styles = StyleSheet.create({
   },
   heroContainer: {
     paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.md,
   },
   heroCard: {
     height: 220,
@@ -369,21 +284,25 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
   },
   section: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
   },
-  sectionHeader: {
+  forYouHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.lg,
     marginBottom: Spacing.md,
+    gap: 12,
   },
-  sectionTitle: {
-    fontSize: 16,
+  forYouTitle: {
+    fontSize: 17,
     fontWeight: '600',
     color: Colors.primary,
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.md,
+    fontFamily: 'serif',
+  },
+  forYouSubtitle: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginTop: 2,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -564,7 +483,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 120,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: Colors.border,
   },
   iconBadge: {
     width: 40,
@@ -575,7 +494,8 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   practiceCardTitle: {
-    fontSize: 12,
+    // Matches Practice tab discoveryTitle: 14px, 600
+    fontSize: 14,
     fontWeight: '600',
     color: Colors.primary,
     textAlign: 'center',
@@ -599,7 +519,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#4285F4',
+    backgroundColor: Colors.accent, // Gold instead of bright blue
     borderRadius: 2,
   },
   practiceCardFooterRow: {
@@ -608,156 +528,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  pillContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.md,
-    gap: 8,
-  },
-  pill: {
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    backgroundColor: '#F1F5F9',
-  },
-  pillActive: {
-    backgroundColor: '#E8F0FE',
-  },
-  pillText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: Colors.textSecondary,
-  },
-  pillTextActive: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4285F4',
-  },
-  recommendationGrid: {
-    flexDirection: 'row',
-    paddingHorizontal: Spacing.lg,
-    gap: 12,
-  },
-  recommendationLeftCol: {
-    flex: 0.45,
-  },
-  recommendationRightCol: {
-    flex: 0.55,
-    gap: 12,
-  },
-  featuredBookCard: {
-    height: '100%',
-    minHeight: 220,
-    borderRadius: Radius.md,
-    overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
-    padding: Spacing.sm,
-    justifyContent: 'space-between',
-    ...Shadows.soft,
-  },
-  bookTag: {
-    backgroundColor: '#24385A',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
-    marginBottom: 8,
-  },
-  bookTagText: {
-    color: '#FFFFFF',
-    fontSize: 9,
-    fontWeight: '700',
-  },
-  featuredBookImage: {
-    width: '100%',
-    height: 100,
-    borderRadius: Radius.sm,
-    marginBottom: 12,
-  },
-  featuredBookContent: {
-    justifyContent: 'flex-end',
-  },
-  featuredBookTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: 4,
-  },
-  featuredBookFooterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 4,
-  },
-  featuredBookAuthor: {
-    fontSize: 10,
-    color: Colors.textSecondary,
-  },
-  articleListItem: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
-    borderRadius: Radius.md,
-    padding: Spacing.sm,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
-    ...Shadows.soft,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 70,
-  },
-  articleListContent: {
-    flex: 1,
-    paddingRight: 8,
-  },
-  articleTag: {
-    backgroundColor: '#E8F0FE',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    marginBottom: 4,
-  },
-  articleTagText: {
-    color: '#4285F4',
-    fontSize: 8,
-    fontWeight: '700',
-  },
-  articleListTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: Colors.primary,
-    marginBottom: 2,
-  },
-  articleListTime: {
-    fontSize: 10,
-    color: Colors.textSecondary,
-  },
-  articleListRight: {
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    height: '100%',
-  },
-  articleListThumbnail: {
-    width: 36,
-    height: 36,
-    borderRadius: 4,
-    resizeMode: 'cover',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 110, // Above the tab bar
-    right: 24,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#FFF8E7', // Light gold background
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Shadows.soft,
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-  },
+
 });
 

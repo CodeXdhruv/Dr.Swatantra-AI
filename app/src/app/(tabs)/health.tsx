@@ -1,64 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  LayoutAnimation, 
-  UIManager, 
-  Platform, 
-  TextInput,
-  KeyboardAvoidingView
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ChevronDown, ChevronUp, Check, Plus, Circle, CheckCircle2, Feather, Heart, Sun } from 'lucide-react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
+import {
+  ChevronRight,
+  ArrowRight,
+  MessageCircle,
+  Gem,
+  Sparkles,
+  Lightbulb,
+} from 'lucide-react-native';
+import { Colors, Spacing, Radius, Shadows } from '@/constants/theme';
 import { usePracticeStore } from '../../store/usePracticeStore';
 
-// Enable LayoutAnimation for Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-const COLORS = {
-  background: '#FCFAF8',
-  card: '#FFFFFF',
-  primary: '#1C2A3A',
-  accent: '#D9A05B',
-  divider: '#ECECEC',
-  success: '#D9A05B',
-  text: '#1C2A3A',
-  textSecondary: '#8C8C8C',
-  textTertiary: '#A0A0A0',
-};
+// ─── Local constants (aligned with home page theme) ─────
+const FONT_SERIF = 'serif'; // matches home page fontFamily: 'serif'
+const ACCENT_LIGHT = '#F5EDD8'; // pale gold tint for reflection card bg
 
-const FONTS = {
-  heading: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-  title: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-  body: 'System',
-  prompt: Platform.OS === 'ios' ? 'Georgia' : 'serif',
-};
+// ─── Lotus icon ──────────────────────────────────────────
+const LotusIcon = () => (
+  <View style={styles.lotusContainer}>
+    <Text style={styles.lotusSymbol}>✿</Text>
+  </View>
+);
+
+// ─── Horizon icon ────────────────────────────────────────
+const HorizonIcon = () => (
+  <Text style={styles.horizonIcon}>☀</Text>
+);
 
 export default function DailyPracticeScreen() {
-  const [expandedCard, setExpandedCard] = useState<string | null>(null);
-  const [showAddHabit, setShowAddHabit] = useState(false);
-
-  // Global State
-  const {
-    habits,
-    setHabits,
-    toggleHabit,
-    addHabit,
-    journalText,
-    journalSaved,
-    setJournalText,
-    setJournalSaved,
-    gratitudes,
-    updateGratitude,
-    checkAndResetDaily,
-  } = usePracticeStore();
+  const router = useRouter();
+  const { journalSaved, checkAndResetDaily } = usePracticeStore();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -66,444 +50,386 @@ export default function DailyPracticeScreen() {
     }, [checkAndResetDaily])
   );
 
-  const currentPrompt = "What brought peace today?";
-
-  const isGratitudeComplete = gratitudes.every(g => g.trim().length > 0);
-
-  const toggleExpand = (card: string) => {
-    LayoutAnimation.configureNext(
-      LayoutAnimation.create(
-        300,
-        LayoutAnimation.Types.spring,
-        LayoutAnimation.Properties.opacity
-      )
-    );
-    if (expandedCard === card) {
-      setExpandedCard(null);
-    } else {
-      setExpandedCard(card);
-    }
-  };
-
-  const completedHabits = habits.filter(h => h.completed).length;
-
-  const saveJournal = () => {
-    setJournalSaved(true);
-    toggleExpand('journal');
-  };
+  const discoveryItems = [
+    {
+      id: 'reflect',
+      title: 'Self Reflection',
+      subtitle: 'Understand your thoughts',
+      icon: <MessageCircle color={Colors.primary} size={20} strokeWidth={1.5} />,
+      iconBg: Colors.secondary,
+      onPress: () => router.push('/(tabs)/health'),
+    },
+    {
+      id: 'chat',
+      title: 'Atmik Conversation',
+      subtitle: 'Talk. Question. Discover.',
+      icon: <Gem color={Colors.primary} size={20} strokeWidth={1.5} />,
+      iconBg: Colors.secondary,
+      onPress: () => router.push('/chat'),
+    },
+    {
+      id: 'wisdom',
+      title: "Today's Wisdom",
+      subtitle: 'A thought worth carrying',
+      icon: <Sparkles color={Colors.accent} size={20} strokeWidth={1.5} />,
+      iconBg: '#F5EDD8',
+      onPress: () => router.push('/(tabs)/learn'),
+    },
+  ];
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-          
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>Daily Practice</Text>
-            <Text style={styles.headerSubtitle}>Small daily reflections create lifelong transformation.</Text>
+    <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+      <StatusBar style="dark" />
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* ── Header ────────────────────────────────────── */}
+        <View style={styles.header}>
+          <View style={styles.headerTextBlock}>
+            <Text style={styles.headerTitle}>Your Inner Journey</Text>
+            <Text style={styles.headerSubtitle}>Pause. Reflect. Understand.</Text>
+          </View>
+          <LotusIcon />
+        </View>
+
+        {/* ── Today's Reflection Card ───────────────────── */}
+        <View style={styles.reflectionCard}>
+          {/* Top row: label + sun icon */}
+          <View style={styles.reflectionTopRow}>
+            <View>
+              <View style={styles.goldAccentBar} />
+              <Text style={styles.reflectionLabel}>TODAY'S REFLECTION</Text>
+            </View>
+            <HorizonIcon />
           </View>
 
-          {/* 1. Daily Habits Card */}
-          <View style={styles.card}>
-            <TouchableOpacity style={styles.cardHeader} onPress={() => toggleExpand('habits')} activeOpacity={0.7}>
-              <View style={styles.cardHeaderLeft}>
-                <Sun color={COLORS.primary} size={24} strokeWidth={1.5} />
-                <View style={styles.cardTitleContainer}>
-                  <Text style={styles.cardTitle}>Daily Habits</Text>
-                  <Text style={styles.cardMeta}>{completedHabits} / {habits.length} Completed</Text>
+          {/* Big question prompt */}
+          <Text style={styles.reflectionQuestion}>
+            What is occupying{'\n'}your mind{'\n'}right now?
+          </Text>
+
+          {/* Grouped Bottom Section to maintain even spacing */}
+          <View>
+            {/* Bottom row: hint text + Begin button */}
+            <View style={styles.reflectionBottomRow}>
+              <Text style={styles.reflectionHint}>
+                Take a moment to pause,{'\n'}listen within and reflect.
+              </Text>
+              <TouchableOpacity
+                style={styles.beginBtn}
+                activeOpacity={0.85}
+                onPress={() => router.push('/(tabs)/health')}
+              >
+                <Text style={styles.beginBtnText}>Begin</Text>
+                <ArrowRight color="#FFFFFF" size={16} strokeWidth={2} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+
+        {/* ── Continue Your Self-Discovery ─────────────── */}
+        <Text style={styles.sectionLabel}>CONTINUE YOUR SELF-DISCOVERY</Text>
+
+        <View style={styles.discoveryCard}>
+          {discoveryItems.map((item, index) => (
+            <React.Fragment key={item.id}>
+              <TouchableOpacity
+                style={styles.discoveryRow}
+                activeOpacity={0.75}
+                onPress={item.onPress}
+              >
+                {/* Icon badge */}
+                <View style={[styles.discoveryIconBadge, { backgroundColor: item.iconBg }]}>
+                  {item.icon}
                 </View>
-              </View>
-              {expandedCard === 'habits' ? (
-                <ChevronUp color={COLORS.textTertiary} size={24} strokeWidth={1.5} />
-              ) : (
-                <ChevronDown color={COLORS.textTertiary} size={24} strokeWidth={1.5} />
+
+                {/* Text */}
+                <View style={styles.discoveryTextBlock}>
+                  <Text style={styles.discoveryTitle}>{item.title}</Text>
+                  <Text style={styles.discoverySubtitle}>{item.subtitle}</Text>
+                </View>
+
+                {/* Chevron */}
+                <ChevronRight color={Colors.textSecondary} size={18} strokeWidth={1.5} />
+              </TouchableOpacity>
+
+              {/* Divider between rows (not after last) */}
+              {index < discoveryItems.length - 1 && (
+                <View style={styles.internalDivider} />
               )}
-            </TouchableOpacity>
+            </React.Fragment>
+          ))}
+        </View>
 
-            {expandedCard === 'habits' && (
-              <View style={styles.expandedContent}>
-                <View style={styles.goldDivider} />
-                
-                {habits.map((habit) => (
-                  <TouchableOpacity 
-                    key={habit.id} 
-                    style={styles.habitRow} 
-                    onPress={() => toggleHabit(habit.id)}
-                    activeOpacity={0.7}
-                  >
-                    {habit.completed ? (
-                      <CheckCircle2 color={COLORS.accent} size={24} fill="transparent" strokeWidth={1.5} />
-                    ) : (
-                      <Circle color={COLORS.textTertiary} size={24} strokeWidth={1.5} />
-                    )}
-                    <Text style={[styles.habitLabel, habit.completed && styles.habitLabelCompleted]}>
-                      {habit.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+        {/* ── Your Reflections Stats ────────────────────── */}
+        <View style={styles.statsCard}>
+          <Text style={styles.statsLabel}>YOUR REFLECTIONS</Text>
 
-                <TouchableOpacity 
-                  style={styles.addHabitButton}
-                  onPress={() => {
-                    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                    setShowAddHabit(!showAddHabit);
-                  }}
-                >
-                  <Plus color={COLORS.accent} size={16} strokeWidth={2} />
-                  <Text style={styles.addHabitText}>Add Habit</Text>
-                </TouchableOpacity>
-
-                {showAddHabit && (
-                  <View style={styles.habitChipsContainer}>
-                    {['Walking', 'Sleep', 'Nutrition', 'Exercise', 'Nature'].map((chip) => (
-                      <TouchableOpacity 
-                        key={chip} 
-                        style={styles.habitChip}
-                        onPress={() => {
-                          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                          addHabit(chip);
-                          setShowAddHabit(false);
-                        }}
-                      >
-                        <Text style={styles.habitChipText}>{chip}</Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
+          <View style={styles.statsRow}>
+            {/* Conversations */}
+            <View style={styles.statItem}>
+              <View style={[styles.statIconBadge, { backgroundColor: '#DDE4F0' }]}>
+                <MessageCircle color={Colors.primary} size={20} strokeWidth={1.5} />
               </View>
-            )}
+              <View style={styles.statTextBlock}>
+                <Text style={styles.statValue}>
+                  {journalSaved ? '1' : '0'}
+                </Text>
+                <Text style={styles.statUnit}>Conversations</Text>
+              </View>
+            </View>
+
+            {/* Vertical rule */}
+            <View style={styles.statsDivider} />
+
+            {/* Insights */}
+            <View style={styles.statItem}>
+              <View style={[styles.statIconBadge, { backgroundColor: '#F5EDD8' }]}>
+                <Lightbulb color={Colors.accent} size={20} strokeWidth={1.5} />
+              </View>
+              <View style={styles.statTextBlock}>
+                <Text style={styles.statValue}>12</Text>
+                <Text style={styles.statUnit}>Insights</Text>
+              </View>
+            </View>
           </View>
+        </View>
 
-          {/* 2. Journal Reflection Card */}
-          <View style={styles.card}>
-            <TouchableOpacity style={styles.cardHeader} onPress={() => toggleExpand('journal')} activeOpacity={0.7}>
-              <View style={styles.cardHeaderLeft}>
-                <Feather color={COLORS.primary} size={24} strokeWidth={1.5} />
-                <View style={styles.cardTitleContainer}>
-                  <Text style={styles.cardTitle}>Journal Reflection</Text>
-                  {journalSaved ? (
-                    <Text style={[styles.cardMeta, { color: COLORS.success }]}>✓ Saved Today</Text>
-                  ) : (
-                    <Text style={styles.cardMeta}>"{currentPrompt}"</Text>
-                  )}
-                </View>
-              </View>
-              {expandedCard === 'journal' ? (
-                <ChevronUp color={COLORS.textTertiary} size={24} strokeWidth={1.5} />
-              ) : (
-                <ChevronDown color={COLORS.textTertiary} size={24} strokeWidth={1.5} />
-              )}
-            </TouchableOpacity>
-
-            {expandedCard === 'journal' && (
-              <View style={styles.expandedContent}>
-                <View style={styles.goldDivider} />
-                
-                <Text style={styles.journalPromptText}>{currentPrompt}</Text>
-                
-                <TextInput
-                  style={styles.journalInput}
-                  multiline
-                  placeholder="Begin writing here..."
-                  placeholderTextColor={COLORS.textTertiary}
-                  value={journalText}
-                  onChangeText={setJournalText}
-                  autoFocus={false}
-                  selectionColor={COLORS.accent}
-                />
-
-                <View style={styles.journalFooter}>
-                  <Text style={styles.charCount}>{journalText.length} characters</Text>
-                  <View style={styles.journalActions}>
-                    <TouchableOpacity onPress={() => toggleExpand('journal')} style={styles.actionBtn}>
-                      <Text style={styles.cancelText}>Cancel</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={saveJournal} style={styles.saveBtn}>
-                      <Text style={styles.saveBtnText}>Save</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </View>
-            )}
-          </View>
-
-          {/* 3. Gratitude Card */}
-          <View style={styles.card}>
-            <TouchableOpacity style={styles.cardHeader} onPress={() => toggleExpand('gratitude')} activeOpacity={0.7}>
-              <View style={styles.cardHeaderLeft}>
-                <Heart color={COLORS.primary} size={24} strokeWidth={1.5} />
-                <View style={styles.cardTitleContainer}>
-                  <Text style={styles.cardTitle}>Gratitude</Text>
-                  {isGratitudeComplete && expandedCard !== 'gratitude' ? (
-                    <Text style={styles.cardMeta}>{gratitudes.join(', ')}</Text>
-                  ) : (
-                    <Text style={styles.cardMeta}>Add three blessings today</Text>
-                  )}
-                </View>
-              </View>
-              {expandedCard === 'gratitude' ? (
-                <ChevronUp color={COLORS.textTertiary} size={24} strokeWidth={1.5} />
-              ) : (
-                <ChevronDown color={COLORS.textTertiary} size={24} strokeWidth={1.5} />
-              )}
-            </TouchableOpacity>
-
-            {expandedCard === 'gratitude' && (
-              <View style={styles.expandedContent}>
-                <View style={styles.goldDivider} />
-                
-                {!isGratitudeComplete ? (
-                  <View style={styles.gratitudeList}>
-                    {[0, 1, 2].map((index) => (
-                      <View key={index} style={styles.gratitudeRow}>
-                        <Text style={styles.gratitudeNumber}>{index + 1}.</Text>
-                        <TextInput
-                          style={styles.gratitudeInput}
-                          placeholder="What are you thankful for?"
-                          placeholderTextColor={COLORS.textTertiary}
-                          value={gratitudes[index]}
-                          onChangeText={(text) => updateGratitude(text, index)}
-                          maxLength={40}
-                          selectionColor={COLORS.accent}
-                        />
-                        {gratitudes[index].trim().length > 0 && (
-                          <Check color={COLORS.accent} size={20} strokeWidth={2} />
-                        )}
-                      </View>
-                    ))}
-                  </View>
-                ) : (
-                  <View style={styles.gratitudeSuccess}>
-                    <Text style={styles.successEmoji}>✧</Text>
-                    <Text style={styles.successText}>Today's Gratitude Completed</Text>
-                  </View>
-                )}
-              </View>
-            )}
-          </View>
-
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
+// ─── Styles ──────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: {
+  safe: {
     flex: 1,
-    backgroundColor: COLORS.background,
+    backgroundColor: Colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 32,
+    paddingHorizontal: Spacing.lg,
+    paddingTop: Spacing.lg,
     paddingBottom: 120,
   },
+
+  // ── Header ────────────────────────────────────────────
   header: {
-    marginBottom: 40,
-    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: Spacing.lg,
+    marginTop: Spacing.md,
+  },
+  headerTextBlock: {
+    flex: 1,
   },
   headerTitle: {
-    fontSize: 26,
-    fontFamily: FONTS.heading,
-    fontWeight: '600',
-    color: COLORS.primary,
-    marginBottom: 6,
+    // Matches home greeting: serif, 20px, weight 500
+    fontSize: 20,
+    fontFamily: FONT_SERIF,
+    fontWeight: '500',
+    color: Colors.primary,
+    marginBottom: 4,
   },
   headerSubtitle: {
+    // Matches home subGreeting: 14px, textSecondary
     fontSize: 14,
-    fontFamily: FONTS.body,
-    color: COLORS.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: 30,
-    lineHeight: 20,
-    letterSpacing: 0.3,
+    color: Colors.textSecondary,
   },
-  card: {
-    backgroundColor: COLORS.card,
-    borderRadius: 24,
-    marginBottom: 20,
+  lotusContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.surface,
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(236, 236, 236, 0.5)', // Very subtle border
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 16,
-    elevation: 2,
-    overflow: 'hidden',
+    borderColor: Colors.border,
   },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 24,
-    backgroundColor: COLORS.card,
-  },
-  cardHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  cardTitleContainer: {
-    marginLeft: 16,
-  },
-  cardTitle: {
+  lotusSymbol: {
     fontSize: 18,
-    fontFamily: FONTS.title,
-    fontWeight: '600',
-    color: COLORS.primary,
-    marginBottom: 2,
-    letterSpacing: 0.5,
+    color: Colors.accent,
   },
-  cardMeta: {
-    fontSize: 14,
-    fontFamily: FONTS.body,
-    color: COLORS.textSecondary,
+
+  // ── Reflection Card ───────────────────────────────────
+  reflectionCard: {
+    height: 220,
+    justifyContent: 'space-between',
+    backgroundColor: ACCENT_LIGHT,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.lg,
+    ...Shadows.soft,
   },
-  expandedContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+  reflectionTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
   },
-  goldDivider: {
+  goldAccentBar: {
     width: 24,
     height: 2,
-    backgroundColor: COLORS.accent,
-    marginBottom: 24,
-    opacity: 0.6,
+    backgroundColor: Colors.accent,
+    borderRadius: 2,
+    marginBottom: 6,
   },
-  habitRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
+  reflectionLabel: {
+    // Matches home heroLabel: 12px, 600
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    color: Colors.accent,
   },
-  habitLabel: {
-    fontSize: 16,
-    fontFamily: FONTS.body,
-    color: COLORS.text,
-    marginLeft: 16,
+  horizonIcon: {
+    fontSize: 24,
+    color: Colors.accent,
+    opacity: 0.85,
   },
-  habitLabelCompleted: {
-    color: COLORS.textTertiary,
-    textDecorationLine: 'line-through',
-  },
-  addHabitButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingVertical: 8,
-  },
-  addHabitText: {
-    fontSize: 15,
-    fontFamily: FONTS.body,
-    color: COLORS.accent,
-    marginLeft: 8,
-    fontWeight: '500',
-  },
-  habitChipsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 16,
-    gap: 10,
-  },
-  habitChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6',
-    borderWidth: 1,
-    borderColor: COLORS.divider,
-  },
-  habitChipText: {
-    fontSize: 14,
-    color: COLORS.textSecondary,
-  },
-  journalPromptText: {
-    fontSize: 20,
-    fontFamily: FONTS.prompt,
+  reflectionQuestion: {
+    // Matches home heroQuote: 24px, serif, italic
+    fontSize: 24,
+    fontFamily: FONT_SERIF,
     fontStyle: 'italic',
-    color: COLORS.primary,
-    marginBottom: 20,
-    lineHeight: 28,
+    color: Colors.primary,
+    lineHeight: 32,
   },
-  journalInput: {
-    fontSize: 16,
-    fontFamily: FONTS.body,
-    color: COLORS.text,
-    minHeight: 120,
-    textAlignVertical: 'top',
-    lineHeight: 24,
-  },
-  journalFooter: {
+  reflectionBottomRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: COLORS.divider,
-    paddingTop: 16,
+    alignItems: 'flex-end',
   },
-  charCount: {
-    fontSize: 13,
-    color: COLORS.textTertiary,
-  },
-  journalActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  actionBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  cancelText: {
-    fontSize: 15,
-    color: COLORS.textTertiary,
-  },
-  saveBtn: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    backgroundColor: COLORS.primary,
-    borderRadius: 16,
-    marginLeft: 8,
-  },
-  saveBtnText: {
-    fontSize: 15,
-    color: '#FFF',
-    fontWeight: '500',
-  },
-  gratitudeList: {
-    marginTop: 8,
-  },
-  gratitudeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
-    paddingVertical: 12,
-    marginBottom: 8,
-  },
-  gratitudeNumber: {
-    fontSize: 16,
-    color: COLORS.accent,
-    marginRight: 12,
-    fontWeight: '500',
-  },
-  gratitudeInput: {
+  reflectionHint: {
+    // Matches home body text: 14px, textSecondary
+    fontSize: 14,
+    color: Colors.textSecondary,
+    lineHeight: 20,
     flex: 1,
-    fontSize: 16,
-    fontFamily: FONTS.body,
-    color: COLORS.text,
+    marginRight: Spacing.sm,
   },
-  gratitudeSuccess: {
+  beginBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 32,
+    backgroundColor: Colors.primary,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.xl,
+    gap: 6,
   },
-  successEmoji: {
-    fontSize: 32,
-    color: COLORS.accent,
-    marginBottom: 16,
+  beginBtnText: {
+    // Matches home viewAllAction scale: 14px, 500
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#FFFFFF',
   },
-  successText: {
-    fontSize: 18,
-    fontFamily: FONTS.title,
-    color: COLORS.primary,
+
+  // ── Section Label — matches home sectionTitle scale ─────
+  sectionLabel: {
+    fontSize: 12,
     fontWeight: '600',
+    letterSpacing: 1.2,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+  },
+
+  // ── Discovery Card ────────────────────────────────────
+  discoveryCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    marginBottom: Spacing.lg,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.border,
+    ...Shadows.soft,
+  },
+  discoveryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.md,
+  },
+  discoveryIconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.sm,
+  },
+  discoveryTextBlock: {
+    flex: 1,
+  },
+  discoveryTitle: {
+    // Matches home practiceCardTitle scale: 14px, 600
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
+    marginBottom: 2,
+  },
+  discoverySubtitle: {
+    // Matches home body: 12px, textSecondary
+    fontSize: 12,
+    color: Colors.textSecondary,
+  },
+  internalDivider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginLeft: 68,
+  },
+
+  // ── Stats Card ────────────────────────────────────────
+  statsCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    ...Shadows.soft,
+  },
+  statsLabel: {
+    // Matches sectionLabel
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: Spacing.md,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statItem: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
+  },
+  statIconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statTextBlock: {},
+  statValue: {
+    // Matches home summaryValue: 16px, 700
+    fontSize: 16,
+    fontFamily: FONT_SERIF,
+    fontWeight: '700',
+    color: Colors.textPrimary,
+  },
+  statUnit: {
+    // Matches home summaryLabel: 10px, textSecondary
+    fontSize: 10,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+  statsDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: Colors.border,
   },
 });
