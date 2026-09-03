@@ -44,32 +44,39 @@ export function SplashScreen() {
   const orbitAngle = useSharedValue(-Math.PI / 2); // Start at top
   const orbitParticleOpacity = useSharedValue(0);
 
+  // Splash screen total animation duration timing configuration (2.5 seconds = 2500ms)
+  // You can manually adjust the total duration or individual stage timings here:
+  const STAGE_1_DURATION = 1000; // Particle rise duration (1000ms)
+  const STAGE_2_ORBIT_DELAY = 300;  // Delay before orbit animation starts (300ms)
+  const STAGE_2_ORBIT_DURATION = 1200; // Orbit rotation duration (1200ms)
+  // Total animation time = STAGE_1_DURATION (1000ms) + STAGE_2_ORBIT_DELAY (300ms) + STAGE_2_ORBIT_DURATION (1200ms) = 2500ms (2.5s)
+
   useEffect(() => {
     // Sequence orchestration
     // 1. Light appears and rises
-    particleOpacity.value = withTiming(1, { duration: 250 });
-    particleY.value = withTiming(CY, { duration: 500, easing: Easing.bezier(0.25, 1, 0.5, 1) }, (finished) => {
+    particleOpacity.value = withTiming(1, { duration: 400 });
+    particleY.value = withTiming(CY, { duration: STAGE_1_DURATION, easing: Easing.bezier(0.25, 1, 0.5, 1) }, (finished) => {
       if (finished) {
         // 2. Ripple expands
-        rippleRadius.value = withTiming(150, { duration: 400, easing: Easing.out(Easing.ease) });
+        rippleRadius.value = withTiming(150, { duration: 800, easing: Easing.out(Easing.ease) });
         rippleOpacity.value = withSequence(
-          withTiming(0.4, { duration: 150 }),
-          withTiming(0, { duration: 250 })
+          withTiming(0.4, { duration: 300 }),
+          withTiming(0, { duration: 500 })
         );
-        particleOpacity.value = withTiming(0, { duration: 200 });
+        particleOpacity.value = withTiming(0, { duration: 400 });
 
         // 3. Wordmark fades in
-        wordmarkOpacity.value = withDelay(150, withTiming(1, { duration: 400 }));
+        wordmarkOpacity.value = withDelay(200, withTiming(1, { duration: 800 }));
 
         // 4. Orbit appears and particle moves
-        orbitOpacity.value = withDelay(250, withTiming(0.3, { duration: 400 }));
-        orbitParticleOpacity.value = withDelay(250, withTiming(1, { duration: 400 }));
+        orbitOpacity.value = withDelay(300, withTiming(0.3, { duration: 800 }));
+        orbitParticleOpacity.value = withDelay(300, withTiming(1, { duration: 800 }));
 
         orbitAngle.value = withDelay(
-          200,
-          withTiming(Math.PI * 1.5, { duration: 500, easing: Easing.inOut(Easing.ease) }, (finished2) => {
+          STAGE_2_ORBIT_DELAY,
+          withTiming(Math.PI * 1.5, { duration: STAGE_2_ORBIT_DURATION, easing: Easing.inOut(Easing.ease) }, (finished2) => {
             if (finished2) {
-              // 5. Transition to Home
+              // 5. Transition to Auth / Home after exactly 2.5 seconds total
               runOnJS(navigateToAuth)();
             }
           })
