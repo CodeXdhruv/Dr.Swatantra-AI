@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     color: '#8A7E6E', // soft muted
   },
   heroSection: {
-    marginBottom: Spacing.xl,
+    marginBottom: Spacing.md,
   },
   sectionHeader: {
     paddingHorizontal: Spacing.lg,
