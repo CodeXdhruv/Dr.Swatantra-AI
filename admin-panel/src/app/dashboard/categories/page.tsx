@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAdminStore } from "@/store/adminStore";
 import { 
   Folder, 
@@ -13,15 +13,26 @@ import {
   ArrowUp, 
   ArrowDown, 
   Check, 
-  X 
+  X,
+  Aperture, Atom, Wind, Droplet, Feather, Flame, Waves, Infinity as InfinityIcon, Network, Layers, Boxes, Sparkles, Orbit, Asterisk, Focus, Zap, Hexagon, Triangle, Circle
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { Category } from "@/services/mockData";
 
+const ICON_MAP: Record<string, React.ElementType> = {
+  Folder, Aperture, Atom, Wind, Droplet, Feather, Flame, Waves, InfinityIcon, Network, Layers, Boxes, Sparkles, Orbit, Asterisk, Focus, Zap, Hexagon, Triangle, Circle
+};
+const AVAILABLE_ICONS = Object.keys(ICON_MAP);
+
 export default function CategoriesPage() {
-  const { categories, addCategory, renameCategory, deleteCategory } = useAdminStore();
+  const { categories, fetchCategories, addCategory, renameCategory, deleteCategory } = useAdminStore();
   const [newCatName, setNewCatName] = useState("");
   const [parentCatId, setParentCatId] = useState<string>("");
+  const [newCatIcon, setNewCatIcon] = useState("Folder");
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   // Edit State
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -31,36 +42,53 @@ export default function CategoriesPage() {
   const [addingSubToId, setAddingSubToId] = useState<string | null>(null);
   const [subCatName, setSubCatName] = useState("");
 
-  const handleAddRoot = (e: React.FormEvent) => {
+  const handleAddRoot = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCatName.trim()) return;
 
-    addCategory(newCatName, parentCatId ? parentCatId : null);
-    setNewCatName("");
-    setParentCatId("");
-    toast.success(`Category "${newCatName}" created successfully!`);
+    try {
+      await addCategory(newCatName, parentCatId ? parentCatId : null, newCatIcon);
+      setNewCatName("");
+      setParentCatId("");
+      setNewCatIcon("Folder");
+      toast.success(`Category "${newCatName}" created successfully!`);
+    } catch (err) {
+      toast.error(`Failed to create category`);
+    }
   };
 
-  const handleAddSub = (parentId: string) => {
+  const handleAddSub = async (parentId: string) => {
     if (!subCatName.trim()) return;
-    addCategory(subCatName, parentId);
-    setSubCatName("");
-    setAddingSubToId(null);
-    toast.success(`Sub-category created!`);
+    try {
+      await addCategory(subCatName, parentId);
+      setSubCatName("");
+      setAddingSubToId(null);
+      toast.success(`Sub-category created!`);
+    } catch (err) {
+      toast.error(`Failed to create sub-category`);
+    }
   };
 
-  const handleSaveRename = (id: string) => {
+  const handleSaveRename = async (id: string) => {
     if (!editName.trim()) return;
-    renameCategory(id, editName);
-    setEditingId(null);
-    setEditName("");
-    toast.success("Category renamed!");
+    try {
+      await renameCategory(id, editName);
+      setEditingId(null);
+      setEditName("");
+      toast.success("Category renamed!");
+    } catch (err) {
+      toast.error("Failed to rename category");
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this category? All sub-categories will be removed as well.")) {
-      deleteCategory(id);
-      toast.success("Category removed!");
+      try {
+        await deleteCategory(id);
+        toast.success("Category removed!");
+      } catch (err) {
+        toast.error("Failed to remove category");
+      }
     }
   };
 
@@ -78,7 +106,10 @@ export default function CategoriesPage() {
           style={{ marginLeft: `${depth * 28}px` }}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <Folder size={16} className="text-accent-gold flex-shrink-0" />
+            {(() => {
+              const IconComp = cat.icon && ICON_MAP[cat.icon] ? ICON_MAP[cat.icon] : Folder;
+              return <IconComp size={16} className="text-accent-gold flex-shrink-0" />;
+            })()}
             
             {isEditing ? (
               <div className="flex items-center gap-2 flex-1">
@@ -265,6 +296,32 @@ export default function CategoriesPage() {
                   placeholder="e.g. Mindfulness"
                   className="w-full px-4 py-2.5 bg-background border border-border-custom rounded-input text-xs text-primary-navy placeholder-primary-navy/30 focus:border-accent-gold/40 outline-none transition-colors"
                 />
+              </div>
+
+              {/* Icon Selection */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-semibold text-primary-navy/60 uppercase tracking-wider">
+                  Category Icon *
+                </label>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-accent-gold/10 text-accent-gold flex items-center justify-center border border-accent-gold/20 flex-shrink-0">
+                    {(() => {
+                      const SelectedIcon = ICON_MAP[newCatIcon] || Folder;
+                      return <SelectedIcon size={18} />;
+                    })()}
+                  </div>
+                  <select
+                    value={newCatIcon}
+                    onChange={(e) => setNewCatIcon(e.target.value)}
+                    className="flex-1 px-4 py-2.5 bg-background border border-border-custom rounded-input text-xs text-primary-navy focus:border-accent-gold/40 outline-none cursor-pointer"
+                  >
+                    {AVAILABLE_ICONS.map(iconName => (
+                      <option key={iconName} value={iconName}>
+                        {iconName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               {/* Parent Category Selection */}
