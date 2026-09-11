@@ -1,6 +1,6 @@
 import { auth } from "@/lib/firebase";
 
-const API_BASE_URL = 'https://atmik-ai-backend.swatantra-backend.workers.dev';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://atmik-ai-backend.swatantra-backend.workers.dev';
 
 // A helper to get the Firebase auth token
 const getAuthHeaders = async () => {
@@ -19,7 +19,7 @@ export const apiService = {
   /**
    * Save content metadata to Cloudflare D1 Database
    */
-  async saveContentMetadata(data: { title: string; type: string; coverUrl?: string; fileUrl: string; description?: string; author?: string; readTime?: number }): Promise<void> {
+  async saveContentMetadata(data: { title: string; type: string; coverUrl?: string; fileUrl: string; description?: string; author?: string; readTime?: number; category?: string }): Promise<void> {
     const response = await fetch(`${API_BASE_URL}/api/library/content`, {
       method: 'POST',
       headers: await getAuthHeaders(),
@@ -115,5 +115,67 @@ export const apiService = {
     if (!response.ok) {
       throw new Error(`Failed to update user role: ${response.statusText}`);
     }
+  },
+
+  /**
+   * Fetch all content from the backend
+   */
+  async fetchContent(): Promise<any[]> {
+    const response = await fetch(`${API_BASE_URL}/api/library/content`, {
+      method: 'GET',
+      headers: await getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error(`Failed to fetch content. Status: ${response.status}, Body: ${errText}`);
+      throw new Error(`Failed to fetch content: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.data;
+  },
+
+  /**
+   * Category Management
+   */
+  async fetchCategories(): Promise<any[]> {
+    const response = await fetch(`${API_BASE_URL}/api/library/categories`, {
+      method: 'GET',
+      headers: await getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error(`Failed to fetch categories`);
+    const data = await response.json();
+    return data.data;
+  },
+
+  async addCategory(name: string, parentId: string | null = null, icon?: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/library/categories`, {
+      method: 'POST',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ name, parentId, icon }),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || `Failed to add category`);
+    }
+    return response.json();
+  },
+
+  async updateCategory(id: string, name: string, icon?: string): Promise<any> {
+    const response = await fetch(`${API_BASE_URL}/api/library/categories/${id}`, {
+      method: 'PUT',
+      headers: await getAuthHeaders(),
+      body: JSON.stringify({ name, icon }),
+    });
+    if (!response.ok) throw new Error(`Failed to update category`);
+    return await response.json();
+  },
+
+  async deleteCategory(id: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/library/categories/${id}`, {
+      method: 'DELETE',
+      headers: await getAuthHeaders(),
+    });
+    if (!response.ok) throw new Error(`Failed to delete category`);
   }
 };

@@ -111,7 +111,7 @@ library.get('/file/:fileKey', async (c) => {
 // Saves the uploaded media metadata to D1
 library.post('/content', async (c) => {
   try {
-    const { title, type, coverUrl, fileUrl, description, author, readTime } = await c.req.json();
+    const { title, type, coverUrl, fileUrl, description, author, readTime, category } = await c.req.json();
     
     if (!title || !type || !fileUrl) {
       return c.json({ error: 'Missing required fields' }, 400);
@@ -121,8 +121,8 @@ library.post('/content', async (c) => {
     const createdAt = new Date().toISOString();
 
     await c.env.DB.prepare(
-      'INSERT INTO Content (id, title, type, coverUrl, fileUrl, createdAt, description, author, readTime) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-    ).bind(id, title, type, coverUrl || null, fileUrl, createdAt, description || null, author || null, readTime || null).run();
+      'INSERT INTO Content (id, title, type, coverUrl, fileUrl, createdAt, description, author, readTime, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(id, title, type, coverUrl || null, fileUrl, createdAt, description || null, author || null, readTime || null, category || null).run();
 
     // Trigger Push Notification automatically
     try {
@@ -172,6 +172,64 @@ library.get('/content', async (c) => {
   try {
     const { results } = await c.env.DB.prepare('SELECT * FROM Content ORDER BY createdAt DESC').all();
     return c.json({ success: true, data: results });
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+// GET /api/library/categories
+library.get('/categories', async (c) => {
+  try {
+    const { results } = await c.env.DB.prepare('SELECT * FROM Category ORDER BY createdAt ASC').all();
+    return c.json({ success: true, data: results });
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+// POST /api/library/categories
+library.post('/categories', async (c) => {
+  try {
+    const { name, parentId, icon } = await c.req.json();
+    if (!name) return c.json({ error: 'Name is required' }, 400);
+
+    const id = crypto.randomUUID();
+    const createdAt = new Date().toISOString();
+
+    await c.env.DB.prepare(
+      'INSERT INTO Category (id, name, parentId, icon, createdAt) VALUES (?, ?, ?, ?, ?)'
+    ).bind(id, name, parentId || null, icon || null, createdAt).run();
+
+    return c.json({ success: true, id, name, parentId, icon, createdAt }, 201);
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+// PUT /api/library/categories/:id
+library.put('/categories/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const { name, icon } = await c.req.json();
+    if (!name) return c.json({ error: 'Name is required' }, 400);
+
+    await c.env.DB.prepare('UPDATE Category SET name = ?, icon = ? WHERE id = ?').bind(name, icon || null, id).run();
+
+    return c.json({ success: true, id, name, icon });
+  } catch (error: any) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+// DELETE /api/library/categories/:id
+library.delete('/categories/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    
+    // Delete the category and any child categories
+    await c.env.DB.prepare('DELETE FROM Category WHERE id = ? OR parentId = ?').bind(id, id).run();
+
+    return c.json({ success: true });
   } catch (error: any) {
     return c.json({ error: error.message }, 500);
   }

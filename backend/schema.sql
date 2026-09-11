@@ -14,6 +14,18 @@ CREATE TABLE IF NOT EXISTS Content (
     type TEXT NOT NULL,
     coverUrl TEXT,
     fileUrl TEXT NOT NULL,
+    createdAt TEXT NOT NULL,
+    author TEXT,
+    description TEXT,
+    readTime INTEGER,
+    category TEXT
+);
+
+CREATE TABLE IF NOT EXISTS Category (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    parentId TEXT,
+    icon TEXT,
     createdAt TEXT NOT NULL
 );
 
