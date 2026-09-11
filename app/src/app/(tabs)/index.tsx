@@ -86,15 +86,13 @@ export default function HomeScreen() {
 
   const [recommendedContent, setRecommendedContent] = useState<any[]>([]);
 
-  useFocusEffect(
-    useCallback(() => {
-      async function loadData() {
-        const data = await apiService.fetchLibraryContent();
-        setRecommendedContent(data);
-      }
-      loadData();
-    }, [])
-  );
+  useEffect(() => {
+    async function loadData() {
+      const data = await apiService.fetchLibraryContent();
+      setRecommendedContent(data);
+    }
+    loadData();
+  }, []);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>

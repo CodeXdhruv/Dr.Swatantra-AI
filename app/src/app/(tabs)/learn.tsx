@@ -1,8 +1,9 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Image, Dimensions } from 'react-native';
+import Animated, { FadeInDown, FadeOutUp, Layout } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
-import { Search, Book, FileText, Headphones, PlayCircle, MessageSquare, Bookmark, Heart, User, Leaf, Quote, MoreVertical } from 'lucide-react-native';
+import { Search, LayoutGrid, Book, FileText, Quote as QuoteIcon, Bookmark, ChevronLeft, ChevronRight, Flower, Leaf, Users, Sun, ArrowRight, Folder, Sparkles, Aperture, Atom, Wind, Droplet, Feather, Flame, Waves, Infinity as InfinityIcon, Network, Layers, Boxes, Orbit, Asterisk, Focus, Zap, Hexagon, Triangle, Circle } from 'lucide-react-native';
 import { Colors, Spacing, Radius, Shadows } from '@/constants/theme';
 import { apiService } from '../../services/api';
 import * as Linking from 'expo-linking';
@@ -10,35 +11,69 @@ import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
-const CATEGORIES = [
-  { id: 'all', label: 'All', icon: null },
-  { id: 'books', label: 'Books', icon: Book },
-  { id: 'articles', label: 'Articles', icon: FileText },
-  { id: 'quotes', label: 'Quotes', icon: MessageSquare },
+const DEFAULT_CATEGORIES = [
+  { id: 'all', label: 'All', icon: LayoutGrid },
+  { id: 'book', label: 'Books', icon: Book },
+  { id: 'article', label: 'Articles', icon: FileText },
+  { id: 'quote', label: 'Quotes', icon: QuoteIcon },
 ];
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  Folder, Aperture, Atom, Wind, Droplet, Feather, Flame, Waves, InfinityIcon, Network, Layers, Boxes, Sparkles, Orbit, Asterisk, Focus, Zap, Hexagon, Triangle, Circle
+};
 
 export default function LearnScreen() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState('all');
+  const [categories] = useState<any[]>(DEFAULT_CATEGORIES);
+  const [themes, setThemes] = useState<any[]>([]);
+  const [activeTheme, setActiveTheme] = useState<string | null>(null);
   const [libraryContent, setLibraryContent] = useState<any[]>([]);
+  const featuredScrollRef = React.useRef<ScrollView>(null);
+  const [activeFeaturedIndex, setActiveFeaturedIndex] = useState(0);
 
-  useFocusEffect(
-    useCallback(() => {
-      async function loadData() {
-        const data = await apiService.fetchLibraryContent();
-        setLibraryContent(data);
-      }
-      loadData();
-    }, [])
-  );
+  React.useEffect(() => {
+    async function loadData() {
+      const [contentData, categoryData] = await Promise.all([
+        apiService.fetchLibraryContent(),
+        apiService.fetchCategories()
+      ]);
+      
+      setLibraryContent(contentData);
+
+      // Map backend categories to our UI format for themes
+      const dynamicThemes = categoryData.map((cat: any) => ({
+        id: cat.id || cat.name.toLowerCase(),
+        label: cat.name,
+        icon: (cat.icon && ICON_MAP[cat.icon]) ? ICON_MAP[cat.icon] : Folder
+      }));
+
+      setThemes(dynamicThemes);
+    }
+    loadData();
+  }, []);
 
   const filteredContent = libraryContent.filter((item) => {
     if (activeCategory === 'all') return true;
-    if (activeCategory === 'books' && item.type === 'BOOK') return true;
-    if (activeCategory === 'articles' && item.type === 'ARTICLE') return true;
-    if (activeCategory === 'quotes' && item.type === 'QUOTE') return true;
-    return false;
+    
+    // Filter purely by content type at the top level
+    return item.type?.toLowerCase() === activeCategory;
   });
+
+  const featuredItems = activeCategory === 'all' ? filteredContent.slice(0, Math.min(3, filteredContent.length)) : [];
+  const curatedItems = activeCategory === 'all' ? filteredContent.slice(featuredItems.length) : filteredContent;
+
+  React.useEffect(() => {
+    if (featuredItems.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveFeaturedIndex((prev) => {
+        const nextIndex = (prev + 1) % featuredItems.length;
+        featuredScrollRef.current?.scrollTo({ x: nextIndex * (width - Spacing.lg * 2), y: 0, animated: true });
+        return nextIndex;
+      });
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [featuredItems.length]);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
@@ -46,13 +81,13 @@ export default function LearnScreen() {
         
         {/* Header without Background Image */}
         <View style={styles.headerBackground}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <View style={{ flex: 1, paddingRight: Spacing.md }}>
-              <Text style={styles.headerTitle}>Library & Wisdom</Text>
-              <Text style={styles.headerSubtitle}>Explore timeless knowledge for{'\n'}a better you and a better world.</Text>
+          <View style={styles.headerTop}>
+            <View>
+              <Text style={styles.headerTitle}>Library</Text>
+              <Text style={styles.headerSubtitle}>Knowledge for a calmer, wiser you.</Text>
             </View>
             <TouchableOpacity style={styles.searchButton}>
-              <Search color={Colors.primary} size={20} strokeWidth={2} />
+              <Search color="#0A2540" size={20} strokeWidth={2} />
             </TouchableOpacity>
           </View>
         </View>
@@ -63,28 +98,21 @@ export default function LearnScreen() {
           showsHorizontalScrollIndicator={false} 
           contentContainerStyle={styles.categoryScroll}
         >
-          {CATEGORIES.map((cat) => {
+          {categories.map((cat) => {
             const isActive = activeCategory === cat.id;
-            const Icon = cat.icon;
+            const Icon = cat.icon || Folder;
+            
             return (
-              <TouchableOpacity
-                key={cat.id}
+              <TouchableOpacity 
+                key={cat.id} 
                 style={[styles.categoryChip, isActive && styles.categoryChipActive]}
                 onPress={() => setActiveCategory(cat.id)}
               >
-                {Icon && (
-                  <Icon 
-                    color={isActive ? '#DEAB5B' : Colors.textSecondary} 
-                    size={16} 
-                    strokeWidth={2} 
-                    style={{ marginRight: 6 }} 
-                  />
-                )}
-                {!Icon && isActive && (
-                  <View style={{ width: 16, height: 16, borderRadius: 8, backgroundColor: '#DEAB5B', marginRight: 6, alignItems: 'center', justifyContent: 'center' }}>
-                    <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#fff' }} />
-                  </View>
-                )}
+                <Icon 
+                  size={16} 
+                  color={isActive ? '#FFFFFF' : Colors.primaryNavy} 
+                  style={styles.categoryIcon}
+                />
                 <Text style={[styles.categoryChipText, isActive && styles.categoryChipTextActive]}>
                   {cat.label}
                 </Text>
@@ -93,86 +121,311 @@ export default function LearnScreen() {
           })}
         </ScrollView>
 
-        {/* Featured for You */}
+        {/* Featured Section */}
+        {featuredItems.length > 0 && (
+          <View style={styles.featuredContainer}>
+            <ScrollView
+              ref={featuredScrollRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={(e) => {
+                const newIndex = Math.round(e.nativeEvent.contentOffset.x / (width - Spacing.lg * 2));
+                setActiveFeaturedIndex(newIndex);
+              }}
+            >
+              {featuredItems.map((item, idx) => (
+                <View key={item.id || idx} style={{ width: width - Spacing.lg * 2 }}>
+                  <TouchableOpacity 
+                    activeOpacity={0.9}
+                    onPress={() => {
+                       if (item.fileUrl) {
+                        const contentType = item.type?.toUpperCase();
+                        if (contentType === 'BOOK') {
+                          router.push({ pathname: '/reader', params: { url: item.fileUrl, title: item.title } });
+                        } else if (contentType === 'ARTICLE') {
+                          router.push({ 
+                            pathname: '/article', 
+                            params: { 
+                              title: item.title, 
+                              description: item.description, 
+                              coverUrl: item.coverUrl, 
+                              author: item.author, 
+                              readTime: item.readTime 
+                            } 
+                          });
+                        } else {
+                          Linking.openURL(item.fileUrl);
+                        }
+                      }
+                    }}
+                  >
+                    <ImageBackground
+                      source={item.coverUrl ? { uri: item.coverUrl } : { uri: 'https://images.unsplash.com/photo-1499244571948-7cc80560242b?auto=format&fit=crop&w=800&q=80' }}
+                      style={styles.featuredCard}
+                      imageStyle={{ borderRadius: 20 }}
+                    >
+                      <View style={styles.featuredOverlay}>
+                        <View style={styles.featuredTopRow}>
+                          <Text style={styles.featuredTag}>FEATURED</Text>
+                          <TouchableOpacity style={styles.bookmarkButton}>
+                            <Bookmark color="#0A2540" size={20} strokeWidth={1.5} />
+                          </TouchableOpacity>
+                        </View>
+                        
+                        <View style={styles.featuredMainContent}>
+                          <Text style={styles.featuredTitle} numberOfLines={2}>{item.title}</Text>
+                          <Text style={styles.featuredDesc} numberOfLines={2}>{item.description || `Explore this ${item.type?.toLowerCase() || 'content'} in our library.`}</Text>
+                          
+                          <View style={styles.featuredBottomRow}>
+                            <View style={styles.exploreButton}>
+                              <Text style={styles.exploreButtonText}>Explore {item.type === 'BOOK' ? 'Book' : item.type === 'ARTICLE' ? 'Article' : 'Content'}</Text>
+                              <ArrowRight color="#fff" size={16} style={{ marginLeft: 4 }} />
+                            </View>
+                            
+                            {featuredItems.length > 1 && (
+                              <View style={styles.paginationControls}>
+                                <Text style={styles.paginationText}>{idx + 1} / {featuredItems.length}</Text>
+                                <TouchableOpacity 
+                                  style={styles.pageButton}
+                                  onPress={() => {
+                                    const nextIdx = (idx - 1 + featuredItems.length) % featuredItems.length;
+                                    featuredScrollRef.current?.scrollTo({ x: nextIdx * (width - Spacing.lg * 2), y: 0, animated: true });
+                                    setActiveFeaturedIndex(nextIdx);
+                                  }}
+                                >
+                                  <ChevronLeft color="#0A2540" size={16} />
+                                </TouchableOpacity>
+                                <TouchableOpacity 
+                                  style={styles.pageButton}
+                                  onPress={() => {
+                                    const nextIdx = (idx + 1) % featuredItems.length;
+                                    featuredScrollRef.current?.scrollTo({ x: nextIdx * (width - Spacing.lg * 2), y: 0, animated: true });
+                                    setActiveFeaturedIndex(nextIdx);
+                                  }}
+                                >
+                                  <ChevronRight color="#0A2540" size={16} />
+                                </TouchableOpacity>
+                              </View>
+                            )}
+                          </View>
+                        </View>
+                      </View>
+                    </ImageBackground>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* Curated for You Section */}
+        {curatedItems.length > 0 && (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Curated for You</Text>
+              <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.viewAllText}>See all</Text>
+                <ArrowRight color="#DEAB5B" size={14} style={{ marginLeft: 2 }} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              contentContainerStyle={styles.curatedScroll}
+            >
+              {curatedItems.map(item => (
+                <TouchableOpacity 
+                  key={item.id || Math.random().toString()}
+                  style={styles.curatedCard}
+                  activeOpacity={0.8}
+                  onPress={() => {
+                     if (item.fileUrl) {
+                      const contentType = item.type?.toUpperCase();
+                      if (contentType === 'BOOK') {
+                        router.push({ pathname: '/reader', params: { url: item.fileUrl, title: item.title } });
+                      } else if (contentType === 'ARTICLE') {
+                        router.push({ 
+                          pathname: '/article', 
+                          params: { 
+                            title: item.title, 
+                            description: item.description, 
+                            coverUrl: item.coverUrl, 
+                            author: item.author, 
+                            readTime: item.readTime 
+                          } 
+                        });
+                      } else {
+                        Linking.openURL(item.fileUrl);
+                      }
+                    }
+                  }}
+                >
+                  {item.type === 'QUOTE' ? (
+                     <View style={[styles.curatedImageContainer, { backgroundColor: '#F8FAFC', borderRadius: 12, padding: 16 }]}>
+                       <View style={styles.curatedCardTop}>
+                         <Text style={styles.curatedTag}>QUOTE</Text>
+                         <Bookmark color="#0A2540" size={18} strokeWidth={1.5} />
+                       </View>
+                       <View style={styles.quoteCardContent}>
+                         <QuoteIcon color="#DEAB5B" size={24} fill="#DEAB5B" style={{ alignSelf: 'center', marginBottom: 12 }} />
+                         <Text style={styles.quoteCardText} numberOfLines={3}>{item.title}</Text>
+                         <Text style={styles.quoteCardAuthor}>{item.author || '— ATMIK'}</Text>
+                       </View>
+                     </View>
+                  ) : (
+                    <View style={styles.curatedImageContainer}>
+                      <ImageBackground
+                        source={item.coverUrl ? { uri: item.coverUrl } : { uri: 'https://images.unsplash.com/photo-1506869640319-ce1c24e1520e?auto=format&fit=crop&w=400&q=80' }}
+                        style={styles.curatedImage}
+                        imageStyle={{ borderRadius: 12 }}
+                      >
+                        <View style={styles.curatedCardTop}>
+                          <Text style={styles.curatedTag}>{item.type || 'CONTENT'}</Text>
+                          <Bookmark color="#0A2540" size={18} strokeWidth={1.5} />
+                        </View>
+                        {item.type === 'BOOK' && (
+                          <View style={styles.curatedImageTextContainer}>
+                            <Text style={styles.curatedImageTitle}>{item.title}</Text>
+                          </View>
+                        )}
+                      </ImageBackground>
+                    </View>
+                  )}
+                  <View style={styles.curatedContent}>
+                    <Text style={styles.curatedItemTitle} numberOfLines={1}>{item.title}</Text>
+                    <Text style={styles.curatedItemSubtitle} numberOfLines={2}>{item.description || `Explore this ${item.type?.toLowerCase() || 'item'}.`}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </>
+        )}
+
+        {/* Explore by Theme */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Featured for You</Text>
-          <TouchableOpacity>
-            <Text style={styles.viewAllText}>View all {'>'}</Text>
+          <Text style={styles.sectionTitle}>Explore by Theme</Text>
+          <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.viewAllText}>See all</Text>
+            <ArrowRight color="#DEAB5B" size={14} style={{ marginLeft: 2 }} />
           </TouchableOpacity>
         </View>
 
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false} 
-          contentContainerStyle={styles.featuredScroll}
-          snapToInterval={width * 0.75 + Spacing.md}
-          decelerationRate="fast"
+          contentContainerStyle={styles.themeScroll}
         >
-          {filteredContent.map((item) => (
-            <TouchableOpacity 
-              key={item.id} 
-              style={[styles.featuredCard, { width: width * 0.75 }]} 
-              onPress={() => { 
-                if (item.fileUrl) {
-                  const contentType = item.type?.toUpperCase();
-                  if (contentType === 'BOOK') {
-                    router.push({ pathname: '/reader', params: { url: item.fileUrl, title: item.title } });
-                  } else if (contentType === 'ARTICLE') {
-                    router.push({ 
-                      pathname: '/article', 
-                      params: { 
-                        title: item.title, 
-                        description: item.description, 
-                        coverUrl: item.coverUrl, 
-                        author: item.author, 
-                        readTime: item.readTime 
-                      } 
-                    });
-                  } else {
-                    Linking.openURL(item.fileUrl);
-                  }
-                } 
-              }}
-            >
-              <ImageBackground 
-                source={item.coverUrl ? { uri: item.coverUrl } : require('@/assets/images/mountain_bg.png')}
-                style={styles.featuredImage}
+          {themes.map((theme) => {
+            const Icon = theme.icon || Folder;
+            const isActiveTheme = activeTheme === theme.label;
+            return (
+              <TouchableOpacity
+                key={theme.id}
+                style={[styles.themeChip, isActiveTheme && styles.themeChipActive]}
+                onPress={() => setActiveTheme(isActiveTheme ? null : theme.label)}
               >
-                <View style={styles.featuredImageOverlay}>
-                  <View style={[styles.typeTag, 
-                    item.type === 'BOOK' ? { backgroundColor: '#E3F2FD' } : 
-                    item.type === 'ARTICLE' ? { backgroundColor: '#E8F5E9' } : 
-                    { backgroundColor: '#E8EAF6' }
-                  ]}>
-                    <Text style={[styles.typeTagText,
-                      item.type === 'BOOK' ? { color: '#1565C0' } : 
-                      item.type === 'ARTICLE' ? { color: '#2E7D32' } : 
-                      { color: '#283593' }
-                    ]}>{item.type || 'CONTENT'}</Text>
-                  </View>
-                  <TouchableOpacity style={styles.bookmarkButton}>
-                    <Bookmark color={Colors.primary} size={20} strokeWidth={1.5} />
-                  </TouchableOpacity>
-                </View>
-              </ImageBackground>
-              <View style={styles.featuredContent}>
-                <Text style={styles.featuredTitle} numberOfLines={1}>{item.title}</Text>
-                <Text style={styles.featuredSubtitle} numberOfLines={2}>Explore this {item.type?.toLowerCase() || 'content'} in our library.</Text>
-                <View style={styles.featuredMetaRow}>
-                  <Text style={styles.featuredMetaText}>{new Date(item.createdAt).toLocaleDateString()}</Text>
-                </View>
-              </View>
-            </TouchableOpacity>
-          ))}
+                <Icon color={isActiveTheme ? "#FFF" : "#0A2540"} size={18} strokeWidth={1.5} style={{ marginRight: 8 }} />
+                <Text style={[styles.themeChipText, isActiveTheme && styles.themeChipTextActive]}>{theme.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
 
-        <View style={styles.paginationDots}>
-          <View style={[styles.dot, styles.dotActive]} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-          <View style={styles.dot} />
-        </View>
-
+        {/* Dynamic Theme Content Display */}
+        {activeTheme && (
+          <Animated.View 
+            entering={FadeInDown.duration(400).springify()} 
+            exiting={FadeOutUp.duration(300)}
+            layout={Layout.springify()}
+            style={styles.themeContentContainer}
+          >
+            <View style={styles.themeContentHeader}>
+              <Text style={styles.themeContentTitle}>Explore {activeTheme}</Text>
+              <TouchableOpacity onPress={() => setActiveTheme(null)} style={styles.closeThemeButton}>
+                <Text style={styles.closeThemeText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {libraryContent.filter(item => item.category === activeTheme).length > 0 ? (
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false} 
+                contentContainerStyle={styles.curatedScroll}
+              >
+                {libraryContent.filter(item => item.category === activeTheme).map(item => (
+                  <TouchableOpacity 
+                    key={`theme-${item.id || Math.random().toString()}`}
+                    style={styles.curatedCard}
+                    activeOpacity={0.8}
+                    onPress={() => {
+                       if (item.fileUrl) {
+                        const contentType = item.type?.toUpperCase();
+                        if (contentType === 'BOOK') {
+                          router.push({ pathname: '/reader', params: { url: item.fileUrl, title: item.title } });
+                        } else if (contentType === 'ARTICLE') {
+                          router.push({ 
+                            pathname: '/article', 
+                            params: { 
+                              title: item.title, 
+                              description: item.description, 
+                              coverUrl: item.coverUrl, 
+                              author: item.author, 
+                              readTime: item.readTime 
+                            } 
+                          });
+                        } else {
+                          Linking.openURL(item.fileUrl);
+                        }
+                      }
+                    }}
+                  >
+                    {item.type === 'QUOTE' ? (
+                       <View style={[styles.curatedImageContainer, { backgroundColor: '#F8FAFC', borderRadius: 12, padding: 16 }]}>
+                         <View style={styles.curatedCardTop}>
+                           <Text style={styles.curatedTag}>QUOTE</Text>
+                           <Bookmark color="#0A2540" size={18} strokeWidth={1.5} />
+                         </View>
+                         <View style={styles.quoteCardContent}>
+                           <QuoteIcon color="#DEAB5B" size={24} fill="#DEAB5B" style={{ alignSelf: 'center', marginBottom: 12 }} />
+                           <Text style={styles.quoteCardText} numberOfLines={3}>{item.title}</Text>
+                           <Text style={styles.quoteCardAuthor}>{item.author || '— ATMIK'}</Text>
+                         </View>
+                       </View>
+                    ) : (
+                      <View style={styles.curatedImageContainer}>
+                        <ImageBackground
+                          source={item.coverUrl ? { uri: item.coverUrl } : { uri: 'https://images.unsplash.com/photo-1506869640319-ce1c24e1520e?auto=format&fit=crop&w=400&q=80' }}
+                          style={styles.curatedImage}
+                          imageStyle={{ borderRadius: 12 }}
+                        >
+                          <View style={styles.curatedCardTop}>
+                            <Text style={styles.curatedTag}>{item.type || 'CONTENT'}</Text>
+                            <Bookmark color="#0A2540" size={18} strokeWidth={1.5} />
+                          </View>
+                          {item.type === 'BOOK' && (
+                            <View style={styles.curatedImageTextContainer}>
+                              <Text style={styles.curatedImageTitle}>{item.title}</Text>
+                            </View>
+                          )}
+                        </ImageBackground>
+                      </View>
+                    )}
+                    <View style={styles.curatedContent}>
+                      <Text style={styles.curatedItemTitle} numberOfLines={1}>{item.title}</Text>
+                      <Text style={styles.curatedItemSubtitle} numberOfLines={2}>{item.description || `Explore this ${item.type?.toLowerCase() || 'item'}.`}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            ) : (
+              <View style={styles.emptyThemeContainer}>
+                <Text style={styles.emptyThemeText}>No content available for {activeTheme} yet.</Text>
+              </View>
+            )}
+          </Animated.View>
+        )}
 
       </ScrollView>
     </SafeAreaView>
@@ -182,7 +435,7 @@ export default function LearnScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FAFBFC', // Light off-white from mockup
+    backgroundColor: '#FAFBFC', 
   },
   scrollContent: {
     paddingBottom: 160,
@@ -192,23 +445,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.md,
-    backgroundColor: '#FAFBFC',
-    zIndex: 1,
+    backgroundColor: '#FAF7F2',
   },
   headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.xl,
-  },
-  headerLogoContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...Shadows.light,
+    alignItems: 'flex-start',
+    marginBottom: Spacing.md,
   },
   searchButton: {
     width: 44,
@@ -220,37 +463,61 @@ const styles = StyleSheet.create({
     ...Shadows.light,
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 40,
     fontFamily: 'serif',
     fontWeight: '700',
     color: '#0A2540',
-    marginBottom: Spacing.sm,
+    marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 15,
-    color: '#4A5568',
+    color: '#718096',
     lineHeight: 22,
+  },
+  quoteContainer: {
+    marginTop: 10,
+    paddingRight: 60,
+  },
+  quoteText: {
+    fontSize: 18,
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+    color: '#0A2540',
+    lineHeight: 26,
+    marginBottom: 8,
+  },
+  authorContainer: {
+    alignItems: 'flex-start',
+  },
+  quoteAuthor: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#718096',
+    letterSpacing: 1,
+    marginBottom: 4,
+  },
+  authorUnderline: {
+    width: 30,
+    height: 2,
+    backgroundColor: '#DEAB5B',
   },
   categoryScroll: {
     paddingHorizontal: Spacing.lg,
-    marginTop: 0,
-    marginBottom: Spacing.xl,
+    marginTop: Spacing.md,
+    paddingBottom: Spacing.lg,
   },
   categoryChip: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
     marginRight: Spacing.sm,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
     ...Shadows.light,
   },
   categoryChipActive: {
     backgroundColor: '#0A2540',
-    borderColor: '#0A2540',
   },
   categoryChipText: {
     fontSize: 14,
@@ -260,6 +527,98 @@ const styles = StyleSheet.create({
   categoryChipTextActive: {
     color: '#fff',
   },
+  featuredContainer: {
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.xl,
+  },
+  featuredCard: {
+    width: '100%',
+    height: 240,
+    borderRadius: 20,
+    ...Shadows.medium,
+  },
+  featuredOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    borderRadius: 20,
+    padding: Spacing.lg,
+    justifyContent: 'space-between',
+  },
+  featuredTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  featuredTag: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#DEAB5B',
+    letterSpacing: 1,
+  },
+  bookmarkButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Shadows.light,
+  },
+  featuredMainContent: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  featuredTitle: {
+    fontSize: 28,
+    fontFamily: 'serif',
+    fontWeight: '700',
+    color: '#0A2540',
+    marginBottom: 8,
+  },
+  featuredDesc: {
+    fontSize: 14,
+    color: '#4A5568',
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  featuredBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+  },
+  exploreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#DEAB5B',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  exploreButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  paginationControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  paginationText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: '600',
+    marginRight: 12,
+  },
+  pageButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+    ...Shadows.light,
+  },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -268,7 +627,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: 'serif',
     fontWeight: '600',
     color: '#0A2540',
@@ -278,80 +637,159 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#DEAB5B',
   },
-  featuredScroll: {
+  curatedScroll: {
     paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.lg,
+    paddingBottom: Spacing.xl,
   },
-  featuredCard: {
+  curatedCard: {
+    width: 160,
+    marginRight: Spacing.md,
     backgroundColor: '#fff',
     borderRadius: 16,
-    marginRight: Spacing.md,
-    ...Shadows.medium,
-    overflow: 'hidden',
+    padding: 8,
+    ...Shadows.light,
   },
-  featuredImage: {
-    height: 160,
+  curatedImageContainer: {
+    height: 180,
     width: '100%',
+    marginBottom: 12,
   },
-  featuredImageOverlay: {
+  curatedImage: {
+    flex: 1,
+    padding: 12,
+    justifyContent: 'space-between',
+  },
+  curatedCardTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: Spacing.sm,
+    alignItems: 'center',
+    width: '100%',
   },
-  typeTag: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  typeTagText: {
-    fontSize: 10,
+  curatedTag: {
+    fontSize: 9,
     fontWeight: '700',
-  },
-  bookmarkButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    color: '#DEAB5B',
+    letterSpacing: 1,
     backgroundColor: 'rgba(255,255,255,0.8)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  curatedImageTextContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  featuredContent: {
-    padding: Spacing.md,
-  },
-  featuredTitle: {
+  curatedImageTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontFamily: 'serif',
+    fontWeight: '600',
+    color: '#0A2540',
+    textAlign: 'center',
+  },
+  quoteCardContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+  },
+  quoteCardText: {
+    fontSize: 14,
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+    color: '#0A2540',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  quoteCardAuthor: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#718096',
+    letterSpacing: 0.5,
+  },
+  curatedContent: {
+    paddingHorizontal: 4,
+    paddingBottom: 4,
+  },
+  curatedItemTitle: {
+    fontSize: 14,
+    fontWeight: '600',
     color: '#0A2540',
     marginBottom: 4,
   },
-  featuredSubtitle: {
-    fontSize: 13,
-    color: '#4A5568',
-    marginBottom: 12,
-    lineHeight: 18,
-  },
-  featuredMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  featuredMetaText: {
+  curatedItemSubtitle: {
     fontSize: 12,
     color: '#718096',
+    lineHeight: 16,
   },
-  paginationDots: {
+  themeScroll: {
+    paddingHorizontal: Spacing.lg,
+    paddingBottom: Spacing.xl,
+  },
+  themeChip: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: Spacing.xl,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginRight: Spacing.sm,
+    ...Shadows.light,
   },
-  dot: {
-    width: 16,
-    height: 4,
-    borderRadius: 2,
+  themeChipText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#4A5568',
+  },
+  themeChipActive: {
+    backgroundColor: '#0A2540',
+    borderColor: '#0A2540',
+  },
+  themeChipTextActive: {
+    color: '#FFF',
+  },
+  themeContentContainer: {
+    marginTop: Spacing.sm,
+    backgroundColor: '#F8F9FA',
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: '#E2E8F0',
+    paddingVertical: Spacing.md,
+  },
+  themeContentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+  },
+  themeContentTitle: {
+    fontSize: 18,
+    fontFamily: 'serif',
+    fontWeight: '600',
+    color: '#0A2540',
+  },
+  closeThemeButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     backgroundColor: '#E2E8F0',
-    marginHorizontal: 4,
+    borderRadius: 12,
   },
-  dotActive: {
-    backgroundColor: '#DEAB5B',
+  closeThemeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#4A5568',
   },
-
+  emptyThemeContainer: {
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.xl,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyThemeText: {
+    fontSize: 14,
+    color: '#718096',
+    fontStyle: 'italic',
+  },
 });
+
