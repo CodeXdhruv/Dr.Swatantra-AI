@@ -6,14 +6,7 @@ import {
   User, 
   MediaItem, 
   Comment, 
-  ActivityLog,
-  initialContent,
-  initialCategories,
-  initialTags,
-  initialUsers,
-  initialMedia,
-  initialComments,
-  initialActivityLogs
+  ActivityLog
 } from '../services/mockData';
 import { apiService } from '../services/api';
 
@@ -26,7 +19,9 @@ interface AdminState {
 
   // Data Collections
   contentList: ContentItem[];
+  fetchContent: () => Promise<void>;
   categories: Category[];
+  fetchCategories: () => Promise<void>;
   tags: Tag[];
   users: User[];
   fetchUsers: () => Promise<void>;
@@ -40,9 +35,9 @@ interface AdminState {
   deleteContentItem: (id: string) => void;
 
   // Categories Actions
-  addCategory: (name: string, parentId: string | null) => void;
-  renameCategory: (id: string, name: string) => void;
-  deleteCategory: (id: string) => void;
+  addCategory: (name: string, parentId: string | null, icon?: string) => Promise<void>;
+  renameCategory: (id: string, name: string, icon?: string) => Promise<void>;
+  deleteCategory: (id: string) => Promise<void>;
 
   // Tags Actions
   addTag: (name: string, color: string) => void;
@@ -66,6 +61,8 @@ interface AdminState {
   // UI States
   sidebarCollapsed: boolean;
   toggleSidebar: () => void;
+  mobileMenuOpen: boolean;
+  setMobileMenuOpen: (open: boolean) => void;
   commandPaletteOpen: boolean;
   setCommandPaletteOpen: (open: boolean) => void;
   notificationCenterOpen: boolean;
@@ -115,6 +112,35 @@ export const useAdminStore = create<AdminState>((set, get) => ({
 
   // Data Collections
   contentList: [],
+  fetchContent: async () => {
+    try {
+      const data = await apiService.fetchContent();
+      // Map API data to ContentItem format if necessary
+      const mapped = data.map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        subtitle: item.description || '', // mapped from description if subtitle is not available
+        slug: item.id, // Or generate slug
+        type: item.type,
+        author: item.author || 'Dr. Atmik Jain',
+        status: item.isPublished ? 'Published' : 'Draft',
+        views: item.views || 0,
+        bookmarks: 0,
+        downloads: 0,
+        language: 'English',
+        category: 'Uncategorized',
+        tags: [],
+        featured: false,
+        date: new Date(item.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        thumbnail: item.coverUrl || '',
+        fileUrl: item.fileUrl,
+        description: item.description || '',
+      }));
+      set({ contentList: mapped });
+    } catch (error) {
+      console.error('Failed to fetch content:', error);
+    }
+  },
   categories: [],
   tags: [],
   users: [],
@@ -197,66 +223,66 @@ export const useAdminStore = create<AdminState>((set, get) => ({
     get().addLog('Delete', `Deleted ${item?.type || 'content'} "${item?.title || 'item'}"`);
   },
 
-  // Categories Actions
-  addCategory: (name, parentId) => {
-    const newCat: Category = {
-      id: `cat-${Math.random().toString()}`,
-      name,
-      slug: name.toLowerCase().replace(/\s+/g, '-'),
-      parentId,
-      children: []
-    };
-    
-    set(state => {
-      if (!parentId) {
-        return { categories: [...state.categories, newCat] };
-      }
-      
-      const insertChild = (list: Category[]): Category[] => {
-        return list.map(cat => {
-          if (cat.id === parentId) {
-            return { ...cat, children: [...(cat.children || []), newCat] };
-          } else if (cat.children && cat.children.length > 0) {
-            return { ...cat, children: insertChild(cat.children) };
-          }
-          return cat;
-        });
-      };
-      
-      return { categories: insertChild(state.categories) };
-    });
-    
-    get().addLog('Update', `Added new category "${name}"`);
-  },
-  renameCategory: (id, name) => {
-    set(state => {
-      const updateName = (list: Category[]): Category[] => {
-        return list.map(cat => {
-          if (cat.id === id) {
-            return { ...cat, name, slug: name.toLowerCase().replace(/\s+/g, '-') };
-          } else if (cat.children && cat.children.length > 0) {
-            return { ...cat, children: updateName(cat.children) };
-          }
-          return cat;
-        });
-      };
-      return { categories: updateName(state.categories) };
-    });
-    get().addLog('Update', `Renamed category to "${name}"`);
-  },
-  deleteCategory: (id) => {
-    set(state => {
-      const filterCat = (list: Category[]): Category[] => {
-        return list
-          .filter(cat => cat.id !== id)
-          .map(cat => ({
-            ...cat,
-            children: cat.children ? filterCat(cat.children) : []
+  // Categories Actions  // -------------------------------------------------------------
+  // Categories
+  // -------------------------------------------------------------
+  categories: [],
+  
+  fetchCategories: async () => {
+    try {
+      const data = await apiService.fetchCategories();
+      // Format backend data into a tree if needed, but for now we can just store the flat list or tree.
+      // The old categories used nested children. The backend returns flat.
+      // Let's build a tree from the flat list.
+      const buildTree = (items: any[], parentId: string | null = null): Category[] => {
+        return items
+          .filter((item) => item.parentId === parentId)
+          .map((item) => ({
+            id: item.id,
+            name: item.name,
+            icon: item.icon,
+            count: 0,
+            children: buildTree(items, item.id)
           }));
       };
-      return { categories: filterCat(state.categories) };
-    });
-    get().addLog('Delete', `Deleted category`);
+      const tree = buildTree(data, null);
+      set({ categories: tree });
+    } catch (error) {
+      console.error("Failed to fetch categories:", error);
+    }
+  },
+
+  addCategory: async (name, parentId, icon) => {
+    try {
+      await apiService.addCategory(name, parentId, icon);
+      get().addLog('Update', `Added new category "${name}"`);
+      await get().fetchCategories();
+    } catch (error) {
+      console.error("Failed to add category:", error);
+      throw error;
+    }
+  },
+
+  renameCategory: async (id, name, icon) => {
+    try {
+      await apiService.updateCategory(id, name, icon);
+      get().addLog('Update', `Renamed category to "${name}"`);
+      await get().fetchCategories();
+    } catch (error) {
+      console.error("Failed to rename category:", error);
+      throw error;
+    }
+  },
+
+  deleteCategory: async (id) => {
+    try {
+      await apiService.deleteCategory(id);
+      get().addLog('Delete', `Deleted category`);
+      await get().fetchCategories();
+    } catch (error) {
+      console.error("Failed to delete category:", error);
+      throw error;
+    }
   },
 
   // Tags Actions
@@ -382,6 +408,9 @@ export const useAdminStore = create<AdminState>((set, get) => ({
   setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
   notificationCenterOpen: false,
   setNotificationCenterOpen: (open) => set({ notificationCenterOpen: open }),
+  
+  mobileMenuOpen: false,
+  setMobileMenuOpen: (open) => set({ mobileMenuOpen: open }),
 
   // Search & Filter State
   searchQuery: '',
