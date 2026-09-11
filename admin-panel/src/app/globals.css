@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Samarkan';
+  src: url('/fonts/Samarkan.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 @theme {
   --color-background: #FAFBFC;
   --color-surface: #FFFFFF;
@@ -18,9 +25,10 @@
   --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.04);
   --shadow-premium: 0 10px 40px rgba(36, 56, 90, 0.05);
 
-  --font-heading: "Cormorant Garamond", Georgia, serif;
-  --font-body: "Manrope", system-ui, sans-serif;
-  --font-ui: "Inter", system-ui, sans-serif;
+  --font-heading: "Roboto Mono", monospace;
+  --font-body: "Roboto Mono", monospace;
+  --font-ui: "Roboto Mono", monospace;
+  --font-logo: "Samarkan", serif;
 }
 
 /* Custom Scrollbar */
