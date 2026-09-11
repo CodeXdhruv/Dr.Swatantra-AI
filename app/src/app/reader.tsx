@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Dimensions, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text, Dimensions, ActivityIndicator, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 import Pdf from 'react-native-pdf';
+import * as FileSystem from 'expo-file-system/legacy';
 
 const { width, height } = Dimensions.get('window');
 
@@ -13,6 +14,38 @@ export default function BookReaderScreen() {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [localUri, setLocalUri] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (!url || typeof url !== 'string') return;
+    
+    // On Android, react-native-blob-util (used by react-native-pdf) has bugs with newer RN versions
+    // related to trust managers and certificates. Downloading via expo-file-system bypasses this reliably.
+    if (Platform.OS === 'android') {
+      const secureDownload = async () => {
+        try {
+          const filename = url.split('/').pop() || 'book.pdf';
+          const safeFilename = filename.replace(/[^a-zA-Z0-9.-]/g, '_') + '.pdf';
+          const fileUri = `${FileSystem.documentDirectory}${safeFilename}`;
+          
+          const fileInfo = await FileSystem.getInfoAsync(fileUri);
+          if (fileInfo.exists && fileInfo.size && fileInfo.size > 0) {
+            setLocalUri(fileUri);
+            return;
+          }
+          
+          const { uri } = await FileSystem.downloadAsync(url, fileUri);
+          setLocalUri(uri);
+        } catch (e: any) {
+          console.error("Secure download failed:", e);
+          setError(e.message || "Failed to securely download PDF.");
+        }
+      };
+      secureDownload();
+    } else {
+      setLocalUri(url);
+    }
+  }, [url]);
 
   if (!url || typeof url !== 'string') {
     return (
@@ -42,7 +75,7 @@ export default function BookReaderScreen() {
             <Text style={styles.headerSubtitle}>Page {currentPage} of {totalPages}</Text>
           )}
         </View>
-        <View style={{ width: 44 }} /> {/* Balance for back button */}
+        <View style={{ width: 44 }} />
       </View>
 
       {/* PDF View */}
@@ -51,10 +84,14 @@ export default function BookReaderScreen() {
           <View style={styles.errorContainer}>
             <Text style={styles.errorText}>Error loading PDF: {error}</Text>
           </View>
+        ) : !localUri ? (
+          <View style={[styles.loadingContainer, { flex: 1 }]}>
+            <ActivityIndicator size="large" color="#0A2540" />
+            <Text style={styles.loadingText}>Fetching secure document...</Text>
+          </View>
         ) : (
           <Pdf
-            trustAllCerts={false}
-            source={{ uri: url, cache: true }}
+            source={{ uri: localUri, cache: false }}
             onLoadComplete={(numberOfPages, filePath) => {
               setTotalPages(numberOfPages);
               console.log(`Number of pages: ${numberOfPages}`);
