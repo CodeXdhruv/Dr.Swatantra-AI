@@ -1,166 +1,182 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useAdminStore } from "@/store/adminStore";
 import { 
-  FileText, 
-  Eye, 
-  Download, 
-  Bookmark, 
-  ArrowUpRight, 
-  ArrowDownRight, 
-  BookOpen, 
-  CheckCircle,
-  Plus,
-  Upload,
-  FolderPlus
-} from "lucide-react";
-import { 
-  LineChart, 
-  Line, 
+  BarChart, 
+  Bar, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
+  AreaChart,
+  Area,
   PieChart,
   Pie,
   Cell
 } from "recharts";
-import Link from "next/link";
+import { 
+  TrendingUp, 
+  Activity, 
+  Clock, 
+  Phone,
+  Calendar,
+  Download,
+  Eye,
+  Bookmark
+} from "lucide-react";
 
-export default function DashboardPage() {
-  const { contentList, activityLogs } = useAdminStore();
+export default function AnalyticsPage() {
+  const { currentAdmin } = useAdminStore();
+  const [greeting, setGreeting] = useState("Good Morning");
+  const [timeRange, setTimeRange] = useState("Weekly");
 
-  // Metrics calculating
-  const totalContent = contentList.length;
-  const publishedContent = contentList.filter(item => item.status === "Published").length;
-  const publishedPercentage = totalContent > 0 ? Math.round((publishedContent / totalContent) * 100) : 0;
-  
-  const totalViews = contentList.reduce((acc, c) => acc + c.views, 0);
-  const totalDownloads = contentList.reduce((acc, c) => acc + c.downloads, 0);
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good Morning");
+    else if (hour < 18) setGreeting("Good Afternoon");
+    else setGreeting("Good Evening");
+  }, []);
 
-  // Mock chart data for weekly views
-  const overviewChartData = [
-    { name: "May 12", views: 12000 },
-    { name: "May 13", views: 19000 },
-    { name: "May 14", views: 15000 },
-    { name: "May 15", views: 24000 },
-    { name: "May 16", views: 22000 },
-    { name: "May 17", views: 20000 },
-    { name: "May 18", views: 27000 }
+  // Summary Metrics
+  const summaryMetrics = [
+    { name: "Avg. Completion Rate", value: "84.2%", desc: "Chapter completion in Books", icon: Activity, trend: "+3.4% vs last month" },
+    { name: "Weekly Growth", value: "+12.8%", desc: "New registered mobile readers", icon: TrendingUp, trend: "Consistent upward path" },
+    { name: "Session Duration", value: "18.5 mins", desc: "Average app usage duration", icon: Clock, trend: "+1.2m this week" },
+    { name: "Active Mobile Users", value: "24.2K", desc: "Active in the last 24h", icon: Phone, trend: "Peak user concurrency" }
   ];
 
-  // Mock pie chart data for content distribution
-  const typeDistributionData = [
-    { name: "Books", value: 45, color: "#24385A" },
-    { name: "Articles", value: 22, color: "#D6A04A" },
-    { name: "Videos", value: 15, color: "#62B06E" },
-    { name: "Audios", value: 10, color: "#45818E" },
-    { name: "Others", value: 8, color: "#D45B5B" }
+  // Mock growth trend data
+  const growthTrendData = [
+    { name: "Mon", Views: 3200, Downloads: 1200 },
+    { name: "Tue", Views: 4100, Downloads: 1900 },
+    { name: "Wed", Views: 3800, Downloads: 1500 },
+    { name: "Thu", Views: 5100, Downloads: 2200 },
+    { name: "Fri", Views: 4900, Downloads: 2500 },
+    { name: "Sat", Views: 6200, Downloads: 3100 },
+    { name: "Sun", Views: 7500, Downloads: 3900 }
   ];
 
-  // Top viewed contents
-  const topContent = [...contentList]
-    .sort((a, b) => b.views - a.views)
-    .slice(0, 5);
+  // Popular categories bar chart data
+  const categoryData = [
+    { name: "Spirituality", count: 18400 },
+    { name: "Meditation", count: 12100 },
+    { name: "Wisdom", count: 9400 },
+    { name: "Mindfulness", count: 6200 },
+    { name: "Life Balance", count: 4800 }
+  ];
+
+  // Popular tags data
+  const tagData = [
+    { name: "Wisdom", count: 980 },
+    { name: "Soul", count: 850 },
+    { name: "Awakening", count: 720 },
+    { name: "Science", count: 540 },
+    { name: "Karma", count: 410 }
+  ];
+
+  const completionData = [
+    { name: "Completed", value: 84, color: "#24385A" },
+    { name: "Dropped", value: 16, color: "#E8EDF4" }
+  ];
 
   return (
-    <div className="space-y-8 select-none">
-      {/* Title Header */}
-      <div>
-        <h2 className="font-heading text-3xl font-bold text-primary-navy">Dashboard</h2>
-        <p className="text-xs text-primary-navy/40 mt-1 font-ui font-light">Overview of your platform.</p>
+    <div className="space-y-8 select-none font-ui">
+      {/* Banner Section */}
+      <div className="rounded-[20px] overflow-hidden relative shadow-sm h-[200px]" style={{ background: 'linear-gradient(90deg, #F5F0E6 0%, #E9E1D3 100%)' }}>
+        <div className="absolute inset-0 z-0 opacity-80" style={{
+          backgroundImage: "url('https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=1200&q=80')",
+          backgroundPosition: "center right",
+          backgroundSize: "cover",
+          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 100%)',
+          maskImage: 'linear-gradient(to right, transparent 0%, black 100%)'
+        }} />
+        
+        <div className="relative z-10 p-6 sm:p-10 h-full flex flex-col justify-between max-w-[80%] sm:max-w-[60%]">
+          <div>
+            <h1 className="font-heading text-4xl font-bold text-primary-navy mb-2">{greeting},<br/>{currentAdmin?.name || 'Dr. Jain'}</h1>
+          </div>
+          <p className="text-[13px] text-primary-navy/70 font-ui font-medium">
+            Thanks for being part of Atmik.<br/>
+            Let's create a little more light today.
+          </p>
+        </div>
+        
+        {/* Quote floating right */}
+        <div className="hidden md:block absolute top-1/2 -translate-y-1/2 right-12 text-right">
+          <p className="font-heading text-xl italic text-primary-navy max-w-[200px] mb-2 leading-tight">
+            "A kinder world begins with better content."
+          </p>
+          <span className="text-[10px] font-bold tracking-widest uppercase text-primary-navy/60 font-ui">— ATMIK</span>
+        </div>
       </div>
 
-      {/* KPI Cards Row */}
+      <div className="flex justify-end items-center">
+
+        <div className="flex bg-white border border-border-custom p-1 rounded-xl shadow-soft">
+          {["Weekly", "Monthly", "Yearly"].map((range) => (
+            <button
+              key={range}
+              onClick={() => setTimeRange(range)}
+              className={`px-3 py-1.5 text-xs rounded-lg font-semibold cursor-pointer transition-all duration-200 ${
+                timeRange === range 
+                  ? "bg-primary-navy text-white shadow-sm" 
+                  : "text-primary-navy/40 hover:text-primary-navy/70"
+              }`}
+            >
+              {range}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Stats Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Card 1 */}
-        <div className="bg-white border border-border-custom rounded-card p-6 shadow-soft hover:shadow-premium transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-primary-navy/40 uppercase tracking-wider font-ui">
-              Total Content
-            </span>
-            <FileText size={16} className="text-accent-gold" />
+        {summaryMetrics.map((m, idx) => (
+          <div key={idx} className="bg-white border border-border-custom rounded-card p-6 shadow-soft hover:shadow-premium transition-all duration-300">
+            <div className="flex justify-between items-start">
+              <span className="text-[10px] font-semibold text-primary-navy/40 uppercase tracking-wider">
+                {m.name}
+              </span>
+              <m.icon size={16} className="text-accent-gold" />
+            </div>
+            <div className="mt-3">
+              <span className="text-2xl font-bold text-primary-navy">{m.value}</span>
+              <p className="text-[10px] text-primary-navy/40 mt-1">{m.desc}</p>
+            </div>
+            <div className="mt-3 pt-3 border-t border-border-custom/50 flex items-center justify-between text-[9px] font-semibold text-success uppercase">
+              <span>{m.trend}</span>
+            </div>
           </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-primary-navy">{totalContent}</span>
-            <span className="text-[10px] text-success font-semibold flex items-center font-ui">
-              <ArrowUpRight size={10} className="mr-0.5" /> +12 this week
-            </span>
-          </div>
-        </div>
-
-        {/* Card 2 */}
-        <div className="bg-white border border-border-custom rounded-card p-6 shadow-soft hover:shadow-premium transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-primary-navy/40 uppercase tracking-wider font-ui">
-              Published
-            </span>
-            <CheckCircle size={16} className="text-success" />
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-primary-navy">{publishedContent}</span>
-            <span className="text-[10px] text-primary-navy/40 font-ui">
-              {publishedPercentage}% of total
-            </span>
-          </div>
-        </div>
-
-        {/* Card 3 */}
-        <div className="bg-white border border-border-custom rounded-card p-6 shadow-soft hover:shadow-premium transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-primary-navy/40 uppercase tracking-wider font-ui">
-              Total Views
-            </span>
-            <Eye size={16} className="text-primary-navy/50" />
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-primary-navy">
-              {(totalViews / 1000).toFixed(1)}K
-            </span>
-            <span className="text-[10px] text-success font-semibold flex items-center font-ui">
-              <ArrowUpRight size={10} className="mr-0.5" /> +18.2%
-            </span>
-          </div>
-        </div>
-
-        {/* Card 4 */}
-        <div className="bg-white border border-border-custom rounded-card p-6 shadow-soft hover:shadow-premium transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <span className="text-[10px] font-semibold text-primary-navy/40 uppercase tracking-wider font-ui">
-              Total Downloads
-            </span>
-            <Download size={16} className="text-primary-navy/50" />
-          </div>
-          <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-primary-navy">
-              {(totalDownloads / 1000).toFixed(1)}K
-            </span>
-            <span className="text-[10px] text-success font-semibold flex items-center font-ui">
-              <ArrowUpRight size={10} className="mr-0.5" /> +14.7%
-            </span>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Grid Layout: Visual charts & Quick lists */}
+      {/* Grid: Growth & Completion Rates */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Content Overview Chart - Spans 2 cols */}
+        
+        {/* Growth Area Chart (Spans 2 cols) */}
         <div className="lg:col-span-2 bg-white border border-border-custom rounded-card p-6 shadow-soft flex flex-col justify-between">
-          <div className="flex justify-between items-center mb-6">
+          <div className="mb-6 flex justify-between items-start">
             <div>
-              <h4 className="font-heading text-lg font-bold text-primary-navy">Content Overview</h4>
-              <p className="text-[10px] text-primary-navy/40 font-ui font-light">Views trends over time</p>
+              <h4 className="font-heading text-lg font-bold text-primary-navy">Views & Downloads Growth</h4>
+              <p className="text-[10px] text-primary-navy/40 font-light mt-0.5">Comparing app hits against asset downloads</p>
             </div>
-            <select className="border border-border-custom px-3 py-1 text-[11px] rounded-lg text-primary-navy outline-none font-ui cursor-pointer bg-white">
-              <option>Last 7 Days</option>
-              <option>Last 30 Days</option>
-              <option>This Year</option>
-            </select>
           </div>
-          <div className="h-[260px] w-full">
+
+          <div className="h-[280px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={overviewChartData} margin={{ left: -10, right: 10, top: 5, bottom: 5 }}>
+              <AreaChart data={growthTrendData} margin={{ left: -10, right: 10, top: 5, bottom: 5 }}>
+                <defs>
+                  <linearGradient id="colorViews" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#24385A" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#24385A" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorDownloads" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#D6A04A" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#D6A04A" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F1F4F9" vertical={false} />
                 <XAxis 
                   dataKey="name" 
@@ -180,192 +196,123 @@ export default function DashboardPage() {
                     borderRadius: "12px", 
                     boxShadow: "0 8px 30px rgba(0,0,0,.04)" 
                   }}
-                  labelStyle={{ fontFamily: "Cormorant Garamond", fontWeight: "bold", color: "#24385A" }}
-                  itemStyle={{ fontFamily: "Inter", fontSize: 11, color: "#D6A04A" }}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="views" 
-                  stroke="#24385A" 
-                  strokeWidth={2} 
-                  dot={{ r: 3, fill: "#24385A" }} 
-                  activeDot={{ r: 5, fill: "#D6A04A", stroke: "#FFFFFF", strokeWidth: 2 }} 
-                />
-              </LineChart>
+                <Area type="monotone" dataKey="Views" stroke="#24385A" strokeWidth={2} fillOpacity={1} fill="url(#colorViews)" />
+                <Area type="monotone" dataKey="Downloads" stroke="#D6A04A" strokeWidth={2} fillOpacity={1} fill="url(#colorDownloads)" />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Top Content List Card - 1 col */}
+        {/* Completion Gauge donut (1 col) */}
         <div className="bg-white border border-border-custom rounded-card p-6 shadow-soft flex flex-col justify-between">
           <div>
-            <div className="flex justify-between items-center mb-5">
-              <div>
-                <h4 className="font-heading text-lg font-bold text-primary-navy">Top Content</h4>
-                <p className="text-[10px] text-primary-navy/40 font-ui font-light">Most viewed content items</p>
-              </div>
-            </div>
-            <div className="space-y-4">
-              {topContent.map((item, index) => (
-                <div key={item.id} className="flex items-center gap-3">
-                  {/* Mock thumbnail square */}
-                  <div className="w-9 h-11 bg-primary-navy/5 border border-border-custom rounded flex items-center justify-center flex-shrink-0">
-                    <BookOpen size={14} className="text-primary-navy/40" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-primary-navy truncate font-ui">{item.title}</p>
-                    <p className="text-[9px] text-primary-navy/40 mt-0.5 font-ui">{item.views.toLocaleString()} views</p>
-                  </div>
-                  <span className="text-[10px] bg-background border border-border-custom px-2 py-0.5 rounded-lg text-primary-navy/60 font-ui">
-                    {item.type}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="pt-4 border-t border-border-custom mt-4">
-            <Link 
-              href="/dashboard/content" 
-              className="text-xs font-semibold text-accent-gold hover:text-accent-gold/80 transition-colors flex items-center justify-center gap-1 font-ui"
-            >
-              <span>View all content</span>
-              <ArrowUpRight size={14} />
-            </Link>
-          </div>
-        </div>
-      </div>
+            <h4 className="font-heading text-lg font-bold text-primary-navy">Book Reads Completion</h4>
+            <p className="text-[10px] text-primary-navy/40 font-light mt-0.5">Average readers completing books to the last chapter</p>
 
-      {/* Second Row Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Content by Type Donut chart */}
-        <div className="bg-white border border-border-custom rounded-card p-6 shadow-soft flex flex-col justify-between">
-          <div>
-            <h4 className="font-heading text-lg font-bold text-primary-navy">Content by Type</h4>
-            <p className="text-[10px] text-primary-navy/40 font-ui font-light">Distribution percentages</p>
-            
-            <div className="h-[180px] w-full mt-4 flex items-center justify-center">
+            <div className="h-[180px] w-full mt-4 flex items-center justify-center relative">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={typeDistributionData}
+                    data={completionData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={50}
+                    innerRadius={55}
                     outerRadius={70}
                     paddingAngle={4}
                     dataKey="value"
                   >
-                    {typeDistributionData.map((entry, index) => (
+                    {completionData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value) => `${value}%`} />
                 </PieChart>
               </ResponsiveContainer>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2.5 pt-4 border-t border-border-custom font-ui text-[10px] text-primary-navy/70">
-            {typeDistributionData.map((entry) => (
-              <div key={entry.name} className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
-                <span>{entry.name}</span>
-                <span className="font-semibold text-primary-navy/40 ml-auto">{entry.value}%</span>
+              
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-2xl font-bold text-primary-navy">84%</span>
+                <span className="text-[9px] uppercase tracking-wider text-primary-navy/40 font-semibold mt-0.5">Completion</span>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Activity Timeline */}
-        <div className="bg-white border border-border-custom rounded-card p-6 shadow-soft flex flex-col justify-between lg:col-span-2">
-          <div>
-            <h4 className="font-heading text-lg font-bold text-primary-navy">Recent Activity</h4>
-            <p className="text-[10px] text-primary-navy/40 font-ui font-light">Live timeline logs</p>
-
-            <div className="space-y-4 mt-6">
-              {activityLogs.slice(0, 3).map((log) => (
-                <div key={log.id} className="flex items-start gap-4">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={log.adminAvatar}
-                    alt={log.adminName}
-                    className="w-8 h-8 rounded-full object-cover border border-border-custom mt-0.5"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-primary-navy leading-relaxed font-ui">
-                      <span className="font-semibold">{log.adminName}</span>: {log.details}
-                    </p>
-                    <span className="text-[9px] text-primary-navy/35 font-ui mt-0.5 block">{log.timestamp}</span>
-                  </div>
-                  <span className={`text-[9px] font-semibold uppercase tracking-wider font-ui px-2 py-0.5 rounded-lg border ${
-                    log.action === "Publish" ? "bg-success/5 border-success/20 text-success" :
-                    log.action === "Delete" ? "bg-danger/5 border-danger/20 text-danger" :
-                    log.action === "Upload" ? "bg-accent-gold/5 border-accent-gold/20 text-accent-gold" :
-                    "bg-primary-navy/5 border-primary-navy/10 text-primary-navy/60"
-                  }`}>
-                    {log.action}
-                  </span>
-                </div>
-              ))}
             </div>
           </div>
 
-          <div className="pt-4 border-t border-border-custom mt-4">
-            <Link 
-              href="/dashboard/activity" 
-              className="text-xs font-semibold text-accent-gold hover:text-accent-gold/80 transition-colors flex items-center justify-center gap-1 font-ui"
-            >
-              <span>View all activity logs</span>
-              <ArrowUpRight size={14} />
-            </Link>
+          <div className="pt-4 border-t border-border-custom space-y-2 text-[10px] text-primary-navy/70">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-primary-navy" />
+                <span>Readers Completing books</span>
+              </div>
+              <span className="font-semibold text-primary-navy">84%</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-border-custom" />
+                <span>Dropped within first 3 chapters</span>
+              </div>
+              <span className="font-semibold text-primary-navy/40">16%</span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions Panel */}
-      <div className="bg-white border border-border-custom rounded-card p-6 shadow-soft">
-        <h4 className="font-heading text-lg font-bold text-primary-navy mb-4">Quick Actions</h4>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Link
-            href="/dashboard/content/new"
-            className="flex items-center gap-3 p-4 rounded-xl border border-border-custom bg-white hover:border-accent-gold/40 hover:bg-primary-navy/[0.01] transition-all group font-ui"
-          >
-            <div className="w-8 h-8 rounded-lg bg-accent-gold/5 flex items-center justify-center text-accent-gold group-hover:scale-105 transition-transform">
-              <Plus size={16} />
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-semibold text-primary-navy">Add Content</p>
-              <p className="text-[9px] text-primary-navy/40 mt-0.5">Upload new books or guides</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/dashboard/media"
-            className="flex items-center gap-3 p-4 rounded-xl border border-border-custom bg-white hover:border-accent-gold/40 hover:bg-primary-navy/[0.01] transition-all group font-ui"
-          >
-            <div className="w-8 h-8 rounded-lg bg-success/5 flex items-center justify-center text-success group-hover:scale-105 transition-transform">
-              <Upload size={16} />
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-semibold text-primary-navy">Upload Media</p>
-              <p className="text-[9px] text-primary-navy/40 mt-0.5">Manage assets in R2 Cloud</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/dashboard/categories"
-            className="flex items-center gap-3 p-4 rounded-xl border border-border-custom bg-white hover:border-accent-gold/40 hover:bg-primary-navy/[0.01] transition-all group font-ui"
-          >
-            <div className="w-8 h-8 rounded-lg bg-primary-navy/5 flex items-center justify-center text-primary-navy/50 group-hover:scale-105 transition-transform">
-              <FolderPlus size={16} />
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-semibold text-primary-navy">Manage Categories</p>
-              <p className="text-[9px] text-primary-navy/40 mt-0.5">Reorder nested category structure</p>
-            </div>
-          </Link>
+      {/* Grid: Popular categories & tags vertical bar charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        {/* Popular Categories */}
+        <div className="bg-white border border-border-custom rounded-card p-6 shadow-soft">
+          <h4 className="font-heading text-lg font-bold text-primary-navy mb-4">Views by Category</h4>
+          <div className="h-[240px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={categoryData} layout="vertical" margin={{ left: 10, right: 10, top: 5, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F1F4F9" horizontal={false} />
+                <XAxis 
+                  type="number" 
+                  axisLine={false} 
+                  tickLine={false}
+                  tick={{ fill: "#24385A", opacity: 0.4, fontSize: 9 }}
+                />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  axisLine={false} 
+                  tickLine={false}
+                  tick={{ fill: "#24385A", opacity: 0.7, fontSize: 9, fontWeight: "semibold" }}
+                  width={80}
+                />
+                <Tooltip />
+                <Bar dataKey="count" fill="#24385A" radius={[0, 8, 8, 0]} barSize={14} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
+
+        {/* Popular Tags */}
+        <div className="bg-white border border-border-custom rounded-card p-6 shadow-soft">
+          <h4 className="font-heading text-lg font-bold text-primary-navy mb-4">Tag References Usage</h4>
+          <div className="h-[240px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={tagData} margin={{ left: -10, right: 10, top: 5, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F1F4F9" vertical={false} />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false}
+                  tick={{ fill: "#24385A", opacity: 0.7, fontSize: 9, fontWeight: "semibold" }}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false}
+                  tick={{ fill: "#24385A", opacity: 0.4, fontSize: 9 }}
+                />
+                <Tooltip />
+                <Bar dataKey="count" fill="#D6A04A" radius={[8, 8, 0, 0]} barSize={18} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
       </div>
+
     </div>
   );
 }
