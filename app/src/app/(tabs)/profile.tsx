@@ -1,32 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, ImageBackground, Image, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { User, Bell, Shield, Moon, Globe, LogOut, ChevronRight, Leaf } from 'lucide-react-native';
+import { 
+  ChevronRight, User, Shield, Bell, Lock, 
+  HelpCircle, Info, FileText, FileSignature, 
+  LogOut, Trash2, Edit2, Sparkle
+} from 'lucide-react-native';
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
-const { width } = Dimensions.get('window');
-
 const COLORS = {
-  background: '#FAFBFC',
-  card: '#FFFFFF',
-  primary: '#243B5A',
-  accent: '#D8B97A',
-  divider: '#F0F0F0',
-  text: '#1F2937',
+  background: '#FCFAF8', // App's main background
+  primary: '#243B5A', // Navy
+  accent: '#DEAB5B', // Gold
   textSecondary: '#6B7280',
-  textTertiary: '#9CA3AF',
+  divider: '#E5E7EB',
   danger: '#EF4444',
-  dangerBg: '#FEF2F2',
-  journeyBg: '#F8F9F5', // Soft greenish/yellowish bg for Journey card
+  cardBg: '#FFFFFF',
   iconBg: '#F3F4F6',
 };
 
 const FONTS = {
   heading: 'serif',
-  title: 'System',
-  body: 'System',
 };
 
 export default function ProfileScreen() {
@@ -51,11 +47,10 @@ export default function ProfileScreen() {
   const handleSignOut = async () => {
     try {
       await auth().signOut();
-      // If they signed in with Google, also sign them out there to clear the session cache
       try {
         await GoogleSignin.signOut();
       } catch (e) {
-        // Ignore Google sign-out errors (e.g. if they used Email/Password instead)
+        // Ignore Google sign-out errors
       }
       router.replace('/auth');
     } catch (error) {
@@ -63,214 +58,261 @@ export default function ProfileScreen() {
     }
   };
 
-  const ACCOUNT_ITEMS = [
-    { id: '1', icon: User, title: 'Account Settings', subtitle: 'Manage your personal information' },
-    { id: '2', icon: Bell, title: 'Notifications', subtitle: 'Manage your notification preferences' },
-    { id: '3', icon: Shield, title: 'Privacy & Security', subtitle: 'Manage your privacy and security' },
-    { id: '4', icon: Moon, title: 'Appearance', subtitle: 'Choose your theme preference' },
-    { id: '5', icon: Globe, title: 'Language', subtitle: 'Select your preferred language' },
-  ];
+  const SettingsSection = ({ title }: { title: string }) => (
+    <Text style={styles.sectionTitle}>{title}</Text>
+  );
+
+  const SettingsRow = ({ 
+    title, 
+    subtitle,
+    icon: Icon,
+    onPress, 
+    isDestructive = false,
+    showDivider = true
+  }: { 
+    title: string; 
+    subtitle?: string;
+    icon: any;
+    onPress: () => void; 
+    isDestructive?: boolean;
+    showDivider?: boolean;
+  }) => (
+    <>
+      <TouchableOpacity style={styles.row} onPress={onPress} activeOpacity={0.7}>
+        <View style={[styles.iconContainer, isDestructive && { backgroundColor: '#FEF2F2' }]}>
+          <Icon color={isDestructive ? COLORS.danger : COLORS.primary} size={20} strokeWidth={1.5} />
+        </View>
+        <View style={styles.rowTextContainer}>
+          <Text style={[styles.rowTitle, isDestructive && { color: COLORS.danger }]}>{title}</Text>
+          {subtitle && <Text style={styles.rowSubtitle}>{subtitle}</Text>}
+        </View>
+        <ChevronRight color={isDestructive ? COLORS.danger : COLORS.textSecondary} size={20} />
+      </TouchableOpacity>
+      {showDivider && <View style={styles.rowDivider} />}
+    </>
+  );
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        
+        <Text style={styles.pageHeader}>Settings</Text>
+
+        {/* Profile Compact Header */}
+        <View style={styles.compactProfileHeader}>
+          <View style={styles.compactAvatarContainer}>
+            {userData.photoURL ? (
+              <Image source={{ uri: userData.photoURL }} style={styles.compactAvatarImage} />
+            ) : (
+              <View style={styles.compactAvatarInitials}>
+                <Text style={styles.compactAvatarText}>
+                  {userData.name.charAt(0).toUpperCase()}
+                </Text>
+              </View>
+            )}
+          </View>
           
-          {/* Header Profile Section */}
-          <View style={styles.profileHeader}>
-            <View style={styles.avatarContainer}>
-              {userData.photoURL ? (
-                <Image 
-                  source={{ uri: userData.photoURL }} 
-                  style={styles.avatarImageCircle} 
-                  resizeMode="cover" 
-                />
-              ) : (
-                <Image 
-                  source={require('@/assets/images/app_icon.png')} 
-                  style={styles.avatarImage} 
-                  resizeMode="contain" 
-                />
-              )}
-            </View>
-            
-            <Text style={styles.name}>{userData.name}</Text>
-            
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <View style={styles.diamond} />
-              <View style={styles.dividerLine} />
-            </View>
-            
-            <Text style={styles.email}>{userData.email}</Text>
-            
-            <TouchableOpacity style={styles.editProfileButton}>
-              <Image source={require('@/assets/images/nav_bar_icon.png')} style={{width: 14, height: 14, tintColor: COLORS.accent, marginRight: 6}} resizeMode="contain" />
-              <Text style={styles.editProfileText}>Edit Profile</Text>
+          <View style={styles.compactProfileInfo}>
+            <Text style={styles.compactName}>{userData.name}</Text>
+            <Text style={styles.compactEmail}>{userData.email}</Text>
+            <TouchableOpacity 
+              style={styles.compactEditRow} 
+              onPress={() => router.push('/settings/personal-info')}
+            >
+              <Text style={styles.compactEditText}>Edit Profile</Text>
+              <ChevronRight color={COLORS.textSecondary} size={16} />
             </TouchableOpacity>
           </View>
+        </View>
 
-          {/* Account Section */}
-          <Text style={styles.sectionTitle}>Account</Text>
-          
-          <View style={styles.accountCard}>
-            {ACCOUNT_ITEMS.map((item, index) => (
-              <TouchableOpacity key={item.id} style={[styles.accountItem, index === ACCOUNT_ITEMS.length - 1 && styles.accountItemLast]} activeOpacity={0.7}>
-                <View style={styles.accountItemIcon}>
-                  <item.icon color={COLORS.primary} size={20} strokeWidth={1.5} />
-                </View>
-                <View style={styles.accountItemText}>
-                  <Text style={styles.accountItemTitle}>{item.title}</Text>
-                  <Text style={styles.accountItemSubtitle}>{item.subtitle}</Text>
-                </View>
-                <ChevronRight color={COLORS.textTertiary} size={20} strokeWidth={1.5} />
-              </TouchableOpacity>
-            ))}
-          </View>
+        <SettingsSection title="Account" />
+        <View style={styles.settingsCard}>
+          <SettingsRow 
+            title="Account Settings" 
+            subtitle="Manage your personal information"
+            icon={User}
+            onPress={() => router.push('/settings/personal-info')} 
+          />
+          <SettingsRow 
+            title="Security" 
+            subtitle="Manage your login methods"
+            icon={Shield}
+            onPress={() => router.push('/settings/security')} 
+            showDivider={false}
+          />
+        </View>
 
-          {/* Sign Out Button */}
-          <TouchableOpacity 
-            style={styles.signOutCard} 
-            activeOpacity={0.7}
-            onPress={handleSignOut}
-          >
-            <View style={[styles.accountItemIcon, { backgroundColor: COLORS.dangerBg }]}>
-              <LogOut color={COLORS.danger} size={20} strokeWidth={1.5} />
-            </View>
-            <View style={styles.accountItemText}>
-              <Text style={styles.signOutTitle}>Sign Out</Text>
-              <Text style={styles.accountItemSubtitle}>You will be signed out from this device</Text>
-            </View>
-            <ChevronRight color={COLORS.danger} size={20} strokeWidth={1.5} />
-          </TouchableOpacity>
+        <SettingsSection title="Preferences" />
+        <View style={styles.settingsCard}>
+          <SettingsRow 
+            title="Notifications" 
+            subtitle="Manage your notification preferences"
+            icon={Bell}
+            onPress={() => router.push('/settings/notifications')} 
+            showDivider={false}
+          />
+        </View>
 
-        </ScrollView>
-      </SafeAreaView>
-    </View>
+        <SettingsSection title="Privacy & Support" />
+        <View style={styles.settingsCard}>
+          <SettingsRow 
+            title="Privacy & Data" 
+            subtitle="Manage your privacy and data"
+            icon={Lock}
+            onPress={() => router.push('/settings/privacy')} 
+          />
+          <SettingsRow 
+            title="Help & Support" 
+            subtitle="Contact us for assistance"
+            icon={HelpCircle}
+            onPress={() => router.push('/settings/support')} 
+            showDivider={false}
+          />
+        </View>
+
+        <SettingsSection title="About" />
+        <View style={styles.settingsCard}>
+          <SettingsRow 
+            title="About Atmik.AI" 
+            subtitle="Version and developer info"
+            icon={Info}
+            onPress={() => router.push('/settings/about')} 
+          />
+          <SettingsRow 
+            title="Privacy Policy" 
+            subtitle="How we handle your data"
+            icon={FileText}
+            onPress={() => router.push('/settings/privacy-policy')} 
+          />
+          <SettingsRow 
+            title="Terms of Service" 
+            subtitle="Rules and guidelines"
+            icon={FileSignature}
+            onPress={() => router.push('/settings/tos')} 
+            showDivider={false}
+          />
+        </View>
+
+        <View style={[styles.settingsCard, { marginTop: 32, borderColor: '#FEF2F2', borderWidth: 1, shadowColor: COLORS.danger }]}>
+          <SettingsRow 
+            title="Sign Out" 
+            subtitle="You will be signed out from this device"
+            icon={LogOut}
+            onPress={handleSignOut} 
+            isDestructive 
+            showDivider={false}
+          />
+        </View>
+
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  safeArea: {
-    flex: 1,
-    zIndex: 1,
-  },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 10,
-    paddingBottom: 120, // Space for navigation bar
+    paddingTop: 16,
+    paddingBottom: 100,
   },
-  profileHeader: {
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  avatarContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 4,
-    marginBottom: 16,
-  },
-  avatarImage: {
-    width: 64,
-    height: 64,
-  },
-  avatarImageCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  name: {
-    fontSize: 28,
+  pageHeader: {
+    fontSize: 24,
     fontFamily: FONTS.heading,
     fontWeight: '700',
     color: COLORS.primary,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  
+  // Settings Styles
+  compactProfileHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 16,
+    marginBottom: 12,
+    paddingHorizontal: 8,
+  },
+  compactAvatarContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: COLORS.iconBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+    overflow: 'hidden',
+  },
+  compactAvatarImage: {
+    width: '100%',
+    height: '100%',
+  },
+  compactAvatarInitials: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  compactAvatarText: {
+    fontSize: 24,
+    color: '#FFF',
+    fontFamily: FONTS.heading,
+  },
+  compactProfileInfo: {
+    flex: 1,
+  },
+  compactName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.primary,
+    fontFamily: FONTS.heading,
     marginBottom: 4,
   },
-  dividerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 4,
-  },
-  dividerLine: {
-    width: 24,
-    height: 1,
-    backgroundColor: COLORS.accent,
-    opacity: 0.5,
-  },
-  diamond: {
-    width: 6,
-    height: 6,
-    backgroundColor: COLORS.accent,
-    transform: [{ rotate: '45deg' }],
-    marginHorizontal: 8,
-  },
-  email: {
+  compactEmail: {
     fontSize: 14,
     color: COLORS.textSecondary,
     marginBottom: 12,
-    marginTop: 4,
   },
-  editProfileButton: {
+  compactEditRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: COLORS.divider,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 1,
   },
-  editProfileText: {
-    fontSize: 13,
-    fontWeight: '500',
+  compactEditText: {
+    fontSize: 14,
+    fontWeight: '600',
     color: COLORS.primary,
   },
   sectionTitle: {
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.textSecondary,
-    marginBottom: 12,
-    marginLeft: 4,
+    marginBottom: 4,
+    marginLeft: 8,
+    marginTop: 12,
   },
-  accountCard: {
-    backgroundColor: COLORS.card,
+  settingsCard: {
+    backgroundColor: COLORS.cardBg,
     borderRadius: 20,
-    marginBottom: 20,
+    paddingVertical: 4,
+    marginBottom: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
     elevation: 2,
-    overflow: 'hidden',
   },
-  accountItem: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.divider,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
-  accountItemLast: {
-    borderBottomWidth: 0,
-  },
-  accountItemIcon: {
+  iconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -279,37 +321,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 16,
   },
-  accountItemText: {
+  rowTextContainer: {
     flex: 1,
+    justifyContent: 'center',
   },
-  accountItemTitle: {
-    fontSize: 15,
-    fontWeight: '600',
+  rowTitle: {
+    fontSize: 16,
+    fontWeight: '500',
     color: COLORS.primary,
     marginBottom: 2,
   },
-  accountItemSubtitle: {
+  rowSubtitle: {
     fontSize: 13,
     color: COLORS.textSecondary,
   },
-  signOutCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: COLORS.card,
-    borderRadius: 20,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 12,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: 'rgba(239, 68, 68, 0.1)', // Very faint red border
-  },
-  signOutTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: COLORS.danger,
-    marginBottom: 2,
+  rowDivider: {
+    height: 1,
+    backgroundColor: COLORS.divider,
+    marginLeft: 72, // Aligns with the text, skipping the icon
+    marginRight: 16,
   },
 });
