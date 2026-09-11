@@ -13,8 +13,8 @@ import Animated, {
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { Wind, Check } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Colors, Spacing, Radius } from '../constants/theme';
-import forYouData from '../../assets/for_you_today.json';
+import { Colors, Spacing, Radius } from '@/constants/theme';
+import forYouData from '../../../assets/for_you_today.json';
 
 // ── Design tokens ──────────────────────────────────────────────
 const CARD_BG    = '#F9F3EA';   

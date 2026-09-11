@@ -8,8 +8,8 @@ import { Bell, Lightbulb, CheckCircle2, Check, Edit3, Edit2, Heart, ChevronRight
 import { usePracticeStore } from '../../store/usePracticeStore';
 import { apiService } from '../../services/api';
 import * as Linking from 'expo-linking';
-import { RecommendedSection } from '../../components/RecommendedSection';
-import { LetItGoCard } from '../../components/LetItGoCard';
+import { RecommendedSection } from '@/components/home/RecommendedSection';
+import { LetItGoCard } from '@/components/home/LetItGoCard';
 
 
 const { width } = Dimensions.get('window');
