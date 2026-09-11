@@ -5,79 +5,86 @@ import { usePathname } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  LayoutDashboard, 
-  FileText, 
-  Image, 
+  BookOpen, 
+  Plus, 
+  LayoutGrid, 
+  Tag, 
+  Image as ImageIcon, 
   Users, 
-  BarChart2, 
   MessageSquare, 
-  History, 
+  BarChart2, 
+  FileText, 
   Settings, 
-  ChevronLeft, 
-  ChevronRight,
+  History, 
+  Home,
   LogOut,
-  ChevronDown,
-  Plus,
-  UserCircle
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { useState } from "react";
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { sidebarCollapsed, toggleSidebar, currentAdmin, logout } = useAdminStore();
-  const [contentOpen, setContentOpen] = useState(pathname.startsWith("/dashboard/content") || pathname.includes("/categories") || pathname.includes("/tags"));
-  const [profilePopover, setProfilePopover] = useState(false);
-
-  const menuItems = [
-    { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  const { sidebarCollapsed, toggleSidebar, currentAdmin, logout, mobileMenuOpen, setMobileMenuOpen } = useAdminStore();
+  
+  const menuGroups = [
     {
-      name: "Content",
-      icon: FileText,
-      isParent: true,
-      open: contentOpen,
-      setOpen: setContentOpen,
-      subItems: [
-        { name: "All Content", href: "/dashboard/content" },
-        { name: "Add Content", href: "/dashboard/content/new" },
-        { name: "Categories", href: "/dashboard/categories" },
-        { name: "Tags", href: "/dashboard/tags" }
+      title: "",
+      items: [
+        { name: "Home", href: "/dashboard", icon: Home }
       ]
     },
-    { name: "Media Library", href: "/dashboard/media", icon: Image },
-    { name: "Users", href: "/dashboard/users", icon: Users },
-    { name: "Analytics", href: "/dashboard/analytics", icon: BarChart2 },
-    { name: "Comments", href: "/dashboard/comments", icon: MessageSquare },
-    { name: "Settings", href: "/dashboard/settings", icon: Settings },
-    { name: "Activity Log", href: "/dashboard/activity", icon: History }
+    {
+      title: "CONTENT",
+      items: [
+        { name: "Library", href: "/dashboard/content", icon: BookOpen },
+        { name: "Create", href: "/dashboard/content/new", icon: Plus },
+        { name: "Categories", href: "/dashboard/categories", icon: LayoutGrid },
+        { name: "Tags", href: "/dashboard/tags", icon: Tag },
+        { name: "Media", href: "/dashboard/media", icon: ImageIcon }
+      ]
+    },
+    {
+      title: "PEOPLE",
+      items: [
+        { name: "Users", href: "/dashboard/users", icon: Users }
+      ]
+    },
+
+    {
+      title: "SYSTEM",
+      items: [
+        { name: "Settings", href: "/dashboard/settings", icon: Settings },
+        { name: "Activity", href: "/dashboard/activity", icon: History }
+      ]
+    }
   ];
 
   return (
     <motion.aside
-      animate={{ width: sidebarCollapsed ? 90 : 280 }}
+      animate={{ width: sidebarCollapsed ? 90 : 260 }}
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-      className="fixed top-0 bottom-0 left-0 z-30 bg-white border-r border-border-custom flex flex-col justify-between py-6 overflow-hidden select-none"
+      className={`fixed top-0 bottom-0 left-0 z-40 bg-[#FBF9F6] border-r border-border-custom flex flex-col justify-between py-8 overflow-hidden select-none lg:translate-x-0 transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}
     >
-      <div>
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Logo Section */}
-        <div className="px-6 flex items-center justify-between mb-8">
-          <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="flex-shrink-0">
-              <svg className="w-9 h-9 text-primary-navy" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 5C24.5 5 28 8.5 28 13C28 19 12 21 12 27C12 31.5 15.5 35 20 35C24.5 35 28 31.5 28 27C28 23 25 21 20 21C15 21 12 19 12 13C12 8.5 15.5 5 20 5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="20" cy="20" r="1.5" fill="currentColor"/>
-              </svg>
+        <div className="px-8 flex flex-col items-center mb-10 text-center">
+          <Link href="/dashboard" className="flex flex-col items-center gap-1">
+            <div className="w-20 h-20 flex items-center justify-center mb-2">
+              {/* Lotus logo from app assets */}
+              <img src="/logo-gold.png" alt="Logo" className="w-full h-full object-contain drop-shadow-sm" />
             </div>
             {!sidebarCollapsed && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="flex flex-col"
+                className="flex flex-col items-center"
               >
-                <span className="font-heading text-lg font-bold tracking-tight text-primary-navy leading-none">
-                  Dr. Atmik AI
+                <span className="font-logo text-2xl text-primary-navy tracking-wide leading-none" style={{ fontFamily: 'Samarkan, serif' }}>
+                  Atmik AI
                 </span>
-                <span className="font-ui text-[10px] uppercase tracking-wider text-accent-gold mt-0.5">
+                <span className="font-ui text-[10px] tracking-wider text-primary-navy/50 mt-1 uppercase font-semibold">
                   Admin Panel
                 </span>
               </motion.div>
@@ -85,148 +92,59 @@ export default function Sidebar() {
           </Link>
         </div>
 
-        {/* Menu Items */}
-        <nav className="px-4 space-y-1.5 overflow-y-auto max-h-[calc(100vh-220px)]">
-          {menuItems.map((item) => {
-            if (item.isParent) {
-              return (
-                <div key={item.name} className="space-y-1">
-                  <button
-                    onClick={() => !sidebarCollapsed && item.setOpen?.(!item.open)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-sidebar transition-all duration-200 ${
-                      pathname.startsWith("/dashboard/content") || pathname.includes("/categories") || pathname.includes("/tags")
-                        ? "bg-primary-navy/5 text-primary-navy font-medium"
-                        : "text-primary-navy/70 hover:bg-primary-navy/[0.02] hover:text-primary-navy"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3.5">
-                      <item.icon size={20} className="stroke-[1.5]" />
-                      {!sidebarCollapsed && <span className="text-sm font-ui">{item.name}</span>}
-                    </div>
-                    {!sidebarCollapsed && (
-                      <ChevronDown
-                        size={16}
-                        className={`transition-transform duration-200 ${item.open ? "rotate-180" : ""}`}
-                      />
-                    )}
-                  </button>
-
-                  <AnimatePresence initial={false}>
-                    {item.open && !sidebarCollapsed && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="pl-9 pr-2 overflow-hidden flex flex-col gap-1 mt-1 border-l border-border-custom/60 ml-[23px]"
-                      >
-                        {item.subItems?.map((sub) => {
-                          const isActive = pathname === sub.href;
-                          return (
-                            <Link
-                              key={sub.name}
-                              href={sub.href}
-                              className={`text-xs font-ui py-2 px-3 rounded-lg transition-colors flex items-center justify-between ${
-                                isActive
-                                  ? "text-primary-navy font-semibold bg-primary-navy/[0.03]"
-                                  : "text-primary-navy/60 hover:text-primary-navy hover:bg-primary-navy/[0.01]"
-                              }`}
-                            >
-                              <span>{sub.name}</span>
-                              {sub.name === "Add Content" && (
-                                <Plus size={12} className="text-accent-gold" />
-                              )}
-                            </Link>
-                          );
-                        })}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            }
-
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href || "#"}
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-sidebar transition-all duration-200 ${
-                  isActive
-                    ? "bg-primary-navy text-white font-medium shadow-soft"
-                    : "text-primary-navy/70 hover:bg-primary-navy/[0.02] hover:text-primary-navy"
-                }`}
-              >
-                <item.icon size={20} className="stroke-[1.5]" />
-                {!sidebarCollapsed && <span className="text-sm font-ui">{item.name}</span>}
-              </Link>
-            );
-          })}
+        {/* Navigation Menu */}
+        <nav className="px-4 flex-1 overflow-y-auto space-y-6 pb-6">
+          {menuGroups.map((group, idx) => (
+            <div key={idx} className="space-y-1">
+              {group.title && (
+                <p className={`px-4 text-[10px] font-bold text-primary-navy/40 uppercase tracking-wider mb-2 font-ui ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+                  {group.title}
+                </p>
+              )}
+              <div className="space-y-0.5">
+                {group.items.map((item) => {
+                  const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== "/dashboard" && item.href !== "#");
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => {
+                        if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+                          setMobileMenuOpen(false);
+                        }
+                      }}
+                      className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl transition-all duration-200 ${
+                        isActive
+                          ? "bg-[#F3EFE9] text-primary-navy font-semibold"
+                          : "text-primary-navy/60 hover:bg-[#F3EFE9]/50 hover:text-primary-navy font-medium"
+                      }`}
+                    >
+                      <item.icon size={18} className={isActive ? "text-accent-gold" : ""} strokeWidth={2} />
+                      <span className={`text-[13px] font-ui ${sidebarCollapsed ? 'lg:hidden' : ''}`}>{item.name}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
       </div>
 
-      {/* Bottom Profile Details */}
-      <div className="px-4 relative">
-        <div 
-          onClick={() => setProfilePopover(!profilePopover)}
-          className="flex items-center gap-3 p-2.5 rounded-sidebar hover:bg-primary-navy/[0.02] cursor-pointer border border-transparent hover:border-border-custom transition-all"
-        >
-          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-primary-navy/5 border border-border-custom text-primary-navy flex-shrink-0">
-            <UserCircle size={22} className="stroke-[1.5]" />
-          </div>
-          {!sidebarCollapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-primary-navy truncate font-ui">
-                {currentAdmin?.name || "Arjun Dev"}
-              </p>
-              <p className="text-[10px] text-primary-navy/50 font-ui truncate">
-                {currentAdmin?.role || "Super Admin"}
-              </p>
+      {/* Bottom Gradient Card */}
+      {!sidebarCollapsed && (
+        <div className="px-6 pb-4 pt-4 mt-auto">
+          <div className="rounded-2xl p-5 overflow-hidden relative shadow-sm" style={{ background: 'linear-gradient(135deg, #E6E1D8 0%, #D5C9B3 100%)' }}>
+            <h4 className="font-heading text-lg font-bold text-primary-navy mb-1 relative z-10 leading-tight">
+              Create<br/>Content<br/>that Matters
+            </h4>
+            <div className="absolute -bottom-4 -right-4 opacity-50 text-accent-gold">
+              <svg width="100" height="100" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" />
+              </svg>
             </div>
-          )}
+          </div>
         </div>
-
-        {/* Profile Popover / Actions Menu */}
-        <AnimatePresence>
-          {profilePopover && (
-            <motion.div
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              className="absolute bottom-16 left-4 right-4 bg-white border border-border-custom p-2 rounded-2xl shadow-premium z-50 flex flex-col gap-1"
-            >
-              <Link 
-                href="/dashboard/settings" 
-                onClick={() => setProfilePopover(false)}
-                className="flex items-center gap-2.5 text-xs text-primary-navy/80 hover:text-primary-navy hover:bg-primary-navy/[0.02] px-3 py-2 rounded-xl transition-colors font-ui"
-              >
-                <Settings size={14} />
-                <span>Account Settings</span>
-              </Link>
-              <button
-                onClick={() => {
-                  setProfilePopover(false);
-                  logout();
-                }}
-                className="flex items-center gap-2.5 text-xs text-danger hover:bg-danger/5 px-3 py-2 rounded-xl transition-colors font-ui text-left"
-              >
-                <LogOut size={14} />
-                <span>Sign Out</span>
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Collapse Button */}
-        <div className="mt-4 flex justify-center">
-          <button
-            onClick={toggleSidebar}
-            className="p-2 rounded-full border border-border-custom bg-white hover:bg-primary-navy/[0.02] text-primary-navy/70 hover:text-primary-navy shadow-sm transition-all"
-          >
-            {sidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-          </button>
-        </div>
-      </div>
+      )}
     </motion.aside>
   );
 }
