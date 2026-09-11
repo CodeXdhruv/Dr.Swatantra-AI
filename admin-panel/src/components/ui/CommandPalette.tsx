@@ -45,7 +45,7 @@ export default function CommandPalette() {
     { name: "Add New Content", href: "/dashboard/content/new", icon: FileText },
     { name: "View Media Library", href: "/dashboard/media", icon: Image },
     { name: "View Users Permission List", href: "/dashboard/users", icon: Users },
-    { name: "View Analytics Page", href: "/dashboard/analytics", icon: Shield },
+    { name: "View Analytics Page", href: "/dashboard", icon: Shield },
     { name: "Configure Admin Settings", href: "/dashboard/settings", icon: Settings },
     { name: "View activity history logs", href: "/dashboard/activity", icon: History }
   ];
