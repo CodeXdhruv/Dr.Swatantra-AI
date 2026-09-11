@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAdminStore } from "@/store/adminStore";
 import { 
   Plus, 
@@ -19,8 +19,18 @@ import {
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
+const stripHtml = (html: string) => {
+  if (!html) return "";
+  return html.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').trim();
+};
+
 export default function ContentListPage() {
-  const { contentList, deleteContentItem, updateContentItem } = useAdminStore();
+  const { contentList, fetchContent, deleteContentItem, updateContentItem } = useAdminStore();
+  
+  useEffect(() => {
+    fetchContent();
+  }, [fetchContent]);
+
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("All Types");
   const [statusFilter, setStatusFilter] = useState("All Status");
@@ -183,7 +193,7 @@ export default function ContentListPage() {
                       </div>
                       <div className="min-w-0">
                         <p className="font-semibold text-primary-navy truncate">{item.title}</p>
-                        <p className="text-[10px] text-primary-navy/40 mt-0.5 truncate leading-relaxed">{item.subtitle}</p>
+                        <p className="text-[10px] text-primary-navy/40 mt-0.5 truncate leading-relaxed">{stripHtml(item.subtitle)}</p>
                       </div>
                     </td>
 

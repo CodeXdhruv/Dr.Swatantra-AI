@@ -28,7 +28,7 @@ export default function EditContentPage({ params }: { params: Promise<{ id: stri
   const resolvedParams = use(params);
   const id = resolvedParams.id;
   const router = useRouter();
-  const { contentList, updateContentItem } = useAdminStore();
+  const { contentList, updateContentItem, categories, fetchCategories } = useAdminStore();
   
   // Find item
   const existingItem = contentList.find(item => item.id === id);
@@ -81,6 +81,13 @@ export default function EditContentPage({ params }: { params: Promise<{ id: stri
       }
     }
   }, [existingItem]);
+
+  // Fetch categories if empty
+  useEffect(() => {
+    if (categories.length === 0) {
+      fetchCategories();
+    }
+  }, [categories.length, fetchCategories]);
 
   const contentTypes = [
     { name: "Book" as ContentType, icon: Book },
@@ -269,10 +276,13 @@ export default function EditContentPage({ params }: { params: Promise<{ id: stri
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-4 py-2.5 bg-background border border-border-custom rounded-input text-xs text-primary-navy focus:border-accent-gold/40 outline-none cursor-pointer"
                 >
-                  <option>Spirituality</option>
-                  <option>Meditation</option>
-                  <option>Wisdom</option>
-                  <option>Mindfulness</option>
+                  {categories.length > 0 ? (
+                    categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    ))
+                  ) : (
+                    <option value={category}>{category || "Loading..."}</option>
+                  )}
                 </select>
               </div>
 
