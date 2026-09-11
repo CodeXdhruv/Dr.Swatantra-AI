@@ -25,6 +25,7 @@ export default function TipTapEditor({ value, onChange }: TipTapEditorProps) {
   const editor = useEditor({
     extensions: [StarterKit],
     content: value,
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class: "prose prose-sm font-ui focus:outline-none min-h-[160px] p-4 text-xs text-primary-navy/80 leading-relaxed font-normal"
