@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
 import { 
@@ -27,7 +27,7 @@ type ContentType = 'Book' | 'Article' | 'Quote';
 
 export default function AddContentPage() {
   const router = useRouter();
-  const { addContentItem, categories, tags } = useAdminStore();
+  const { addContentItem, categories, tags, fetchCategories } = useAdminStore();
 
   // Form State
   const [type, setType] = useState<ContentType>("Book");
@@ -35,7 +35,16 @@ export default function AddContentPage() {
   const [subtitle, setSubtitle] = useState("");
   const [author, setAuthor] = useState("");
   const [language, setLanguage] = useState("English");
-  const [category, setCategory] = useState("Spirituality");
+  const [category, setCategory] = useState("");
+
+  // Fetch categories if empty, and initialize category once fetched
+  useEffect(() => {
+    if (categories.length === 0) {
+      fetchCategories();
+    } else if (!category) {
+      setCategory(categories[0].name);
+    }
+  }, [categories, category, fetchCategories]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [description, setDescription] = useState("");
   const [quoteText, setQuoteText] = useState("");
@@ -74,7 +83,8 @@ export default function AddContentPage() {
           fileUrl: pdfFile?.url || "text-only",
           description,
           author,
-          readTime: 5 // Default for now
+          readTime: 5, // Default for now
+          category
         });
       }
 
@@ -244,10 +254,13 @@ export default function AddContentPage() {
                   onChange={(e) => setCategory(e.target.value)}
                   className="w-full px-4 py-2.5 bg-background border border-border-custom rounded-input text-xs text-primary-navy focus:border-accent-gold/40 outline-none font-ui cursor-pointer"
                 >
-                  <option>Spirituality</option>
-                  <option>Meditation</option>
-                  <option>Wisdom</option>
-                  <option>Mindfulness</option>
+                  {categories.length > 0 ? (
+                    categories.map((cat) => (
+                      <option key={cat.id} value={cat.name}>{cat.name}</option>
+                    ))
+                  ) : (
+                    <option value={category}>{category || "Loading..."}</option>
+                  )}
                 </select>
               </div>
 
