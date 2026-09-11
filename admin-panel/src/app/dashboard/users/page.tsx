@@ -121,7 +121,7 @@ export default function UsersPage() {
                       {/* Permissions List */}
                       <td className="py-4 px-4">
                         <div className="flex flex-wrap gap-1 max-w-[200px]">
-                          {user.permissions.map((perm) => (
+                          {(user.permissions || []).map((perm) => (
                             <span 
                               key={perm}
                               className="px-1.5 py-0.5 bg-primary-navy/5 border border-border-custom rounded text-[8px] font-mono text-primary-navy/60 uppercase"
