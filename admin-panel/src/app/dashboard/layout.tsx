@@ -18,7 +18,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { sidebarCollapsed } = useAdminStore();
+  const { sidebarCollapsed, mobileMenuOpen, setMobileMenuOpen } = useAdminStore();
   const [mounted, setMounted] = useState(false);
   const [isFirebaseAuthenticated, setIsFirebaseAuthenticated] = useState<boolean | null>(null);
 
@@ -79,10 +79,17 @@ export default function DashboardLayout({
       {/* Sidebar - Fixed */}
       <Sidebar />
 
+      {/* Mobile Backdrop */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-20 bg-primary-navy/20 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Main Workspace Area */}
       <div 
-        className="flex-1 min-h-screen flex flex-col transition-all duration-300"
-        style={{ paddingLeft: sidebarCollapsed ? "90px" : "280px" }}
+        className={`flex-1 min-h-screen flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'lg:pl-[90px]' : 'lg:pl-[260px]'}`}
       >
         {/* Sticky Topbar */}
         <Topbar />

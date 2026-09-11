@@ -11,8 +11,8 @@ import toast, { Toaster } from "react-hot-toast";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@atmik.ai");
-  const [password, setPassword] = useState("••••••••••••");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -74,17 +74,13 @@ export default function LoginPage() {
       >
         <div className="mb-9 flex flex-col items-center text-center">
           {/* Logo Section */}
-          <div className="flex items-center gap-3.5 mb-6">
-            <svg className="w-10 h-10 text-primary-navy" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M20 5C24.5 5 28 8.5 28 13C28 19 12 21 12 27C12 31.5 15.5 35 20 35C24.5 35 28 31.5 28 27C28 23 25 21 20 21C15 21 12 19 12 13C12 8.5 15.5 5 20 5Z" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="20" cy="20" r="1.5" fill="currentColor"/>
-            </svg>
-            <h1 className="font-heading text-2xl font-bold tracking-tight text-primary-navy leading-none">
-              atmik.ai
+          <div className="flex items-center justify-center mb-8">
+            <h1 className="font-logo text-5xl text-black tracking-wide" style={{ fontFamily: 'Samarkan, serif' }}>
+              Atmik AI
             </h1>
           </div>
 
-          <h3 className="font-heading text-3xl font-extrabold text-primary-navy leading-tight">
+          <h3 className="font-heading text-2xl font-extrabold text-primary-navy leading-tight">
             Sign in to your account
           </h3>
           <p className="font-ui text-sm text-primary-navy/55 mt-2 font-medium">
